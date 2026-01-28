@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Team - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding-top: 50px;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0"><i class="fas fa-plus-circle"></i> Create New Team</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label"><i class="fas fa-users"></i> Team Name</label>
+                                <input type="text" name="team_name" class="form-control" placeholder="Enter team name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label"><i class="fas fa-key"></i> Team Password</label>
+                                <input type="text" name="team_password" class="form-control" placeholder="Set team password" required>
+                                <small class="form-text text-muted">Participants will use this password to join the team</small>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="fas fa-check"></i> Create Team
+                            </button>
+                        </form>
+                        <hr>
+                        <a href="{% url 'admin_teams' %}" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-arrow-left"></i> Back to Teams
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

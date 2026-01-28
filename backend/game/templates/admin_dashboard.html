@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Debug Escape Game</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #1e3c72;
+        }
+        .stat-label {
+            color: #666;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .round-control-card {
+            border-left: 5px solid;
+        }
+        .round-1 { border-color: #17a2b8; }
+        .round-2 { border-color: #ffc107; }
+        .round-3 { border-color: #dc3545; }
+    </style>
+</head>
+<body>
+    <!-- NAVIGATION -->
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'admin_dashboard' %}">
+                <i class="fas fa-shield-alt"></i> Admin Control Panel
+            </a>
+            <div class="d-flex gap-2">
+                <a href="{% url 'admin_create_team' %}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Create Team
+                </a>
+                <a href="{% url 'admin_teams' %}" class="btn btn-primary">
+                    <i class="fas fa-users"></i> Manage Teams
+                </a>
+                <a href="{% url 'admin_leaderboard' %}" class="btn btn-warning">
+                    <i class="fas fa-trophy"></i> Leaderboard
+                </a>
+                <a href="{% url 'team_dashboard' %}" class="btn btn-outline-light">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a href="{% url 'logout' %}" class="btn btn-outline-danger">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4">
+        <!-- STATISTICS CARDS -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon text-primary">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number">{{ total_teams }}</div>
+                    <div class="stat-label">Total Teams</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon text-success">
+                        <i class="fas fa-user-friends"></i>
+                    </div>
+                    <div class="stat-number">{{ total_participants }}</div>
+                    <div class="stat-label">Total Participants</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon text-warning">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">Game Rounds</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GAME MANAGEMENT SECTION -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h4 class="mb-0"><i class="fas fa-gamepad"></i> Game Management</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row">
+                            {% for round in rounds %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card round-control-card round-{{ round.round_number }}">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">
+                                            {% if round.round_number == 1 %}🎭 Round 1 - Stranger Things
+                                            {% elif round.round_number == 2 %}🏴‍☠️ Round 2 - One Piece
+                                            {% else %}🎮 Round 3 - Squid Game{% endif %}
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p><strong>Status:</strong> 
+                                            <span class="badge {% if round.is_open %}bg-success{% else %}bg-secondary{% endif %}">
+                                                {% if round.is_open %}OPEN{% else %}CLOSED{% endif %}
+                                            </span>
+                                        </p>
+                                        <p><strong>Duration:</strong> {{ round.duration_minutes }} minutes</p>
+                                        
+                                        {% with stats=round_stats|get_item:round.round_number %}
+                                        <p><strong>Teams Started:</strong> {{ stats.teams_started|default:0 }}</p>
+                                        <p><strong>Teams Completed:</strong> {{ stats.teams_completed|default:0 }}</p>
+                                        <p><strong>Total Score:</strong> {{ stats.avg_score|default:0 }}</p>
+                                        {% endwith %}
+                                        
+                                        <hr>
+                                        
+                                        <!-- ROUND CONTROLS -->
+                                        <form method="post" action="{% url 'admin_round_control' round.round_number %}" class="mb-2">
+                                            {% csrf_token %}
+                                            {% if round.is_open %}
+                                                <button type="submit" name="action" value="close_round" class="btn btn-danger w-100">
+                                                    <i class="fas fa-lock"></i> Close Round for All Teams
+                                                </button>
+                                            {% else %}
+                                                <button type="submit" name="action" value="open_round" class="btn btn-success w-100">
+                                                    <i class="fas fa-unlock"></i> Open Round for All Teams
+                                                </button>
+                                            {% endif %}
+                                        </form>
+                                        
+                                        <!-- DURATION ADJUSTMENT -->
+                                        <form method="post" action="{% url 'admin_round_control' round.round_number %}" class="mb-2">
+                                            {% csrf_token %}
+                                            <div class="input-group input-group-sm">
+                                                <input type="number" name="duration" class="form-control" 
+                                                       value="{{ round.duration_minutes }}" min="5" max="180">
+                                                <button type="submit" name="action" value="set_duration" class="btn btn-primary">
+                                                    <i class="fas fa-clock"></i> Set Duration (min)
+                                                </button>
+                                            </div>
+                                        </form>
+                                        
+                                        <!-- QUALIFY ALL -->
+                                        <form method="post" action="{% url 'admin_round_control' round.round_number %}">
+                                            {% csrf_token %}
+                                            <button type="submit" name="action" value="qualify_all" class="btn btn-warning w-100 btn-sm">
+                                                <i class="fas fa-check-circle"></i> Qualify All Completed Teams
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LEADERBOARD SECTION -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-trophy"></i> Top Teams Overall</h5>
+                        <a href="{% url 'admin_leaderboard' %}" class="btn btn-light btn-sm">
+                            <i class="fas fa-expand"></i> Full Leaderboard
+                        </a>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Team Name</th>
+                                    <th>Members</th>
+                                    <th>Total Score</th>
+                                    <th>Pages Completed</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for team in teams %}
+                                <tr>
+                                    <td>
+                                        <strong>
+                                            {% if forloop.counter == 1 %}🥇
+                                            {% elif forloop.counter == 2 %}🥈
+                                            {% elif forloop.counter == 3 %}🥉
+                                            {% else %}{{ forloop.counter }}{% endif %}
+                                        </strong>
+                                    </td>
+                                    <td><strong>{{ team.team_name }}</strong></td>
+                                    <td>{{ team.member_count }}</td>
+                                    <td><span class="badge bg-primary">{{ team.total_score|default:0 }}</span></td>
+                                    <td>{{ team.pages_completed|default:0 }}/30</td>
+                                    <td>
+                                        <a href="{% url 'admin_team_detail' team.id %}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-refresh every 30 seconds
+        setTimeout(function() {
+            location.reload();
+        }, 30000);
+    </script>
+</body>
+</html>

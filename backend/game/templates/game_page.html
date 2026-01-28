@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Round {{ round.round_number }} - Page {{ page_number }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        .game-header {
+            background: rgba(0,0,0,0.95);
+            padding: 15px 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            border-bottom: 3px solid #667eea;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+        .timer-box {
+            background: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+        .timer-box.warning {
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .game-content {
+            margin-top: 80px;
+            height: calc(100vh - 80px);
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .sync-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sync-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00ff00;
+            animation: blink 2s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .notification {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            background: rgba(102, 126, 234, 0.95);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 999;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0" style="color: #667eea;">{{ team.team_name }}</h5>
+                <small>Round {{ round.round_number }} - Page {{ page_number }}/10 | Score: <span id="score">{{ team_round.score }}</span></small>
+            </div>
+            
+            <div class="timer-box" id="timer">
+                --:--
+            </div>
+            
+            <div class="sync-indicator">
+                <div class="sync-dot"></div>
+                <span id="sync-text" style="font-size: 12px;">Synced</span>
+                <button class="btn btn-danger btn-sm" onclick="exitGame()">
+                    <i class="fas fa-door-open"></i> Exit
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <div class="game-content">
+        <!-- ACTUAL GAME CONTENT LOADS HERE -->
+        <div style="background: white; color: black; padding: 40px; border-radius: 15px;">
+            <h1>Round {{ round.round_number }} - Page {{ page_number }}</h1>
+            <p class="lead">Debug the code below to fix all bugs and proceed to the next page.</p>
+            
+            <div class="alert alert-info">
+                <strong>🐛 Your Mission:</strong> Find and fix all intentional bugs using browser DevTools
+            </div>
+            
+            <hr>
+            
+            <!-- DEMO CONTROLS -->
+            <h3>Test Controls (Debug Mode):</h3>
+            <div class="mb-3">
+                <button class="btn btn-primary" onclick="fixBug('bug1')">Fix Bug 1</button>
+                <button class="btn btn-primary" onclick="fixBug('bug2')">Fix Bug 2</button>
+                <button class="btn btn-primary" onclick="fixBug('bug3')">Fix Bug 3</button>
+            </div>
+            
+            <div class="mb-3">
+                <strong>Bugs Fixed:</strong> <span id="bugs-count">{{ page_progress.bugs_fixed|length }}</span>/3
+            </div>
+            
+            <button class="btn btn-success btn-lg" onclick="completePage()">
+                <i class="fas fa-arrow-right"></i> Complete Page
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const teamId = "{{ team.id|default:'' }}";
+        const roundNumber = "{{ round.round_number|default:'' }}";
+        const pageNumber = "{{ page_number|default:'' }}";
+        const timeRemaining = "{{ time_remaining|default:0 }}";
+        
+        // Timer countdown
+        let timeLeft = timeRemaining;
+        const timerEl = document.getElementById('timer');
+        
+        function updateTimer() {
+            if (timeLeft <= 0) {
+                timerEl.textContent = 'TIME UP!';
+                timerEl.classList.add('warning');
+                setTimeout(() => {
+                    alert('Time is over! Returning to dashboard...');
+                    window.location.href = '/dashboard/';
+                }, 2000);
+                return;
+            }
+            
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            
+            if (timeLeft < 300) {
+                timerEl.classList.add('warning');
+            }
+            
+            timeLeft--;
+            setTimeout(updateTimer, 1000);
+        }
+        
+        updateTimer();
+        
+        // WebSocket connection
+        const wsUrl = `ws://${window.location.host}/ws/game/team/${teamId}/round/${roundNumber}/`;
+        let socket;
+        
+        function connectWebSocket() {
+            socket = new WebSocket(wsUrl);
+            
+            socket.onopen = () => {
+                console.log('WebSocket connected');
+                document.getElementById('sync-text').textContent = 'Synced';
+            };
+            
+            socket.onmessage = (e) => {
+                const data = JSON.parse(e.data);
+                if (data.type === 'bug_fixed') {
+                    showNotification(`Teammate fixed ${data.bug_id}!`);
+                } else if (data.type === 'page_completed') {
+                    showNotification(`${data.user} completed a page!`);
+                }
+            };
+            
+            socket.onclose = () => {
+                document.getElementById('sync-text').textContent = 'Disconnected';
+                setTimeout(connectWebSocket, 3000);
+            };
+        }
+        
+        connectWebSocket();
+        
+        function fixBug(bugId) {
+            fetch(`/round/${roundNumber}/page/${pageNumber}/fix-bug/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: `bug_id=${bugId}`
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(`Fixed ${bugId}!`);
+                    document.getElementById('bugs-count').textContent = data.bugs_fixed;
+                    
+                    // Broadcast to team
+                    if (socket && socket.readyState === WebSocket.OPEN) {
+                        socket.send(JSON.stringify({
+                            type: 'bug_fixed',
+                            page_number: pageNumber,
+                            bug_id: bugId,
+                            user: '{{ user.username }}'
+                        }));
+                    }
+                }
+            });
+        }
+        
+        function completePage() {
+            if (confirm('Complete this page and move to the next?')) {
+                fetch(`/round/${roundNumber}/page/${pageNumber}/complete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('score').textContent = data.score;
+                        
+                        if (data.completed) {
+                            alert('Round completed! Returning to dashboard...');
+                            window.location.href = '/dashboard/';
+                        } else if (data.next_page) {
+                            window.location.href = `/round/${roundNumber}/page/${data.next_page}/`;
+                        }
+                    }
+                });
+            }
+        }
+        
+        function exitGame() {
+            if (confirm('Exit game and return to dashboard?')) {
+                window.location.href = '/dashboard/';
+            }
+        }
+        
+        function showNotification(message) {
+            const notif = document.getElementById('notification');
+            notif.textContent = message;
+            notif.style.display = 'block';
+            setTimeout(() => {
+                notif.style.display = 'none';
+            }, 3000);
+        }
+        
+        function getCookie(name) {
+            let value = `; ${document.cookie}`;
+            let parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+    </script>
+</body>
+</html>

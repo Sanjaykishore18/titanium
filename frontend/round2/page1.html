@@ -1,0 +1,284 @@
+
+<!-- ============================================================================
+     GAME PAGE TEMPLATE - Use this for all 30 pages
+     ============================================================================ -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Round 1 - Page 1: The Flickering Basement</title>
+    
+    <!-- Game Styles -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+        }
+        
+        /* Game Header */
+        .game-header {
+            background: rgba(0,0,0,0.95);
+            padding: 15px 30px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            border-bottom: 3px solid #667eea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .team-info {
+            color: #667eea;
+        }
+        
+        .timer {
+            background: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 24px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+        
+        .timer-warning {
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .bugs-indicator {
+            background: #28a745;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        
+        .exit-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .exit-btn:hover {
+            background: #c82333;
+        }
+        
+        /* Game Content */
+        .game-content {
+            margin-top: 80px;
+            min-height: calc(100vh - 80px);
+            padding: 40px;
+        }
+        
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.05);
+            padding: 40px;
+            border-radius: 15px;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-pulse {
+            animation: btnPulse 1s infinite;
+        }
+        
+        @keyframes btnPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 90px;
+            right: -300px;
+            background: rgba(102, 126, 234, 0.95);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: right 0.3s;
+            z-index: 999;
+        }
+        
+        .notification.show {
+            right: 20px;
+        }
+        
+        .notification-success {
+            background: rgba(40, 167, 69, 0.95);
+        }
+        
+        .notification-error {
+            background: rgba(220, 53, 69, 0.95);
+        }
+    </style>
+</head>
+<body>
+    <!-- GAME HEADER -->
+    <div class="game-header">
+        <div class="team-info">
+            <strong id="team-name">Loading...</strong><br>
+            <small>Round <span id="round-num">1</span> - Page <span id="page-num">1</span> | Score: <span id="current-score">0</span></small>
+        </div>
+        
+        <div class="timer" id="timer">--:--</div>
+        
+        <div class="bugs-indicator">
+            🐛 Bugs: <span id="bugs-fixed">0/3</span>
+        </div>
+        
+        <button class="exit-btn" onclick="exitGame()">
+            ← Exit Game
+        </button>
+    </div>
+
+    <!-- GAME CONTENT -->
+    <div class="game-content">
+        <div class="game-container">
+            <h1 style="color: #8B0000; text-align: center; margin-bottom: 30px;">
+                🎭 The Flickering Basement
+            </h1>
+            
+            <div style="background: rgba(139,0,0,0.2); padding: 20px; border-left: 5px solid #8B0000; margin-bottom: 30px;">
+                <p><strong>Story:</strong> You wake up in the Byers' basement. The lights are flickering, and the alphabet wall is covered in Christmas lights. Joyce left a message saying "Find the light to escape," but the bulbs won't turn on.</p>
+                <p><strong>Mission:</strong> Fix all 3 bugs using DevTools to reveal the escape button!</p>
+            </div>
+
+            <!-- GAME CHALLENGE AREA -->
+            <div style="background: rgba(255,255,255,0.1); padding: 40px; border-radius: 10px; margin: 30px 0;">
+                
+                <!-- BUG 1: Message with opacity 0 -->
+                <div id="message-bulbs" style="opacity: 0; text-align: center; font-size: 48px; margin: 30px 0; letter-spacing: 20px;">
+                    RUN
+                </div>
+
+                <!-- BUG 2: Escape button with display: none -->
+                <div style="text-align: center; margin: 40px 0;">
+                    <button id="escape-door" onclick="fixBug('bug1')" style="display: none; background: #28a745; color: white; border: none; padding: 20px 40px; font-size: 24px; border-radius: 10px; cursor: pointer;">
+                        🚪 ESCAPE DOOR
+                    </button>
+                </div>
+
+                <!-- BUG 3: Instructions with visibility hidden -->
+                <div id="instructions" style="visibility: hidden; background: rgba(255,243,205,0.1); padding: 15px; border-radius: 8px; margin-top: 30px; color: #ffc107;">
+                    <p><strong>💡 Hint:</strong> Use DevTools (F12) → Inspect Element</p>
+                    <ul>
+                        <li>Look for <code>display: none</code></li>
+                        <li>Check for <code>opacity: 0</code></li>
+                        <li>Find <code>visibility: hidden</code></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- BUGS CHECKLIST -->
+            <div style="background: rgba(255,243,205,0.1); padding: 20px; border-radius: 8px; margin: 30px 0;">
+                <h4 style="color: #ffc107;">💡 Bugs to Fix:</h4>
+                <ul style="color: #fff;">
+                    <li>Bug 1: Message has <code>opacity: 0</code> (Change to <code>opacity: 1</code>)</li>
+                    <li>Bug 2: Escape button has <code>display: none</code> (Change to <code>display: block</code>)</li>
+                    <li>Bug 3: Instructions have <code>visibility: hidden</code> (Change to <code>visibility: visible</code>)</li>
+                </ul>
+            </div>
+
+            <hr style="margin: 40px 0; border-color: #8B0000;">
+
+            <!-- DEBUG PANEL (For Testing) -->
+            <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px;">
+                <h4>🐛 Debug Panel (Testing Only)</h4>
+                <p style="color: #aaa;">In a real game, players use DevTools. For testing:</p>
+                <div style="margin: 20px 0;">
+                    <button onclick="fixBug('bug1')" class="btn btn-primary">Fix Bug 1 (Opacity)</button>
+                    <button onclick="fixBug('bug2')" class="btn btn-primary">Fix Bug 2 (Display)</button>
+                    <button onclick="fixBug('bug3')" class="btn btn-primary">Fix Bug 3 (Visibility)</button>
+                </div>
+                
+                <button id="complete-btn" onclick="completePage()" class="btn btn-success" style="width: 100%; font-size: 18px; padding: 15px;" disabled>
+                    ✅ Complete Page & Continue (+10 Points)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Configuration -->
+    <script>
+        // Inline config for this page
+        const CONFIG = {
+            BACKEND_URL: 'http://127.0.0.1:8000',
+            API: {
+                START_GAME: '/api/start-game/',
+                VALIDATE_PAGE: '/api/validate-page/',
+                GAME_STATE: '/api/game-state/',
+            },
+            getSession: function() {
+                return {
+                    teamId: localStorage.getItem('team_id') || new URLSearchParams(window.location.search).get('team'),
+                    token: localStorage.getItem('game_token') || new URLSearchParams(window.location.search).get('token'),
+                    roundNumber: 1,  // This page is round 1
+                    pageNumber: 1    // This page is page 1
+                };
+            },
+            setSession: function(data) {
+                if (data.teamId) localStorage.setItem('team_id', data.teamId);
+                if (data.token) localStorage.setItem('game_token', data.token);
+            }
+        };
+        
+        // Set round and page in UI
+        document.getElementById('round-num').textContent = '1';
+        document.getElementById('page-num').textContent = '1';
+    </script>
+    
+    <!-- Load Game Engine (copy the game-engine.js code here or link externally) -->
+    <script src="../assets/js/game-engine.js"></script>
+</body>
+</html>
