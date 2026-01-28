@@ -1,8 +1,6 @@
 import json
-
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
-
 from .models import Team, TeamRoundProgress, PageProgress
 
 
@@ -58,7 +56,7 @@ class GameSyncConsumer(AsyncWebsocketConsumer):
     async def handle_bug_fixed(self, data):
         page_number = data.get("page_number")
         bug_id = data.get("bug_id")
-        username = data.get("user")
+        username = data.get("user", "Teammate")
 
         # Broadcast to all team members
         await self.channel_layer.group_send(
@@ -73,15 +71,25 @@ class GameSyncConsumer(AsyncWebsocketConsumer):
 
     async def handle_page_completed(self, data):
         page_number = data.get("page_number")
-        username = data.get("user")
+        username = data.get("user", "Teammate")
 
-        # Broadcast page completion
+        # Broadcast page completion to ALL team members
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 "type": "page_completed_broadcast",
                 "page_number": page_number,
                 "user": username
+            }
+        )
+
+        # Also send updated game state to everyone
+        state = await self.get_game_state()
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "game_state_broadcast",
+                "data": state
             }
         )
 
@@ -101,6 +109,15 @@ class GameSyncConsumer(AsyncWebsocketConsumer):
                 "type": "page_completed",
                 "page_number": event["page_number"],
                 "user": event["user"]
+            })
+        )
+
+    async def game_state_broadcast(self, event):
+        """Broadcast updated game state to all connected clients"""
+        await self.send(
+            text_data=json.dumps({
+                "type": "game_state",
+                "data": event["data"]
             })
         )
 

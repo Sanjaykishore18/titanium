@@ -4,26 +4,172 @@ class GameEngine {
         this.totalBugs = 3;
         this.session = CONFIG.getSession();
         this.timer = null;
+        this.ws = null; // ✅ WebSocket connection
+        this.isPageCompleted = false; // ✅ Track if current page is done
     }
 
     // Initialize game page
     async init() {
-        this.extractURLParams(); // Extract team_id from URL if present
+        this.extractURLParams();
         this.validateToken();
         this.setupBugTracking();
-        await this.loadGameState(); // countdown starts here
+        await this.loadGameState();
+        this.connectWebSocket(); // ✅ NEW: Connect to WebSocket
+    }
+
+    // ✅ NEW: Establish WebSocket Connection
+    connectWebSocket() {
+        const session = this.session;
+        
+        if (!session?.teamId || !session?.roundNumber) {
+            console.error('Cannot connect WebSocket: Missing team or round info');
+            return;
+        }
+
+        // WebSocket URL pattern: ws://backend/ws/game/team/{team_id}/round/{round_number}/
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsHost = CONFIG.BACKEND_URL.replace('http://', '').replace('https://', '');
+        const wsUrl = `${wsProtocol}//${wsHost}/ws/game/team/${session.teamId}/round/${session.roundNumber}/`;
+
+        console.log('Connecting to WebSocket:', wsUrl);
+
+        this.ws = new WebSocket(wsUrl);
+
+        this.ws.onopen = () => {
+            console.log('✅ WebSocket connected');
+            this.showNotification('Connected to team sync', 'success');
+        };
+
+        this.ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            this.handleWebSocketMessage(data);
+        };
+
+        this.ws.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
+
+        this.ws.onclose = () => {
+            console.log('WebSocket disconnected');
+            // ✅ Auto-reconnect after 3 seconds
+            setTimeout(() => {
+                if (!this.isPageCompleted) {
+                    console.log('Reconnecting WebSocket...');
+                    this.connectWebSocket();
+                }
+            }, 3000);
+        };
+    }
+
+    // ✅ NEW: Handle incoming WebSocket messages
+    handleWebSocketMessage(data) {
+        console.log('WebSocket message received:', data);
+
+        switch (data.type) {
+            case 'game_state':
+                this.updateGameState(data.data);
+                break;
+
+            case 'bug_fixed':
+                this.handleTeammateBugFix(data);
+                break;
+
+            case 'page_completed':
+                this.handleTeammatePageCompletion(data);
+                break;
+
+            default:
+                console.log('Unknown message type:', data.type);
+        }
+    }
+
+    // ✅ NEW: Update game state from WebSocket
+    updateGameState(state) {
+        console.log('Updating game state:', state);
+
+        // Update score
+        const scoreEl = document.getElementById('current-score');
+        if (scoreEl && state.score !== undefined) {
+            scoreEl.textContent = state.score;
+        }
+
+        // Check if current page is already completed by team
+        if (state.pages && Array.isArray(state.pages)) {
+            const currentPageState = state.pages.find(p => p.page_number === this.session.pageNumber);
+            
+            if (currentPageState && currentPageState.completed && !this.isPageCompleted) {
+                this.showPageCompletedByTeam();
+            }
+        }
+    }
+
+    // ✅ NEW: Show that page was completed by teammate
+    showPageCompletedByTeam() {
+        this.isPageCompleted = true;
+        
+        this.showNotification('✅ Page completed by your team!', 'success');
+
+        // Enable the complete button for all team members
+        const completeBtn = document.getElementById('complete-btn');
+        if (completeBtn) {
+            completeBtn.disabled = false;
+            completeBtn.classList.add('btn-pulse');
+            completeBtn.innerHTML = '✅ Continue to Next Page (Completed by Team)';
+            completeBtn.onclick = () => this.moveToNextPage(); // ✅ Just move, don't resubmit
+        }
+    }
+
+    // ✅ NEW: Handle teammate's bug fix
+    handleTeammateBugFix(data) {
+        const { bug_id, user } = data;
+        
+        this.showNotification(`${user} fixed Bug ${bug_id}`, 'info');
+        
+        // Optionally mark bug as fixed locally too (visual sync)
+        this.bugsFixed.add(bug_id);
+        this.updateBugCounter();
+    }
+
+    // ✅ NEW: Handle teammate's page completion
+    handleTeammatePageCompletion(data) {
+        const { page_number, user } = data;
+        
+        if (page_number === this.session.pageNumber) {
+            this.showNotification(`${user} completed this page!`, 'success');
+            this.showPageCompletedByTeam();
+        }
+    }
+
+    // ✅ NEW: Move to next page without resubmitting
+    async moveToNextPage() {
+        try {
+            // Just redirect to next page using stored URL or calculate it
+            const nextPage = this.session.pageNumber + 1;
+            
+            if (nextPage > 10) {
+                // Round completed
+                alert('Round completed! Returning to dashboard...');
+                window.location.href = CONFIG.BACKEND_URL + '/dashboard/';
+                return;
+            }
+
+            const nextPageUrl = `/round${this.session.roundNumber}/page${nextPage}.html?team=${this.session.teamId}&token=${this.session.token}&round=${this.session.roundNumber}&page=${nextPage}`;
+            window.location.href = nextPageUrl;
+
+        } catch (error) {
+            console.error('Error moving to next page:', error);
+            alert('Error. Please try again.');
+        }
     }
 
     // Extract team_id and token from URL parameters
-// Extract team_id and token from URL parameters
     extractURLParams() {
         const urlParams = new URLSearchParams(window.location.search);
         const teamFromURL = urlParams.get('team');
         const tokenFromURL = urlParams.get('token');
-        const roundFromURL = urlParams.get('round');      // ✅ NEW
-        const pageFromURL = urlParams.get('page');        // ✅ NEW
+        const roundFromURL = urlParams.get('round');
+        const pageFromURL = urlParams.get('page');
         
-        // Store all URL params to localStorage
         if (teamFromURL) {
             localStorage.setItem('team_id', teamFromURL);
             this.session.teamId = teamFromURL;
@@ -34,7 +180,6 @@ class GameEngine {
             this.session.token = tokenFromURL;
         }
 
-        // ✅ NEW: Store round and page from URL
         if (roundFromURL) {
             localStorage.setItem('current_round', roundFromURL);
             this.session.roundNumber = parseInt(roundFromURL);
@@ -45,7 +190,6 @@ class GameEngine {
             this.session.pageNumber = parseInt(pageFromURL);
         }
     }
-
 
     // Validate URL token
     validateToken() {
@@ -66,7 +210,6 @@ class GameEngine {
 
     // Load game state from backend
     async loadGameState() {
-        // Re-fetch session after extracting URL params
         this.session = CONFIG.getSession();
         
         if (!this.session?.teamId || !this.session?.roundNumber) {
@@ -101,9 +244,18 @@ class GameEngine {
             // Update UI
             const teamEl = document.getElementById('team-name');
             const scoreEl = document.getElementById('current-score');
+            const roundEl = document.getElementById('round-num');
+            const pageEl = document.getElementById('page-num');
 
             if (teamEl) teamEl.textContent = data.team_name;
             if (scoreEl) scoreEl.textContent = data.current_score;
+            if (roundEl) roundEl.textContent = this.session.roundNumber;
+            if (pageEl) pageEl.textContent = this.session.pageNumber;
+
+            // ✅ Check if this page is already completed
+            if (data.current_page > this.session.pageNumber) {
+                this.showPageCompletedByTeam();
+            }
 
             // Start countdown timer
             this.startCountdown(data.time_remaining);
@@ -115,9 +267,14 @@ class GameEngine {
 
     // Setup bug tracking UI
     setupBugTracking() {
+        this.updateBugCounter();
+    }
+
+    // ✅ NEW: Update bug counter UI
+    updateBugCounter() {
         const bugCounter = document.getElementById('bugs-fixed');
         if (bugCounter) {
-            bugCounter.textContent = `0/${this.totalBugs}`;
+            bugCounter.textContent = `${this.bugsFixed.size}/${this.totalBugs}`;
         }
     }
 
@@ -126,10 +283,16 @@ class GameEngine {
         if (this.bugsFixed.has(bugId)) return;
 
         this.bugsFixed.add(bugId);
+        this.updateBugCounter();
 
-        const bugCounter = document.getElementById('bugs-fixed');
-        if (bugCounter) {
-            bugCounter.textContent = `${this.bugsFixed.size}/${this.totalBugs}`;
+        // ✅ Broadcast to team via WebSocket
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify({
+                type: 'bug_fixed',
+                page_number: this.session.pageNumber,
+                bug_id: bugId,
+                user: this.session.teamId // You can get actual username if stored
+            }));
         }
 
         this.showNotification(`Bug ${bugId} fixed! ✓`, 'success');
@@ -150,6 +313,12 @@ class GameEngine {
 
     // Complete page
     async completePage() {
+        // ✅ If already completed by team, just move to next page
+        if (this.isPageCompleted) {
+            this.moveToNextPage();
+            return;
+        }
+
         if (this.bugsFixed.size < this.totalBugs) {
             alert(`You must fix all ${this.totalBugs} bugs first!`);
             return;
@@ -181,8 +350,7 @@ class GameEngine {
             if (data.error) {
                 alert(data.error);
                 if (data.redirect_dashboard) {
-                    window.location.href =
-                        CONFIG.BACKEND_URL + '/dashboard/';
+                    window.location.href = CONFIG.BACKEND_URL + '/dashboard/';
                 }
                 return;
             }
@@ -191,17 +359,20 @@ class GameEngine {
                 const scoreEl = document.getElementById('current-score');
                 if (scoreEl) scoreEl.textContent = data.current_score;
 
+                // ✅ Broadcast page completion to team
+                if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                    this.ws.send(JSON.stringify({
+                        type: 'page_completed',
+                        page_number: this.session.pageNumber,
+                        user: this.session.teamId
+                    }));
+                }
+
                 if (data.round_completed) {
-                    alert(
-                        `${data.message} Final Score: ${data.final_score}`
-                    );
-                    window.location.href =
-                        CONFIG.BACKEND_URL + '/dashboard/';
+                    alert(`${data.message} Final Score: ${data.final_score}`);
+                    window.location.href = CONFIG.BACKEND_URL + '/dashboard/';
                 } else {
-                    this.showNotification(
-                        'Page completed! +10 points',
-                        'success'
-                    );
+                    this.showNotification('Page completed! +10 points', 'success');
                     setTimeout(() => {
                         window.location.href = data.next_page_url;
                     }, 1500);
@@ -226,18 +397,14 @@ class GameEngine {
             if (timeLeft <= 0) {
                 clearInterval(this.timer);
                 alert('Time is up! Returning to dashboard...');
-                window.location.href =
-                    CONFIG.BACKEND_URL + '/dashboard/';
+                window.location.href = CONFIG.BACKEND_URL + '/dashboard/';
                 return;
             }
 
             const minutes = Math.floor(timeLeft / 60);
             const secs = timeLeft % 60;
 
-            timerEl.textContent = `${String(minutes).padStart(
-                2,
-                '0'
-            )}:${String(secs).padStart(2, '0')}`;
+            timerEl.textContent = `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 
             if (timeLeft <= 300) {
                 timerEl.classList.add('timer-warning');
@@ -265,11 +432,11 @@ class GameEngine {
 
     // Exit game
     exitGame() {
-        if (
-            confirm(
-                'Exit game and return to dashboard? (Progress will be saved)'
-            )
-        ) {
+        if (confirm('Exit game and return to dashboard? (Progress will be saved)')) {
+            // Close WebSocket
+            if (this.ws) {
+                this.ws.close();
+            }
             window.location.href = CONFIG.BACKEND_URL + '/dashboard/';
         }
     }
