@@ -1,458 +1,1100 @@
-{% extends 'base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titanium Escape Game - Join Team</title>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=New+Rocker&family=Exo+2:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-{% block title %}Join Team - Web Escape{% endblock %}
+        :root {
+            --flame-blue: #00d9ff;
+            --dark-blue: #0099cc;
+            --black: #0a0a0a;
+            --dark-gray: #1a1a1a;
+            --text-gray: #888;
+            --white: #ffffff;
+            --neon-cyan: #00ffff;
+            --neon-purple: #b300ff;
+        }
 
-{% block extra_css %}
-<style>
-    body {
-        background: #000000 !important;
-        color: #ffffff !important;
-    }
+        body {
+            font-family: 'New Rocker', cursive;
+            background: var(--black);
+            color: var(--white);
+            overflow-x: hidden;
+        }
 
-    .game-header {
-        position: relative;
-        background: #0a0a0a;
-        border: 3px solid transparent;
-        border-image: linear-gradient(135deg, #5B21B6, #7C3AED, #5B21B6);
-        border-image-slice: 1;
-        padding: 60px 40px;
-        border-radius: 0;
-        margin-bottom: 40px;
-        overflow: hidden;
-    }
+        /* Scanline effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 9999;
+        }
 
-    .game-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, rgba(91, 33, 182, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);
-        z-index: 0;
-    }
+        /* Animated background gradient */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at 50% 50%, rgba(0, 217, 255, 0.1) 0%, transparent 70%);
+            opacity: 0.5;
+            animation: pulseGradient 8s ease-in-out infinite;
+        }
 
-    .game-header::after {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, transparent 70%);
-        z-index: 0;
-        pointer-events: none;
-    }
+        @keyframes pulseGradient {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
 
-    .game-header-content {
-        position: relative;
-        z-index: 1;
-        text-align: center;
-    }
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 5%;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 217, 255, 0.2);
+            z-index: 1000;
+            animation: slideDown 0.6s ease-out;
+        }
 
-    .game-header h1 {
-        font-size: 4rem;
-        font-weight: 900;
-        margin: 0 0 20px 0;
-        text-transform: uppercase;
-        letter-spacing: 8px;
-        color: #ffffff;
-        text-shadow: 0 0 6px rgba(124, 58, 237, 0.8),
-                     0 0 12px rgba(124, 58, 237, 0.4);
-        line-height: 1.2;
-    }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    .game-header h1 i {
-        color: #7C3AED;
-        margin-right: 20px;
-        filter: drop-shadow(0 0 8px rgba(124, 58, 237, 0.5));
-    }
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
 
-    .subtitle-wrapper {
-        max-width: 700px;
-        margin: 0 auto;
-        padding-top: 15px;
-        border-top: 2px solid rgba(124, 58, 237, 0.3);
-    }
+        .logo-text {
+            font-family: 'New Rocker', cursive;
+            font-size: 1.8rem;
+            font-weight: 400;
+            letter-spacing: 2px;
+        }
 
-    .game-header .subtitle {
-        font-size: 1.15rem;
-        font-weight: 400;
-        color: #cccccc;
-        line-height: 1.6;
-        margin: 0;
-        letter-spacing: 0.5px;
-    }
+        .logo-text .blue {
+            color: var(--flame-blue);
+            font-weight: 400;
+        }
 
-    .game-stats {
-        display: flex;
-        justify-content: center;
-        gap: 40px;
-        margin-top: 25px;
-        flex-wrap: wrap;
-    }
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8rem 5% 4rem;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
 
-    .game-stat-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
+        .hero-tag {
+            font-family: 'New Rocker', cursive;
+            font-size: 1rem;
+            color: var(--flame-blue);
+            letter-spacing: 3px;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.2s forwards;
+        }
 
-    .game-stat-item i {
-        color: #7C3AED;
-        font-size: 1.2rem;
-    }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    .game-stat-item span {
-        color: #ffffff;
-        font-weight: 600;
-        font-size: 0.95rem;
-    }
+        .hero-title {
+            font-size: 6.5rem;
+            font-weight: 400;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, var(--white) 0%, var(--flame-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.4s forwards;
+            font-family: 'New Rocker', cursive;
+            text-shadow: 0 0 20px rgba(0, 217, 255, 0.5),
+                         0 0 40px rgba(0, 217, 255, 0.3),
+                         0 0 60px rgba(0, 217, 255, 0.2);
+            filter: drop-shadow(0 0 30px rgba(0, 217, 255, 0.4));
+        }
 
-    .card {
-        background: #0a0a0a;
-        border: 2px solid #1f1f1f;
-        border-radius: 12px;
-        color: #ffffff;
-    }
+        .hero-subtitle {
+            font-family: 'New Rocker', cursive;
+            font-size: 2rem;
+            color: var(--text-gray);
+            letter-spacing: 8px;
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.6s forwards;
+        }
 
-    .info-card {
-        background: #0a0a0a;
-        border: 2px solid #1f1f1f;
-        padding: 40px;
-        border-radius: 12px;
-        margin-bottom: 30px;
-        transition: all 0.3s;
-    }
+        .hero-description {
+            max-width: 700px;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--text-gray);
+            margin-bottom: 3rem;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.8s forwards;
+            font-family: 'Exo 2', sans-serif;
+        }
 
-    .info-card:hover {
-        border-color: #333;
-        box-shadow: 0 10px 30px rgba(255, 255, 255, 0.05);
-    }
+        .hero-cta {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 5rem;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 1s forwards;
+        }
 
-    .info-section {
-        text-align: center;
-        padding: 30px 20px;
-        transition: all 0.3s;
-    }
+        .btn-primary {
+            padding: 1.2rem 3rem;
+            background: var(--flame-blue);
+            color: var(--black);
+            border: 2px solid var(--flame-blue);
+            font-family: 'New Rocker', cursive;
+            font-size: 1.1rem;
+            font-weight: 400;
+            letter-spacing: 2px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
 
-    .info-section:hover {
-        transform: translateY(-5px);
-    }
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: left 0.3s;
+        }
 
-    .info-section i {
-        font-size: 3rem;
-        margin-bottom: 20px;
-        color: #ffffff;
-    }
+        .btn-primary:hover::before {
+            left: 100%;
+        }
 
-    .info-section h5 {
-        font-weight: 700;
-        margin-bottom: 15px;
-        color: #ffffff;
-        font-size: 1.3rem;
-    }
+        .btn-primary:hover {
+            background: var(--dark-blue);
+            border-color: var(--dark-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
+        }
 
-    .info-section p {
-        color: #aaa;
-        font-size: 1rem;
-        margin: 0;
-    }
+        /* Stats */
+        .stats {
+            display: flex;
+            gap: 5rem;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 1.2s forwards;
+        }
 
-    .divider {
-        height: 2px;
-        background: linear-gradient(90deg, transparent, #333, transparent);
-        margin: 30px 0;
-    }
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-    .form-card {
-        background: #0a0a0a;
-        border: 2px solid #1f1f1f;
-        border-radius: 12px;
-        overflow: hidden;
-    }
+        .stat-number {
+            font-size: 3.5rem;
+            font-weight: 400;
+            color: var(--flame-blue);
+            font-family: 'New Rocker', cursive;
+        }
 
-    .form-card .card-header {
-        background: linear-gradient(135deg, #5B21B6 0%, #7C3AED 100%);
-        color: #ffffff;
-        padding: 25px;
-        border-bottom: none;
-    }
+        .stat-label {
+            font-size: 0.95rem;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'New Rocker', cursive;
+        }
 
-    .form-card .card-header h4 {
-        margin: 0;
-        font-weight: 700;
-        font-size: 1.5rem;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-    }
+        /* Join Form Section */
+        .join-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 5%;
+            position: relative;
+            z-index: 1;
+        }
 
-    .form-card .card-body {
-        padding: 40px;
-        background: #0a0a0a;
-    }
+        .form-container {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
 
-    .form-label {
-        color: #ffffff;
-        font-weight: 600;
-        margin-bottom: 10px;
-        font-size: 1rem;
-    }
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--flame-blue), transparent);
+        }
 
-    .form-label i {
-        color: #7C3AED;
-        margin-right: 8px;
-    }
+        .form-title {
+            font-size: 2.8rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+            color: var(--flame-blue);
+            font-family: 'New Rocker', cursive;
+        }
 
-    .form-control {
-        background: #1a1a1a;
-        border: 2px solid #2a2a2a;
-        color: #ffffff;
-        padding: 15px;
-        font-size: 1rem;
-        border-radius: 8px;
-        transition: all 0.3s;
-    }
+        .form-subtitle {
+            font-family: 'New Rocker', cursive;
+            font-size: 1rem;
+            color: var(--text-gray);
+            margin-bottom: 2.5rem;
+        }
 
-    .form-control:focus {
-        background: #1a1a1a;
-        border-color: #7C3AED;
-        color: #ffffff;
-        box-shadow: 0 0 0 0.2rem rgba(124, 58, 237, 0.25);
-    }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
 
-    .form-control::placeholder {
-        color: #666;
-    }
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            font-family: 'New Rocker', cursive;
+        }
 
-    .form-check-input {
-        background-color: #1a1a1a;
-        border: 2px solid #2a2a2a;
-        width: 20px;
-        height: 20px;
-        cursor: pointer;
-    }
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(10, 10, 10, 0.6);
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            color: var(--white);
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
 
-    .form-check-input:checked {
-        background-color: #7C3AED;
-        border-color: #7C3AED;
-    }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--flame-blue);
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.2);
+        }
 
-    .form-check-input:focus {
-        box-shadow: 0 0 0 0.2rem rgba(124, 58, 237, 0.25);
-    }
+        .form-submit {
+            width: 100%;
+            padding: 1.2rem;
+            background: var(--flame-blue);
+            color: var(--black);
+            border: 2px solid var(--flame-blue);
+            font-family: 'New Rocker', cursive;
+            font-size: 1.1rem;
+            font-weight: 400;
+            letter-spacing: 2px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
 
-    .form-check-label {
-        color: #aaa;
-        margin-left: 10px;
-        cursor: pointer;
-        font-size: 0.95rem;
-    }
+        .form-submit:hover {
+            background: var(--dark-blue);
+            border-color: var(--dark-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
+        }
 
-    .btn-join {
-        background: linear-gradient(135deg, #5B21B6 0%, #7C3AED 100%);
-        border: none;
-        color: white;
-        padding: 18px 30px;
-        font-size: 1.2rem;
-        font-weight: 700;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s;
-        width: 100%;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-    }
+        .error-message {
+            color: #ff3347;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            display: none;
+            font-family: 'Exo 2', sans-serif;
+        }
 
-    .btn-join:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 15px 40px rgba(124, 58, 237, 0.6);
-        background: linear-gradient(135deg, #6D28D9 0%, #8B5CF6 100%);
-    }
+        .error-message.show {
+            display: block;
+        }
 
-    .btn-join:active {
-        transform: translateY(-1px);
-    }
+        /* Footer */
+        footer {
+            background: var(--dark-gray);
+            padding: 3rem 5% 1.5rem;
+            border-top: 1px solid rgba(0, 217, 255, 0.2);
+        }
 
-    .feature-icon {
-        display: inline-block;
-        width: 80px;
-        height: 80px;
-        background: #1a1a1a;
-        border: 2px solid #2a2a2a;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 20px;
-        transition: all 0.3s;
-    }
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
 
-    .info-section:hover .feature-icon {
-        border-color: #7C3AED;
-        box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
-    }
-</style>
-{% endblock %}
+        .footer-logo {
+            font-family: 'New Rocker', cursive;
+            font-size: 1.8rem;
+            font-weight: 400;
+            letter-spacing: 2px;
+        }
 
-{% block content %}
-<div class="row justify-content-center mt-5">
-    <div class="col-md-10">
+        .footer-logo .blue {
+            color: var(--flame-blue);
+            font-weight: 400;
+        }
 
-        <!-- GAME HEADER -->
-        <div class="game-header">
-            <div class="game-header-content">
-                <h1>
-                    <i class="fas fa-door-open"></i>WEB ESCAPE
-                </h1>
-                <div class="subtitle-wrapper">
-                    <p class="subtitle">
-                        Escape if you can!
-                    </p>
-                    
+        .footer-bottom {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .footer-text {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+            margin-bottom: 0.5rem;
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        .footer-tagline {
+            font-family: 'New Rocker', cursive;
+            font-size: 0.9rem;
+            color: var(--flame-blue);
+            opacity: 0.5;
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 6rem 5% 4rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            position: relative;
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.03) 0%, rgba(0, 153, 204, 0.05) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 217, 255, 0.1);
+            padding: 0;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--flame-blue), transparent);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 217, 255, 0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .feature-card:hover::after {
+            left: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(0, 217, 255, 0.4);
+            box-shadow: 0 20px 60px rgba(0, 217, 255, 0.15),
+                        inset 0 0 30px rgba(0, 217, 255, 0.05);
+        }
+
+        .feature-header {
+            padding: 2.5rem 2rem 1.5rem;
+            border-bottom: 1px solid rgba(0, 217, 255, 0.1);
+        }
+
+        .feature-icon-wrapper {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(0, 153, 204, 0.1));
+            border: 2px solid rgba(0, 217, 255, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            transition: all 0.4s;
+        }
+
+        .feature-card:hover .feature-icon-wrapper {
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.2), rgba(0, 153, 204, 0.2));
+            border-color: var(--flame-blue);
+            transform: rotate(5deg) scale(1.1);
+        }
+
+        .feature-icon-svg {
+            width: 28px;
+            height: 28px;
+            stroke: var(--flame-blue);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .feature-title {
+            font-size: 1.7rem;
+            font-weight: 400;
+            color: var(--white);
+            margin-bottom: 0.5rem;
+            font-family: 'New Rocker', cursive;
+            letter-spacing: 1px;
+        }
+
+        .feature-subtitle {
+            font-size: 1rem;
+            color: var(--flame-blue);
+            font-weight: 400;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-family: 'New Rocker', cursive;
+        }
+
+        .feature-body {
+            padding: 2rem;
+        }
+
+        .feature-points {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .feature-point {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .feature-card:hover .feature-point {
+            opacity: 1;
+        }
+
+        .feature-point-icon {
+            width: 6px;
+            height: 6px;
+            background: var(--flame-blue);
+            border-radius: 50%;
+            margin-top: 8px;
+            flex-shrink: 0;
+        }
+
+        .feature-point-text {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        .feature-footer {
+            padding: 1.5rem 2rem;
+            background: rgba(0, 217, 255, 0.02);
+            border-top: 1px solid rgba(0, 217, 255, 0.1);
+            margin-top: auto;
+        }
+
+        .feature-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .feature-stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .feature-stat-value {
+            font-size: 2rem;
+            font-weight: 400;
+            color: var(--flame-blue);
+            font-family: 'New Rocker', cursive;
+            line-height: 1;
+        }
+
+        .feature-stat-label {
+            font-size: 0.8rem;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0.3rem;
+            font-family: 'New Rocker', cursive;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .feature-header {
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .feature-body {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-container {
+            position: relative;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.7);
+            transition: transform 0.3s ease;
+            z-index: 1;
+        }
+
+        .modal-overlay.active .modal-container {
+            transform: scale(1);
+        }
+
+        .modal-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .modal-bg-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.05) 0%, rgba(0, 255, 255, 0.05) 100%);
+            z-index: 1;
+        }
+
+        .modal-content {
+            position: relative;
+            z-index: 2;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(0, 217, 255, 0.3);
+            padding: 3rem 2.5rem;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 40px;
+            height: 40px;
+            border: 2px solid rgba(0, 217, 255, 0.3);
+            background: transparent;
+            color: var(--flame-blue);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        .modal-close:hover {
+            background: var(--flame-blue);
+            color: var(--black);
+            transform: rotate(90deg);
+        }
+
+        .modal-title {
+            font-size: 2.8rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+            color: var(--flame-blue);
+            font-family: 'New Rocker', cursive;
+            text-align: center;
+        }
+
+        .modal-subtitle {
+            font-family: 'New Rocker', cursive;
+            font-size: 1rem;
+            color: var(--text-gray);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .error-message {
+            background: rgba(255, 51, 71, 0.1);
+            border: 1px solid #ff3347;
+            color: #ff3347;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 3.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.3rem;
+                letter-spacing: 4px;
+            }
+
+            .hero-description {
+                font-size: 1rem;
+            }
+
+            .stats {
+                gap: 2rem;
+                flex-wrap: wrap;
+            }
+
+            .stat-number {
+                font-size: 2.5rem;
+            }
+
+            .modal-content {
+                padding: 2rem 1.5rem;
+            }
+
+            .modal-title {
+                font-size: 2.2rem;
+            }
+
+            .modal-close {
+                top: 1rem;
+                right: 1rem;
+            }
+
+            .logo-text {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+
+    <header>
+        <div class="nav-container">
+            <div class="logo-text"><span class="blue">Titanium</span> 2026</div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="hero-tag">&lt;/ ENTER THE ESCAPE /&gt;</div>
+        <h1 class="hero-title">WEB ESCAPE</h1>
+        <p class="hero-subtitle">ESCAPE IF YOU CAN</p>
+        <p class="hero-description">
+            The digital escape room awaits. Test your problem-solving skills against the clock. 
+            Work with your team to solve complex puzzles, break codes, and escape before time runs out. 
+            Do you have what it takes to break free?
+        </p>
+        <div class="hero-cta">
+            <button class="btn-primary" onclick="openModal()">Join Team</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-number">100+</span>
+                <span class="stat-label">Registrations</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">3H</span>
+                <span class="stat-label">Event Duration</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">30+</span>
+                <span class="stat-label">Challenges</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">₹20K</span>
+                <span class="stat-label">Prize Pool</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="features-grid">
+            <!-- Team Collaboration Card -->
+            <div class="feature-card">
+                <div class="feature-header">
+                    <div class="feature-icon-wrapper">
+                        <svg class="feature-icon-svg" viewBox="0 0 24 24">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Team Collaboration</h3>
+                    <p class="feature-subtitle">Real-Time Sync</p>
+                </div>
+                <div class="feature-body">
+                    <ul class="feature-points">
+                        <li class="feature-point">
+                            <div class="feature-point-icon"></div>
+                            <p class="feature-point-text">Live coordination with teammates across all challenges</p>
+                        </li>
+                        <li class="feature-point">
+                            <div class="feature-point-icon"></div>
+                            <p class="feature-point-text">Shared progress tracking and synchronized puzzle solving</p>
+                        </li>
+                        <li class="feature-point">
+                            <div class="feature-point-icon"></div>
+                            <p class="feature-point-text">Instant updates when teammates solve puzzles</p>
+                        </li>
+                    </ul>
+                </div>
+                <div class="feature-footer">
+                    <div class="feature-meta">
+                        <div class="feature-stat">
+                            <span class="feature-stat-value">4-6</span>
+                            <span class="feature-stat-label">Members</span>
+                        </div>
+                        <div class="feature-stat">
+                            <span class="feature-stat-value">Live</span>
+                            <span class="feature-stat-label">Updates</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Challenge Structure Card -->
+            <div class="feature-card">
+                <div class="feature-header">
+                    <div class="feature-icon-wrapper">
+                        <svg class="feature-icon-svg" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Challenge Format</h3>
+                    <p class="feature-subtitle">Multi-Round System</p>
+                </div>
+                <div class="feature-body">
+                    <ul class="feature-points">
+                        <li class="feature-point">
+                            <div class="feature-point-icon"></div>
+                            <p class="feature-point-text">3 progressive rounds with increasing difficulty</p>
+                        </li>
+                        <li class="feature-point">
+                            <div class="feature-point-icon"></div>
+                            <p class="feature-point-text">10 unique puzzle pages per round to solve</p>
+                        </li>
+                        <li class="feature-point">
+                            <div class="feature-point-icon"></div>
+                            <p class="feature-point-text">1 hour time limit to complete each round</p>
+                        </li>
+                    </ul>
+                </div>
+                <div class="feature-footer">
+                    <div class="feature-meta">
+                        <div class="feature-stat">
+                            <span class="feature-stat-value">30</span>
+                            <span class="feature-stat-label">Total Pages</span>
+                        </div>
+                        <div class="feature-stat">
+                            <span class="feature-stat-value">60m</span>
+                            <span class="feature-stat-label">Per Round</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Competition Card -->
+            <div class="feature-card">
+                <div class="feature-header">
+                    <div class="feature-icon-wrapper">
+                        <svg class="feature-icon-svg" viewBox="0 0 24 24">
+                            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                            <path d="M4 22h16"></path>
+                            <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+                            <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+                            <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Compete & Win</h3>
+                    <p class="feature-subtitle">Leaderboard Ranking</p>
+                </div>
+                <div class="feature-body">
+                    <ul class="feature-points">
+                        <li class="feature-point">
+                            <div class="feature-point-icon"></div>
+                            <p class="feature-point-text">Live leaderboard tracking with real-time rankings</p>
+                        </li>
+                        <li class="feature-point">
+                            <div class="feature-point-icon"></div>
+                            <p class="feature-point-text">Speed and accuracy-based scoring system</p>
+                        </li>
+                        <li class="feature-point">
+                            <div class="feature-point-icon"></div>
+                            <p class="feature-point-text">Compete against 100+ teams for top position</p>
+                        </li>
+                    </ul>
+                </div>
+                <div class="feature-footer">
+                    <div class="feature-meta">
+                        <div class="feature-stat">
+                            <span class="feature-stat-value">₹20K</span>
+                            <span class="feature-stat-label">Prize Pool</span>
+                        </div>
+                        <div class="feature-stat">
+                            <span class="feature-stat-value">100+</span>
+                            <span class="feature-stat-label">Teams</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- GAME INFO CARD -->
-        <div class="info-card">
-            <div class="row text-center">
-                <div class="col-md-4">
-                    <div class="info-section">
-                        <div class="feature-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <h5>Team-Based</h5>
-                        <p>Collaborate with your teammates in real-time</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="info-section">
-                        <div class="feature-icon">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <h5>3 Rounds</h5>
-                        <p>Each round: 10 pages, 1 hour time limit</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="info-section">
-                        <div class="feature-icon">
-                            <i class="fas fa-trophy"></i>
-                        </div>
-                        <h5>Compete</h5>
-                        <p>Climb the leaderboard by solving faster</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- JOIN TEAM FORM -->
-        <div class="form-card card">
-            <div class="card-header text-center">
-                <h4>
-                    <i class="fas fa-sign-in-alt"></i> Join Your Team
-                </h4>
-            </div>
-
-            <div class="card-body">
-                <form method="post" id="joinForm" autocomplete="off">
+    <!-- Join Team Modal -->
+    <div class="modal-overlay" id="joinModal">
+        <div class="modal-container">
+            <!-- Background SVG -->
+            <svg class="modal-bg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+                <defs>
+                    <radialGradient id="glow1" cx="50%" cy="30%">
+                        <stop offset="0%" style="stop-color:#00d9ff;stop-opacity:0.3" />
+                        <stop offset="100%" style="stop-color:#000;stop-opacity:1" />
+                    </radialGradient>
+                    <radialGradient id="glow2" cx="70%" cy="60%">
+                        <stop offset="0%" style="stop-color:#00ffff;stop-opacity:0.2" />
+                        <stop offset="100%" style="stop-color:#000;stop-opacity:1" />
+                    </radialGradient>
+                </defs>
+                <rect width="1200" height="800" fill="#0a0a0a"/>
+                <circle cx="400" cy="250" r="300" fill="url(#glow1)"/>
+                <circle cx="800" cy="500" r="250" fill="url(#glow2)"/>
+                <g opacity="0.3">
+                    <rect x="100" y="100" width="300" height="200" fill="#1a1a1a" stroke="#00d9ff" stroke-width="2"/>
+                    <rect x="500" y="300" width="250" height="180" fill="#1a1a1a" stroke="#00ffff" stroke-width="2"/>
+                    <rect x="800" y="150" width="200" height="150" fill="#1a1a1a" stroke="#00d9ff" stroke-width="2"/>
+                </g>
+                <text x="600" y="400" text-anchor="middle" font-family="'New Rocker', cursive" font-size="120" fill="#00d9ff" opacity="0.1">ESCAPE</text>
+            </svg>
+            
+            <div class="modal-bg-overlay"></div>
+            
+            <div class="modal-content">
+                <button class="modal-close" onclick="closeModal()">×</button>
+                
+                <h2 class="modal-title">Join Your Team</h2>
+                <p class="modal-subtitle">&lt;/ Enter team credentials /&gt;</p>
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="error-message show">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+                
+                <form method="POST" action="{% url 'join_team_auth' %}" id="joinForm">
                     {% csrf_token %}
-
-                    <div class="mb-4">
-                        <label class="form-label">
-                            <i class="fas fa-user"></i> Username
-                        </label>
-                        <input
-                            type="text"
-                            name="username"
-                            id="username"
-                            class="form-control"
-                            placeholder="Enter your username"
-                            required>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" name="username" class="form-input" placeholder="Enter your username" required>
                     </div>
-
-                    <div class="mb-4">
-                        <label class="form-label">
-                            <i class="fas fa-envelope"></i> Email
-                        </label>
-                        <input
-                            type="email"
-                            name="email"
-                            id="email"
-                            class="form-control"
-                            placeholder="your.email@example.com"
-                            required>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" name="email" class="form-input" placeholder="your@email.com" required>
                     </div>
-
-                    <div class="mb-4">
-                        <label class="form-label">
-                            <i class="fas fa-key"></i> Team Password
-                        </label>
-                        <input
-                            type="password"
-                            name="team_password"
-                            id="team_password"
-                            class="form-control"
-                            placeholder="Enter your team password"
-                            required>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Team Password</label>
+                        <input type="password" name="team_password" class="form-input" placeholder="Enter team password" required>
                     </div>
-
-                    <div class="form-check mb-4">
-                        <input
-                            class="form-check-input"
-                            type="checkbox"
-                            id="remember_me"
-                            name="remember_me">
-                        <label class="form-check-label" for="remember_me">
-                            Remember username & email on this device
-                        </label>
-                    </div>
-
-                    <button type="submit" class="btn-join">
-                        <i class="fas fa-sign-in-alt"></i> Join Team
-                    </button>
+                    
+                    <button type="submit" class="form-submit">Join Team</button>
                 </form>
             </div>
         </div>
-
     </div>
-</div>
-{% endblock %}
 
-{% block extra_js %}
-<!-- SAFE LOCAL STORAGE (NO PASSWORD SAVED) -->
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const savedUsername = localStorage.getItem('saved_username');
-    const savedEmail = localStorage.getItem('saved_email');
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo"><span class="blue">WEB</span> ESCAPE</div>
+        </div>
+        <div class="footer-bottom">
+            <p class="footer-text">© 2026 WEB ESCAPE. All rights reserved.</p>
+            <p class="footer-tagline">Escape if you can. Break free from reality.</p>
+        </div>
+    </footer>
 
-    if (savedUsername) {
-        document.getElementById('username').value = savedUsername;
-        document.getElementById('remember_me').checked = true;
-    }
+    <script>
+        function openModal() {
+            document.getElementById('joinModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
 
-    if (savedEmail) {
-        document.getElementById('email').value = savedEmail;
-    }
-});
+        function closeModal() {
+            document.getElementById('joinModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
 
-document.getElementById('joinForm').addEventListener('submit', function () {
-    const rememberMe = document.getElementById('remember_me').checked;
+        // Close modal when clicking outside
+        document.getElementById('joinModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
 
-    if (rememberMe) {
-        localStorage.setItem(
-            'saved_username',
-            document.getElementById('username').value
-        );
-        localStorage.setItem(
-            'saved_email',
-            document.getElementById('email').value
-        );
-    } else {
-        localStorage.removeItem('saved_username');
-        localStorage.removeItem('saved_email');
-    }
-});
-</script>
-{% endblock %}
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Add floating animation to stats
+        document.addEventListener('DOMContentLoaded', function() {
+            const stats = document.querySelectorAll('.stat-item');
+            stats.forEach((stat, index) => {
+                stat.style.animation = `float 3s ease-in-out ${index * 0.2}s infinite`;
+            });
+        });
+
+        // Add keyframe for float animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes float {
+                0%, 100% { transform: translateY(0px); }
+                50% { transform: translateY(-10px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

@@ -1,41 +1,29 @@
 """
 Django settings for escape_game_project project.
+CORRECTED VERSION - Fixed CSRF and CORS issues
 """
 
 from pathlib import Path
 import os
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-ss881e0icnut0^z%ptbu8n4gvk%)l@az4r8)1=f_zg!x5)v4fh'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# ✅ UPDATED: New IP address
-ALLOWED_HOSTS = [
-    "10.98.207.227",
-    "localhost",
-    "127.0.0.1",
-    ".trycloudflare.com",
-]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "backend", "*"]
 
-# ✅ FIX: Remove Cross-Origin-Opener-Policy header
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 
-
-# Application definition
 INSTALLED_APPS = [
-    "jazzmin",  # Must be FIRST for admin styling
+    "jazzmin",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',  # ✅ CRITICAL for static files
+    'django.contrib.staticfiles',
     'channels',
     'crispy_forms',
     'crispy_bootstrap5',
@@ -75,8 +63,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'escape_game_project.wsgi.application'
 ASGI_APPLICATION = 'escape_game_project.asgi.application'
 
-
-# Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -84,72 +70,41 @@ DATABASES = {
     }
 }
 
-
-# Password validation
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-
-# Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-
 # ============================================================================
-# CHANNELS & WEBSOCKET CONFIGURATION
+# CHANNELS & WEBSOCKET
 # ============================================================================
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
-        },
+        'CONFIG': {"hosts": [("redis", 6379)]},
     },
 }
 
-
 # ============================================================================
-# STATIC FILES CONFIGURATION - ✅ COMPLETE FIX
+# STATIC FILES
 # ============================================================================
-
-# Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-
-# ✅ Where collectstatic will copy all static files
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-# ✅ Additional directories to look for static files
-STATICFILES_DIRS = []
-
-# ✅ Static files finders (how Django finds your static files)
+STATICFILES_DIRS = [BASE_DIR / 'game' / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 ]
 
-# ✅ CRITICAL: Storage backend for static files
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-
-# Default primary key field type
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
 # ============================================================================
-# JAZZMIN ADMIN CONFIGURATION
+# JAZZMIN ADMIN (keeping your existing config)
 # ============================================================================
 JAZZMIN_SETTINGS = {
     "site_title": "Web Escape Admin",
@@ -157,31 +112,20 @@ JAZZMIN_SETTINGS = {
     "site_brand": "Web Escape Game",
     "welcome_sign": "Welcome to Web Escape Admin",
     "copyright": "Web Escape Game 2026",
-    
     "search_model": ["auth.User", "game.Team", "game.TeamMember"],
     "user_avatar": None,
-    
-    # Top Menu
     "topmenu_links": [
         {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
         {"name": "Teams", "url": "admin:game_team_changelist", "permissions": ["game.view_team"]},
         {"name": "Rounds", "url": "admin:game_round_changelist", "permissions": ["game.view_round"]},
         {"model": "auth.User"},
     ],
-    
-    # User Menu
-    "usermenu_links": [
-        {"model": "auth.user"}
-    ],
-    
-    # Side Menu
+    "usermenu_links": [{"model": "auth.user"}],
     "show_sidebar": True,
     "navigation_expanded": True,
     "hide_apps": [],
     "hide_models": [],
     "order_with_respect_to": ["game", "auth"],
-    
-    # Icons
     "icons": {
         "auth": "fas fa-users-cog",
         "auth.user": "fas fa-user",
@@ -193,24 +137,17 @@ JAZZMIN_SETTINGS = {
         "game.PageProgress": "fas fa-tasks",
         "game.GameActivity": "fas fa-history",
     },
-    
     "default_icon_parents": "fas fa-chevron-circle-right",
     "default_icon_children": "fas fa-circle",
-    
     "related_modal_active": False,
     "custom_css": None,
     "custom_js": None,
     "use_google_fonts_cdn": True,
     "show_ui_builder": False,
-    
     "changeform_format": "horizontal_tabs",
-    "changeform_format_overrides": {
-        "auth.user": "collapsible",
-        "auth.group": "vertical_tabs",
-    },
+    "changeform_format_overrides": {"auth.user": "collapsible", "auth.group": "vertical_tabs"},
 }
 
-# UI Customization for Dark Theme
 JAZZMIN_UI_TWEAKS = {
     "navbar_small_text": False,
     "footer_small_text": False,
@@ -244,40 +181,39 @@ JAZZMIN_UI_TWEAKS = {
     "actions_sticky_top": False
 }
 
-
-# ============================================================================
-# CRISPY FORMS
-# ============================================================================
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-
-# ============================================================================
-# AUTHENTICATION
-# ============================================================================
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
 
-
 # ============================================================================
-# CORS CONFIGURATION
+# CORS & CSRF CONFIGURATION - ✅ FIXED FOR CROSS-PORT ACCESS
 # ============================================================================
-CORS_ALLOWED_ORIGINS = [
-    "http://10.98.207.227:8080",
-    "http://localhost:8080",
-    "http://127.0.0.1:8080",
-]
-
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
-# ✅ CSRF Trusted Origins
+# ✅ CRITICAL: Add port 8080 for frontend
 CSRF_TRUSTED_ORIGINS = [
-    "http://10.98.207.227:8000",
-    "http://10.98.207.227:8080",
     "http://localhost:8000",
-    "http://localhost:8080",
+    "http://localhost:8080",  # Frontend port
+    "http://127.0.0.1:8000",
+    "http://127.0.0.1:8080",  # Frontend port
+    "http://frontend:80",
+    "http://frontend",
+    "http://backend:8000",
 ]
 
-# Frontend URL
-FRONTEND_URL = 'http://10.98.207.227:8080'
+# ✅ CRITICAL: Allow JavaScript to read CSRF cookie
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_HTTPONLY = False  # Must be False to allow JS access
+CSRF_COOKIE_DOMAIN = None  # Works across localhost ports
+CSRF_COOKIE_SECURE = False  # Only True in production with HTTPS
+
+# ✅ Session cookie settings
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = False
+
+FRONTEND_URL = "http://frontend"

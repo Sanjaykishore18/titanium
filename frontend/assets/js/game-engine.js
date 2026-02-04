@@ -1,23 +1,29 @@
+// ============================================================================
+// CORRECTED game-engine.js - Fixed CSRF, token validation, and WebSocket
+// Save as: frontend/assets/js/game-engine.js
+// ============================================================================
+
 class GameEngine {
     constructor() {
         this.bugsFixed = new Set();
         this.totalBugs = 3;
         this.session = CONFIG.getSession();
         this.timer = null;
-        this.ws = null; // ✅ WebSocket connection
-        this.isPageCompleted = false; // ✅ Track if current page is done
+        this.ws = null;
+        this.isPageCompleted = false;
+        this.reconnectAttempts = 0;
+        this.maxReconnectAttempts = 5;
     }
 
-    // Initialize game page
     async init() {
         this.extractURLParams();
         this.validateToken();
         this.setupBugTracking();
         await this.loadGameState();
-        this.connectWebSocket(); // ✅ NEW: Connect to WebSocket
+        this.connectWebSocket();
     }
 
-    // ✅ NEW: Establish WebSocket Connection
+    // ✅ FIXED: Better WebSocket with reconnection logic
     connectWebSocket() {
         const session = this.session;
         
@@ -26,17 +32,14 @@ class GameEngine {
             return;
         }
 
-        // WebSocket URL pattern: ws://backend/ws/game/team/{team_id}/round/{round_number}/
-        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsHost = CONFIG.BACKEND_URL.replace('http://', '').replace('https://', '');
-        const wsUrl = `${wsProtocol}//${wsHost}/ws/game/team/${session.teamId}/round/${session.roundNumber}/`;
-
+        const wsUrl = CONFIG.WEBSOCKET.getUrl(session.teamId, session.roundNumber);
         console.log('Connecting to WebSocket:', wsUrl);
 
         this.ws = new WebSocket(wsUrl);
 
         this.ws.onopen = () => {
             console.log('✅ WebSocket connected');
+            this.reconnectAttempts = 0;
             this.showNotification('Connected to team sync', 'success');
         };
 
@@ -51,17 +54,22 @@ class GameEngine {
 
         this.ws.onclose = () => {
             console.log('WebSocket disconnected');
-            // ✅ Auto-reconnect after 3 seconds
-            setTimeout(() => {
-                if (!this.isPageCompleted) {
-                    console.log('Reconnecting WebSocket...');
+            
+            // Only reconnect if not completed and within attempt limit
+            if (!this.isPageCompleted && this.reconnectAttempts < this.maxReconnectAttempts) {
+                this.reconnectAttempts++;
+                console.log(`Reconnecting WebSocket... (Attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+                
+                setTimeout(() => {
                     this.connectWebSocket();
-                }
-            }, 3000);
+                }, 3000);
+            } else if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+                console.log('Max reconnection attempts reached');
+                this.showNotification('Team sync offline. Your progress is still saved.', 'info');
+            }
         };
     }
 
-    // ✅ NEW: Handle incoming WebSocket messages
     handleWebSocketMessage(data) {
         console.log('WebSocket message received:', data);
 
@@ -69,31 +77,25 @@ class GameEngine {
             case 'game_state':
                 this.updateGameState(data.data);
                 break;
-
             case 'bug_fixed':
                 this.handleTeammateBugFix(data);
                 break;
-
             case 'page_completed':
                 this.handleTeammatePageCompletion(data);
                 break;
-
             default:
                 console.log('Unknown message type:', data.type);
         }
     }
 
-    // ✅ NEW: Update game state from WebSocket
     updateGameState(state) {
         console.log('Updating game state:', state);
 
-        // Update score
         const scoreEl = document.getElementById('current-score');
         if (scoreEl && state.score !== undefined) {
             scoreEl.textContent = state.score;
         }
 
-        // Check if current page is already completed by team
         if (state.pages && Array.isArray(state.pages)) {
             const currentPageState = state.pages.find(p => p.page_number === this.session.pageNumber);
             
@@ -103,34 +105,26 @@ class GameEngine {
         }
     }
 
-    // ✅ NEW: Show that page was completed by teammate
     showPageCompletedByTeam() {
         this.isPageCompleted = true;
-        
         this.showNotification('✅ Page completed by your team!', 'success');
 
-        // Enable the complete button for all team members
         const completeBtn = document.getElementById('complete-btn');
         if (completeBtn) {
             completeBtn.disabled = false;
             completeBtn.classList.add('btn-pulse');
             completeBtn.innerHTML = '✅ Continue to Next Page (Completed by Team)';
-            completeBtn.onclick = () => this.moveToNextPage(); // ✅ Just move, don't resubmit
+            completeBtn.onclick = () => this.moveToNextPage();
         }
     }
 
-    // ✅ NEW: Handle teammate's bug fix
     handleTeammateBugFix(data) {
         const { bug_id, user } = data;
-        
         this.showNotification(`${user} fixed Bug ${bug_id}`, 'info');
-        
-        // Optionally mark bug as fixed locally too (visual sync)
         this.bugsFixed.add(bug_id);
         this.updateBugCounter();
     }
 
-    // ✅ NEW: Handle teammate's page completion
     handleTeammatePageCompletion(data) {
         const { page_number, user } = data;
         
@@ -140,14 +134,11 @@ class GameEngine {
         }
     }
 
-    // ✅ NEW: Move to next page without resubmitting
     async moveToNextPage() {
         try {
-            // Just redirect to next page using stored URL or calculate it
             const nextPage = this.session.pageNumber + 1;
             
             if (nextPage > 10) {
-                // Round completed
                 alert('Round completed! Returning to dashboard...');
                 window.location.href = CONFIG.BACKEND_URL + '/dashboard/';
                 return;
@@ -162,7 +153,6 @@ class GameEngine {
         }
     }
 
-    // Extract team_id and token from URL parameters
     extractURLParams() {
         const urlParams = new URLSearchParams(window.location.search);
         const teamFromURL = urlParams.get('team');
@@ -191,7 +181,6 @@ class GameEngine {
         }
     }
 
-    // Validate URL token
     validateToken() {
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token');
@@ -208,7 +197,7 @@ class GameEngine {
         }
     }
 
-    // Load game state from backend
+    // ✅ FIXED: Added CSRF token to request
     async loadGameState() {
         this.session = CONFIG.getSession();
         
@@ -225,6 +214,7 @@ class GameEngine {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'X-CSRFToken': CONFIG.getCsrfToken(), // ✅ ADDED CSRF
                     },
                     credentials: 'include',
                     body: JSON.stringify({
@@ -241,7 +231,6 @@ class GameEngine {
                 return;
             }
 
-            // Update UI
             const teamEl = document.getElementById('team-name');
             const scoreEl = document.getElementById('current-score');
             const roundEl = document.getElementById('round-num');
@@ -252,12 +241,10 @@ class GameEngine {
             if (roundEl) roundEl.textContent = this.session.roundNumber;
             if (pageEl) pageEl.textContent = this.session.pageNumber;
 
-            // ✅ Check if this page is already completed
             if (data.current_page > this.session.pageNumber) {
                 this.showPageCompletedByTeam();
             }
 
-            // Start countdown timer
             this.startCountdown(data.time_remaining);
         } catch (error) {
             console.error('Error loading game state:', error);
@@ -265,12 +252,10 @@ class GameEngine {
         }
     }
 
-    // Setup bug tracking UI
     setupBugTracking() {
         this.updateBugCounter();
     }
 
-    // ✅ NEW: Update bug counter UI
     updateBugCounter() {
         const bugCounter = document.getElementById('bugs-fixed');
         if (bugCounter) {
@@ -278,30 +263,25 @@ class GameEngine {
         }
     }
 
-    // Mark bug as fixed
     fixBug(bugId) {
         if (this.bugsFixed.has(bugId)) return;
 
         this.bugsFixed.add(bugId);
         this.updateBugCounter();
 
-        // ✅ Broadcast to team via WebSocket
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
             this.ws.send(JSON.stringify({
                 type: 'bug_fixed',
                 page_number: this.session.pageNumber,
                 bug_id: bugId,
-                user: this.session.teamId // You can get actual username if stored
+                user: this.session.teamId
             }));
         }
 
         this.showNotification(`Bug ${bugId} fixed! ✓`, 'success');
 
         if (this.bugsFixed.size >= this.totalBugs) {
-            this.showNotification(
-                'All bugs fixed! You can complete this page!',
-                'success'
-            );
+            this.showNotification('All bugs fixed! You can complete this page!', 'success');
 
             const completeBtn = document.getElementById('complete-btn');
             if (completeBtn) {
@@ -311,9 +291,8 @@ class GameEngine {
         }
     }
 
-    // Complete page
+    // ✅ FIXED: Added CSRF token to validation
     async completePage() {
-        // ✅ If already completed by team, just move to next page
         if (this.isPageCompleted) {
             this.moveToNextPage();
             return;
@@ -333,6 +312,7 @@ class GameEngine {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'X-CSRFToken': CONFIG.getCsrfToken(), // ✅ ADDED CSRF
                     },
                     credentials: 'include',
                     body: JSON.stringify({
@@ -359,7 +339,6 @@ class GameEngine {
                 const scoreEl = document.getElementById('current-score');
                 if (scoreEl) scoreEl.textContent = data.current_score;
 
-                // ✅ Broadcast page completion to team
                 if (this.ws && this.ws.readyState === WebSocket.OPEN) {
                     this.ws.send(JSON.stringify({
                         type: 'page_completed',
@@ -384,7 +363,6 @@ class GameEngine {
         }
     }
 
-    // Countdown timer
     startCountdown(seconds) {
         let timeLeft = seconds;
         const timerEl = document.getElementById('timer');
@@ -414,7 +392,6 @@ class GameEngine {
         }, 1000);
     }
 
-    // Notifications
     showNotification(message, type = 'info') {
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
@@ -430,10 +407,8 @@ class GameEngine {
         }, 3000);
     }
 
-    // Exit game
     exitGame() {
         if (confirm('Exit game and return to dashboard? (Progress will be saved)')) {
-            // Close WebSocket
             if (this.ws) {
                 this.ws.close();
             }
@@ -442,14 +417,12 @@ class GameEngine {
     }
 }
 
-// Initialize game engine
 let gameEngine;
 window.addEventListener('DOMContentLoaded', () => {
     gameEngine = new GameEngine();
     gameEngine.init();
 });
 
-// Global handlers for HTML
 function fixBug(bugId) {
     gameEngine.fixBug(bugId);
 }

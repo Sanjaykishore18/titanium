@@ -1,8 +1,3 @@
-# ============================================================================
-# UPDATED urls.py with Static Files Serving
-# Replace: escape_game_project/urls.py
-# ============================================================================
-
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
@@ -13,7 +8,6 @@ urlpatterns = [
     path('', include('game.urls')),
 ]
 
-# ✅ CRITICAL: Serve static files in development
-# This is what was missing!
+# Serve static files in development
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

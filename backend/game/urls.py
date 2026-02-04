@@ -1,5 +1,5 @@
 # ============================================================================
-# COMPLETE urls.py
+# UPDATED urls.py - Add these new routes to your existing urls.py
 # Copy this ENTIRE file to: game/urls.py
 # ============================================================================
 
@@ -14,6 +14,7 @@ urlpatterns = [
     # ============= TEAM DASHBOARD =============
     path('dashboard/', views.team_dashboard, name='team_dashboard'),
     
+
     # ============= ADMIN PANEL =============
     path('admin-panel/', views.admin_dashboard, name='admin_dashboard'),
     path('admin-panel/create-team/', views.admin_create_team, name='admin_create_team'),
@@ -22,6 +23,8 @@ urlpatterns = [
     path('admin-panel/round/<int:round_number>/control/', views.admin_round_control, name='admin_round_control'),
     path('admin-panel/leaderboard/', views.admin_leaderboard, name='admin_leaderboard'),
     
+    path('leaderboard/', views.public_leaderboard, name='public_leaderboard'),
+    path('export-csv/', views.export_team_round_progress_csv, name='export_team_round_progress'),
     # ============= API ENDPOINTS FOR FRONTEND =============
     path('api/start-game/', views.api_start_game, name='api_start_game'),
     path('api/validate-page/', views.api_validate_page, name='api_validate_page'),

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{ team.team_name }} - Team Management</title>
+    <title>{{ team.team_name }} - Details</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -14,11 +14,13 @@
         .card {
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            background: white;
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container-fluid px-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="text-white"><i class="fas fa-users"></i> {{ team.team_name }}</h2>
             <a href="{% url 'admin_teams' %}" class="btn btn-light">
@@ -26,8 +28,17 @@
             </a>
         </div>
 
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+
         <!-- TEAM INFO -->
-        <div class="card mb-4">
+        <div class="card">
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0">Team Information</h5>
             </div>
@@ -38,24 +49,24 @@
                         <p><strong>Team Password:</strong> <code>{{ team.team_password }}</code></p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Members:</strong> {{ team.member_count }}</p>
                         <p><strong>Created:</strong> {{ team.created_at|date:"M d, Y H:i" }}</p>
+                        <p><strong>Total Members:</strong> {{ members.count }}</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- TEAM MEMBERS -->
-        <div class="card mb-4">
+        <div class="card">
             <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Team Members ({{ members.count }})</h5>
                 <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#addMemberModal">
-                    <i class="fas fa-user-plus"></i> Add Member
+                    <i class="fas fa-plus"></i> Add Member
                 </button>
             </div>
             <div class="card-body p-0">
                 <table class="table table-hover mb-0">
-                    <thead>
+                    <thead class="table-light">
                         <tr>
                             <th>Username</th>
                             <th>Email</th>
@@ -68,14 +79,13 @@
                         <tr>
                             <td><strong>{{ member.username }}</strong></td>
                             <td>{{ member.email }}</td>
-                            <td><small>{{ member.joined_at|timesince }} ago</small></td>
+                            <td><small>{{ member.joined_at|date:"M d, Y" }}</small></td>
                             <td>
                                 <form method="post" style="display:inline;">
                                     {% csrf_token %}
                                     <input type="hidden" name="action" value="remove_member">
                                     <input type="hidden" name="member_id" value="{{ member.id }}">
-                                    <button type="submit" class="btn btn-sm btn-danger" 
-                                            onclick="return confirm('Remove {{ member.username }} from team?')">
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Remove this member?')">
                                         <i class="fas fa-trash"></i> Remove
                                     </button>
                                 </form>

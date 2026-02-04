@@ -49,6 +49,39 @@
         .round-1 { border-color: #17a2b8; }
         .round-2 { border-color: #ffc107; }
         .round-3 { border-color: #dc3545; }
+        
+        .btn-export-csv {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            font-weight: bold;
+            padding: 10px 20px;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+            transition: all 0.3s;
+        }
+        
+        .btn-export-csv:hover {
+            background: linear-gradient(135deg, #20c997, #28a745);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.6);
+        }
+        
+        .btn-leaderboard {
+            background: linear-gradient(135deg, #ffc107, #ff9800);
+            color: white;
+            border: none;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+            transition: all 0.3s;
+        }
+        
+        .btn-leaderboard:hover {
+            background: linear-gradient(135deg, #ff9800, #ffc107);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.6);
+        }
     </style>
 </head>
 <body>
@@ -58,7 +91,7 @@
             <a class="navbar-brand" href="{% url 'admin_dashboard' %}">
                 <i class="fas fa-shield-alt"></i> Admin Control Panel
             </a>
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 flex-wrap">
                 <a href="{% url 'admin_create_team' %}" class="btn btn-success">
                     <i class="fas fa-plus"></i> Create Team
                 </a>
@@ -66,7 +99,11 @@
                     <i class="fas fa-users"></i> Manage Teams
                 </a>
                 <a href="{% url 'admin_leaderboard' %}" class="btn btn-warning">
-                    <i class="fas fa-trophy"></i> Leaderboard
+                    <i class="fas fa-trophy"></i> Admin Leaderboard
+                </a>
+                <!-- ⭐ PUBLIC LEADERBOARD BUTTON ⭐ -->
+                <a href="{% url 'public_leaderboard' %}" class="btn btn-leaderboard" target="_blank">
+                    <i class="fas fa-trophy"></i> Public Leaderboard
                 </a>
                 <a href="{% url 'team_dashboard' %}" class="btn btn-outline-light">
                     <i class="fas fa-home"></i> Dashboard
@@ -114,7 +151,7 @@
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header bg-dark text-white">
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
                         <h4 class="mb-0"><i class="fas fa-gamepad"></i> Game Management</h4>
                     </div>
                     <div class="card-body p-4">
@@ -137,7 +174,7 @@
                                         </p>
                                         <p><strong>Duration:</strong> {{ round.duration_minutes }} minutes</p>
                                         
-                                        {% with stats=round_stats|get_item:round.round_number %}
+                                        {% with round_stats|get_item:round.round_number as stats %}
                                         <p><strong>Teams Started:</strong> {{ stats.teams_started|default:0 }}</p>
                                         <p><strong>Teams Completed:</strong> {{ stats.teams_completed|default:0 }}</p>
                                         <p><strong>Total Score:</strong> {{ stats.avg_score|default:0 }}</p>
@@ -188,15 +225,118 @@
             </div>
         </div>
 
+        <!-- ⭐⭐⭐ TEAM ROUND PROGRESS SECTION WITH CSV EXPORT ⭐⭐⭐ -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-success" style="border-width: 3px;">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0"><i class="fas fa-chart-line"></i> Team Round Progress</h4>
+                        <!-- ⭐ CSV EXPORT BUTTON ⭐ -->
+                        <a href="{% url 'export_team_round_progress' %}" class="btn btn-light btn-lg">
+                            <i class="fas fa-file-download"></i> Download CSV
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> 
+                            <strong>Export Team Round Progress Data:</strong> Click the "Download CSV" button to export complete team progress data including team names, round numbers, scores, status, pages completed, timestamps, and duration.
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Team Name</th>
+                                        <th>Round</th>
+                                        <th>Current Page</th>
+                                        <th>Score</th>
+                                        <th>Status</th>
+                                        <th>Pages Completed</th>
+                                        <th>Qualified</th>
+                                        <th>Start Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for team in teams %}
+                                        {% for progress in team.round_progress.all %}
+                                        <tr>
+                                            <td><strong>{{ team.team_name }}</strong></td>
+                                            <td>
+                                                <span class="badge 
+                                                    {% if progress.round.round_number == 1 %}bg-info
+                                                    {% elif progress.round.round_number == 2 %}bg-warning text-dark
+                                                    {% else %}bg-danger{% endif %}">
+                                                    Round {{ progress.round.round_number }}
+                                                </span>
+                                            </td>
+                                            <td>{{ progress.current_page }}/10</td>
+                                            <td><strong>{{ progress.score }}</strong></td>
+                                            <td>
+                                                <span class="badge 
+                                                    {% if progress.status == 'completed' or progress.status == 'qualified' %}bg-success
+                                                    {% elif progress.status == 'in_progress' %}bg-primary
+                                                    {% elif progress.status == 'time_over' %}bg-danger
+                                                    {% else %}bg-secondary{% endif %}">
+                                                    {{ progress.get_status_display }}
+                                                </span>
+                                            </td>
+                                            <td>{{ progress.pages_completed }}/10</td>
+                                            <td>
+                                                {% if progress.is_qualified %}
+                                                    <i class="fas fa-check-circle text-success"></i> Yes
+                                                {% else %}
+                                                    <i class="fas fa-times-circle text-muted"></i> No
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if progress.start_time %}
+                                                    {{ progress.start_time|date:"M d, H:i" }}
+                                                {% else %}
+                                                    <span class="text-muted">Not Started</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="8" class="text-center text-muted py-4">
+                                                No team progress data available
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- BOTTOM CSV EXPORT BUTTON -->
+                        <div class="text-center mt-4">
+                            <a href="{% url 'export_team_round_progress' %}" class="btn btn-export-csv btn-lg px-5 py-3">
+                                <i class="fas fa-file-csv fa-2x d-block mb-2"></i>
+                                <strong>DOWNLOAD COMPLETE CSV REPORT</strong>
+                            </a>
+                            <p class="text-muted mt-2 mb-0">
+                                <small>Includes: Team ID, Team Name, Round Info, Scores, Status, Timestamps, Duration, Pages Completed</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- LEADERBOARD SECTION -->
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
                         <h5 class="mb-0"><i class="fas fa-trophy"></i> Top Teams Overall</h5>
-                        <a href="{% url 'admin_leaderboard' %}" class="btn btn-light btn-sm">
-                            <i class="fas fa-expand"></i> Full Leaderboard
-                        </a>
+                        <div>
+                            <a href="{% url 'public_leaderboard' %}" class="btn btn-dark btn-sm me-2" target="_blank">
+                                <i class="fas fa-external-link-alt"></i> Public Leaderboard
+                            </a>
+                            <a href="{% url 'admin_leaderboard' %}" class="btn btn-dark btn-sm">
+                                <i class="fas fa-expand"></i> Full Admin Leaderboard
+                            </a>
+                        </div>
                     </div>
                     <div class="card-body p-0">
                         <table class="table table-hover mb-0">
@@ -211,7 +351,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for team in teams %}
+                                {% for team in teams|slice:":20" %}
                                 <tr>
                                     <td>
                                         <strong>
