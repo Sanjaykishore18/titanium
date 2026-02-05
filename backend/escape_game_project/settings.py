@@ -1,6 +1,6 @@
 """
 Django settings for escape_game_project project.
-CORRECTED VERSION - Fixed CSRF and CORS issues
+CSRF COMPLETELY REMOVED VERSION
 """
 
 from pathlib import Path
@@ -31,12 +31,15 @@ INSTALLED_APPS = [
     'game',
 ]
 
+# ============================================================================
+# MIDDLEWARE - CSRF MIDDLEWARE COMPLETELY REMOVED
+# ============================================================================
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',  # ❌ REMOVED
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -104,7 +107,7 @@ STATICFILES_FINDERS = [
 ]
 
 # ============================================================================
-# JAZZMIN ADMIN (keeping your existing config)
+# JAZZMIN ADMIN
 # ============================================================================
 JAZZMIN_SETTINGS = {
     "site_title": "Web Escape Admin",
@@ -189,29 +192,14 @@ LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
 
 # ============================================================================
-# CORS & CSRF CONFIGURATION - ✅ FIXED FOR CROSS-PORT ACCESS
+# CORS CONFIGURATION - ALLOW ALL (NO CSRF)
 # ============================================================================
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
-# ✅ CRITICAL: Add port 8080 for frontend
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8000",
-    "http://localhost:8080",  # Frontend port
-    "http://127.0.0.1:8000",
-    "http://127.0.0.1:8080",  # Frontend port
-    "http://frontend:80",
-    "http://frontend",
-    "http://backend:8000",
-]
-
-# ✅ CRITICAL: Allow JavaScript to read CSRF cookie
-CSRF_COOKIE_SAMESITE = 'Lax'
-CSRF_COOKIE_HTTPONLY = False  # Must be False to allow JS access
-CSRF_COOKIE_DOMAIN = None  # Works across localhost ports
-CSRF_COOKIE_SECURE = False  # Only True in production with HTTPS
-
-# ✅ Session cookie settings
+# ============================================================================
+# SESSION COOKIE SETTINGS
+# ============================================================================
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = False

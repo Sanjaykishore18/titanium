@@ -2,6 +2,7 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from .models import Team, TeamRoundProgress, PageProgress
+import hashlib
 
 
 class GameSyncConsumer(AsyncWebsocketConsumer):
@@ -72,14 +73,16 @@ class GameSyncConsumer(AsyncWebsocketConsumer):
     async def handle_page_completed(self, data):
         page_number = data.get("page_number")
         username = data.get("user", "Teammate")
+        new_token = data.get("new_token")  # ✅ Get new token from frontend
 
-        # Broadcast page completion to ALL team members
+        # ✅ Broadcast page completion WITH NEW TOKEN to ALL team members
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 "type": "page_completed_broadcast",
                 "page_number": page_number,
-                "user": username
+                "user": username,
+                "new_token": new_token  # ✅ Include new token
             }
         )
 
@@ -104,11 +107,13 @@ class GameSyncConsumer(AsyncWebsocketConsumer):
         )
 
     async def page_completed_broadcast(self, event):
+        # ✅ Send new token with page completion message
         await self.send(
             text_data=json.dumps({
                 "type": "page_completed",
                 "page_number": event["page_number"],
-                "user": event["user"]
+                "user": event["user"],
+                "new_token": event.get("new_token")  # ✅ Include new token
             })
         )
 
@@ -124,6 +129,8 @@ class GameSyncConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_game_state(self):
         try:
+            from django.conf import settings
+            
             team = Team.objects.get(id=self.team_id)
 
             team_round = TeamRoundProgress.objects.get(
@@ -135,12 +142,22 @@ class GameSyncConsumer(AsyncWebsocketConsumer):
                 team_round=team_round
             ).order_by("page_number")
 
+            # ✅ Generate current page token
+            current_page = team_round.current_page or 1
+            current_token = self.generate_page_token(
+                self.team_id, 
+                self.round_number, 
+                current_page, 
+                settings.SECRET_KEY
+            )
+
             return {
                 "team_name": team.team_name,
                 "round_number": self.round_number,
-                "current_page": team_round.current_page,
+                "current_page": current_page,
                 "score": team_round.score,
                 "status": team_round.status,
+                "current_token": current_token,  # ✅ Include current token
                 "pages": [
                     {
                         "page_number": page.page_number,
@@ -159,3 +176,8 @@ class GameSyncConsumer(AsyncWebsocketConsumer):
 
         except Exception as e:
             return {"error": str(e)}
+
+    def generate_page_token(self, team_id, round_num, page_num, secret_key):
+        """Generate page token - same logic as views.py"""
+        data = f"{team_id}-{round_num}-{page_num}-{secret_key}"
+        return hashlib.sha256(data.encode()).hexdigest()[:16]

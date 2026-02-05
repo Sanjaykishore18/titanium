@@ -1,5 +1,5 @@
 # ============================================================================
-# CORRECTED views.py - FIXED SCORING LOGIC (10 points per page, once only)
+# FIXED views.py - Token synchronization for multiplayer
 # ============================================================================
 
 import csv
@@ -13,7 +13,6 @@ from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.http import JsonResponse
 from django.contrib.auth.models import User
-from django.views.decorators.csrf import csrf_exempt
 from datetime import timedelta
 import hashlib
 import json
@@ -85,7 +84,7 @@ def logout_view(request):
     logout(request)
     return redirect('join_team_auth')
 
-# ============= TEAM DASHBOARD (COMPLETELY FIXED) =============
+# ============= TEAM DASHBOARD =============
 
 @login_required
 def team_dashboard(request):
@@ -100,7 +99,6 @@ def team_dashboard(request):
     rounds_completed = 0
     total_score = 0
     
-    # ✅ Process each round correctly
     for round_obj in rounds:
         progress, created = TeamRoundProgress.objects.get_or_create(
             team=team,
@@ -108,19 +106,15 @@ def team_dashboard(request):
             defaults={'status': 'not_started', 'score': 0}
         )
         
-        # ✅ CRITICAL: Calculate score from COMPLETED PAGES only
         completed_pages_count = progress.page_progress.filter(completed=True).count()
         correct_score = completed_pages_count * 10
         
-        # Update if score is wrong
         if progress.score != correct_score:
             progress.score = correct_score
             progress.save(update_fields=['score'])
         
-        # ✅ Add to total score
         total_score += correct_score
         
-        # ✅ CRITICAL: Only count as completed if status is actually completed/qualified
         if progress.status in ['completed', 'qualified']:
             rounds_completed += 1
         
@@ -128,13 +122,10 @@ def team_dashboard(request):
     
     rounds_with_progress = list(zip(rounds, round_progress_list))
     
-    # ✅ CRITICAL FIX: Annotate members_count FIRST, then total_score separately
-    # This prevents the Sum from multiplying by the number of members
     all_teams = Team.objects.annotate(
         members_count=Count('members', distinct=True)
     ).annotate(
         total_score=Coalesce(Sum('round_progress__score', distinct=True), 0),
-        # ✅ CRITICAL: Count ONLY completed/qualified rounds (not in_progress)
         rounds_completed=Count(
             'round_progress',
             filter=Q(round_progress__status__in=['completed', 'qualified']),
@@ -142,7 +133,6 @@ def team_dashboard(request):
         )
     ).order_by('-total_score', 'created_at')
     
-    # Find current team's rank
     team_rank = 1
     for idx, t in enumerate(all_teams, 1):
         if t.id == team.id:
@@ -154,11 +144,11 @@ def team_dashboard(request):
     context = {
         'team': team,
         'rounds_with_progress': rounds_with_progress,
-        'rounds_completed': rounds_completed,  # ✅ Correct count (0-3 only)
+        'rounds_completed': rounds_completed,
         'team_rank': team_rank,
         'total_teams': all_teams.count(),
         'top_teams': top_teams,
-        'total_score': total_score,  # ✅ Correct total (0-300 only)
+        'total_score': total_score,
     }
     
     return render(request, 'team_dashboard.html', context)
@@ -172,7 +162,6 @@ def admin_dashboard(request):
     
     rounds = Round.objects.all().order_by('round_number')
     
-    # ✅ FIX: Separate annotations to prevent score multiplication
     teams = Team.objects.annotate(
         members_count=Count('members', distinct=True)
     ).annotate(
@@ -219,7 +208,6 @@ def admin_create_team(request):
 
 @user_passes_test(is_superuser)
 def admin_teams(request):
-    # ✅ FIX: Separate annotations
     teams = Team.objects.annotate(
         member_count=Count('members', distinct=True)
     ).annotate(
@@ -300,7 +288,6 @@ def admin_round_control(request, round_number):
 
 @user_passes_test(is_superuser)
 def admin_leaderboard(request):
-    # ✅ FIX: Separate annotations
     teams = Team.objects.annotate(
         members_count=Count('members', distinct=True)
     ).annotate(
@@ -394,8 +381,6 @@ def api_start_game(request):
     
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
-# ✅ CRITICAL FIX: Page validation with ONE-TIME scoring
-@csrf_exempt
 def api_validate_page(request):
     if request.method == 'POST':
         try:
@@ -436,13 +421,11 @@ def api_validate_page(request):
                     'bugs_fixed': len(bugs_fixed)
                 }, status=400)
             
-            # ✅ CRITICAL: Check if page is ALREADY completed
             page_progress, created = PageProgress.objects.get_or_create(
                 team_round=team_round,
                 page_number=page_number
             )
             
-            # ✅ Only award points if NOT already completed
             if not page_progress.completed:
                 page_progress.completed = True
                 page_progress.completed_at = timezone.now()
@@ -450,7 +433,6 @@ def api_validate_page(request):
                 page_progress.time_taken_seconds = int((page_progress.completed_at - page_progress.started_at).total_seconds())
                 page_progress.save()
                 
-                # ✅ Award 10 points ONCE per page
                 team_round.score += 10
                 team_round.current_page = page_number + 1
                 team_round.save()
@@ -461,12 +443,12 @@ def api_validate_page(request):
                     description=f'Completed Round {round_number} Page {page_number}'
                 )
             else:
-                # ✅ Page already completed - just update current page
                 team_round.current_page = page_number + 1
                 team_round.save()
             
             if page_number < 10:
                 next_page = page_number + 1
+                # ✅ Generate token for next page
                 next_token = generate_page_token(team_id, round_number, next_page, settings.SECRET_KEY)
                 
                 current_host = request.get_host().split(':')[0]
@@ -477,7 +459,9 @@ def api_validate_page(request):
                     'next_page_url': next_url,
                     'current_score': team_round.score,
                     'pages_completed': page_number,
-                    'total_pages': 10
+                    'total_pages': 10,
+                    'new_token': next_token,  # ✅ SEND NEW TOKEN TO FRONTEND
+                    'next_page': next_page     # ✅ SEND NEXT PAGE NUMBER
                 })
             else:
                 team_round.status = 'completed'
@@ -512,7 +496,6 @@ def api_validate_page(request):
     
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
-@csrf_exempt
 def api_get_game_state(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -525,12 +508,18 @@ def api_get_game_state(request):
         
         time_remaining = int((team_round.end_time - timezone.now()).total_seconds())
         
+        # ✅ Generate current page token and send it
+        from django.conf import settings
+        current_page = team_round.current_page or 1
+        current_token = generate_page_token(team_id, round_number, current_page, settings.SECRET_KEY)
+        
         return JsonResponse({
             'team_name': team.team_name,
             'current_score': team_round.score,
             'time_remaining': max(0, time_remaining),
-            'current_page': team_round.current_page,
-            'status': team_round.status
+            'current_page': current_page,
+            'status': team_round.status,
+            'current_token': current_token  # ✅ SEND CURRENT VALID TOKEN
         })
     
     return JsonResponse({'error': 'Invalid request'}, status=400)
@@ -592,10 +581,9 @@ def export_team_round_progress_csv(request):
     
     return response
 
-# ============= PUBLIC LEADERBOARD (ONLY OVERALL) =============
+# ============= PUBLIC LEADERBOARD =============
 
 def public_leaderboard(request):
-    # ✅ FIX: Separate annotations to prevent score multiplication
     teams = Team.objects.annotate(
         members_count=Count('members', distinct=True)
     ).annotate(
