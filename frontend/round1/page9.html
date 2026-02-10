@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="total-bugs" content="3">
-<title>Web Escape | Round 1 - Page 1</title>
+<meta name="total-bugs" content="2">
+<title>Web Escape | Round 1 - Page 9</title>
 <style>
 /* RESET */
 * {
@@ -207,7 +207,7 @@ body {
   left: 50%;
   transform: translateX(-50%);
   padding: 12px 30px;
-  background: blue;  /* BUG 3: Should be red, not blue */
+  background: blue;
   color: white;
   text-decoration: none;
   font-size: 18px;
@@ -325,9 +325,9 @@ body {
 
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false, // All bulbs have "on" class
-  bug2: false, // Page doesn't have "lights-locked" class
-  bug3: false  // Escape button background is red (not blue)
+  bug1: false,
+  bug2: false,
+  bug3: false
 };
 
 /*
@@ -338,28 +338,21 @@ function checkEscapeConditions() {
   const page = document.getElementById('page');
   const escapeBtn = document.getElementById('escapeBtn');
   
-  // Check Bug 1: All lights on
   const allLightsOn = [...bulbs].every(b => b.classList.contains('on'));
   bugStatus.bug1 = allLightsOn;
   
-  // Check Bug 2: Page unlocked
   const pageUnlocked = !page.classList.contains('lights-locked');
   bugStatus.bug2 = pageUnlocked;
   
-  // Check Bug 3: Button background is red
-  const btnStyle = window.getComputedStyle(escapeBtn);
-  const bgColor = btnStyle.backgroundColor;
-  // Red in rgb is rgb(255, 0, 0) or similar
-  bugStatus.bug3 = bgColor.includes('255, 0, 0') || bgColor === 'red';
   
   // Check if all bugs are fixed
-  const allBugsFixed = bugStatus.bug1 && bugStatus.bug2 && bugStatus.bug3;
+  const allBugsFixed = bugStatus.bug1 && bugStatus.bug2;
   
   // Update bug counter in header
   const bugsFixedCount = Object.values(bugStatus).filter(v => v).length;
   const bugCounter = document.getElementById('bugs-fixed');
   if (bugCounter) {
-    bugCounter.textContent = `${bugsFixedCount}/3`;
+    bugCounter.textContent = `${bugsFixedCount}/2`;
   }
   
   // Enable/disable escape button
@@ -385,7 +378,7 @@ async function handleEscape(event) {
   
   // Check if escape is allowed
   if (!escapeBtn.classList.contains('active')) {
-    alert('❌ Fix all bugs first! Use DevTools (F12) to:\n\n1. Add "on" class to all bulbs\n2. Remove "lights-locked" class from page\n3. Change button background from blue to red');
+    alert('❌ Fix all bugs first! Use DevTools (F12)');
     return;
   }
   
@@ -393,7 +386,6 @@ async function handleEscape(event) {
   const bugsFixed = [];
   if (bugStatus.bug1) bugsFixed.push('bug1_lights_on');
   if (bugStatus.bug2) bugsFixed.push('bug2_page_unlocked');
-  if (bugStatus.bug3) bugsFixed.push('bug3_button_red');
   
   console.log('🐛 Bugs fixed:', bugsFixed);
   

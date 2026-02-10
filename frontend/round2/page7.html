@@ -188,7 +188,6 @@ h1 {
 
 button.play-btn {
     background: linear-gradient(135deg, var(--soul-green), var(--soul-purple));
-    /* ❌ BUG 1: Text color is black - invisible on dark background */
     color: black;
     font-family: 'Creepster', cursive;
     padding: 1rem 3rem;
@@ -199,7 +198,6 @@ button.play-btn {
     font-size: 1.2rem;
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(0, 255, 157, 0.3);
-    /* ❌ BUG 2: Position absolute with weird margin pushes button off-center */
     position: absolute;
     margin-left: 190px;
 }
@@ -341,8 +339,8 @@ button.play-btn:hover {
 <script>
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false,  // Play button text color is not black
-  bug2: false   // Play button position is relative (not absolute)
+  bug1: false,
+  bug2: false
 };
 
 let music = "stopped";
@@ -350,13 +348,12 @@ let music = "stopped";
 function checkBugsFixed() {
     const playBtn = document.getElementById('playBtn');
     
-    // Check Bug 1: Button text color is not black
+  
     const btnStyle = window.getComputedStyle(playBtn);
     const color = btnStyle.color;
-    // Check if color is NOT black (rgb(0, 0, 0))
+   
     bugStatus.bug1 = !color.includes('rgb(0, 0, 0)') && color !== 'black';
     
-    // Check Bug 2: Button position is not absolute
     const position = btnStyle.position;
     bugStatus.bug2 = position === 'relative' || position === 'static';
     
@@ -379,7 +376,7 @@ function playMusic() {
         if (!bugStatus.bug1) missingFixes.push('Change .play-btn color from black to white or var(--bone-white)');
         if (!bugStatus.bug2) missingFixes.push('Change .play-btn position from absolute to relative');
         
-        alert(`❌ Fix all 2 bugs first! Use DevTools (F12) to:\n\n${missingFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`);
+        alert('❌ Fix all 2 bugs first! Use DevTools (F12)');
         return;
     }
     
@@ -427,17 +424,6 @@ async function proceedToNext() {
         alert('Error: Game engine not loaded. Please refresh the page.');
     }
 }
-
-// Console hints
-console.log("🎵 Brook's Musical Performance Challenge");
-console.log("STEP 1: Fix all 2 CSS bugs using DevTools");
-console.log("STEP 2: Click PLAY BINKS' SAKE");
-console.log("STEP 3: Enjoy the music and proceed!");
-console.log("");
-console.log("Bugs to fix:");
-console.log("1. Button text color (black → white)");
-console.log("2. Button position (absolute → relative) and remove margin-left");
-
 checkBugsFixed();
 </script>
 

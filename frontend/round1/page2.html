@@ -281,7 +281,7 @@ body {
 <script>
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false   // .world doesn't have transform: rotate(180deg)
+  bug1: false 
 };
 
 function checkEscapeConditions() {
@@ -322,7 +322,7 @@ async function handleEscape(event) {
   const escapeBtn = document.getElementById('escapeBtn');
   
   if (!escapeBtn.classList.contains('active')) {
-    alert('❌ Fix the bug first! Use DevTools (F12) to:\n\n1. Remove the rotate(180deg) transform from .world to flip the world right-side up');
+    alert('❌ Fix the bug first! Use DevTools (F12)');
     return;
   }
   

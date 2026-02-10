@@ -150,16 +150,13 @@ body {
   color: #ffd700;
   opacity: 0.7;
 }
-
-/* SHADOW (BUG IS HERE) */
 .shadow {
   position: absolute;
   inset: 0;
   background: rgba(0,0,0,0.85);
-  z-index: 4; /* ❌ BUG 1: Too high - should be lower than ladder's z-index */
+  z-index: 4;
 }
 
-/* LADDER (HIDDEN INITIALLY) */
 .ladder {
   position: absolute;
   bottom: 0;
@@ -175,7 +172,7 @@ body {
     transparent 10px,
     transparent 25px
   );
-  z-index: 2; /* ❌ ladder is behind shadow because shadow z-index is 4 */
+  z-index: 2;
 }
 
 /* ESCAPE BUTTON */
@@ -287,7 +284,7 @@ body {
 <script>
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false   // Ladder z-index is higher than shadow z-index
+  bug1: false
 };
 
 function checkEscapeConditions() {
@@ -295,11 +292,10 @@ function checkEscapeConditions() {
   const shadow = document.querySelector(".shadow");
   const escapeBtn = document.getElementById("escape");
   
-  // Get z-index values
+
   const ladderZ = parseInt(getComputedStyle(ladder).zIndex) || 0;
   const shadowZ = parseInt(getComputedStyle(shadow).zIndex) || 0;
-  
-  // Check Bug 1: Ladder should be above shadow (higher z-index)
+
   bugStatus.bug1 = ladderZ > shadowZ;
   
   // Update bug counter in header
@@ -325,7 +321,7 @@ async function handleEscape(event) {
   const escapeBtn = document.getElementById('escape');
   
   if (!escapeBtn.classList.contains('active')) {
-    alert('❌ Fix the bug first! Use DevTools (F12) to:\n\n1. Change the shadow z-index to be lower than ladder z-index (e.g., shadow z-index: 1)\nOR\n2. Change ladder z-index to be higher than shadow z-index (e.g., ladder z-index: 5)');
+    alert('❌ Fix the bug first! Use DevTools (F12)');
     return;
   }
   

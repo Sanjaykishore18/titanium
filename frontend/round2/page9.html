@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="total-bugs" content="2">
-<title>Web Escape | Round 3 - Page 1 (2 Bugs)</title>
+<title>Web Escape | Round 2 - Page 9 (2 Bugs)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Permanent+Marker&display=swap" rel="stylesheet">
@@ -226,7 +226,6 @@ h1 {
 }
 
 #target {
-    /* ❌ BUG 1: Position fixed makes it unmovable and pointer-events none makes it unclickable */
     position: fixed;
     top: 50%;
     pointer-events: none;
@@ -239,7 +238,6 @@ h1 {
     cursor: pointer;
     z-index: 100;
     box-shadow: 0 0 15px var(--pop-green);
-    /* ❌ BUG 2: CSS custom property for state - should be managed in JavaScript */
     --target-state: running;
 }
 
@@ -374,8 +372,8 @@ button.hint-btn:hover {
 <script>
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false,  // Target position is absolute and pointer-events is auto
-  bug2: false   // Target doesn't have --target-state CSS property
+  bug1: false,
+  bug2: false
 };
 
 let score = 0;
@@ -387,13 +385,11 @@ const navBtn = document.getElementById('nav-next');
 function checkBugsFixed() {
     const targetStyle = window.getComputedStyle(target);
     
-    // Check Bug 1: Position is absolute AND pointer-events is auto
+   
     const position = targetStyle.position;
     const pointerEvents = targetStyle.pointerEvents;
     bugStatus.bug1 = position === 'absolute' && pointerEvents === 'auto';
     
-    // Check Bug 2: --target-state CSS property should not be used
-    // (This is harder to check, but we'll check if the property exists)
     const customProp = targetStyle.getPropertyValue('--target-state');
     bugStatus.bug2 = !customProp || customProp.trim() === '';
     
@@ -416,7 +412,7 @@ function showHint() {
         if (!bugStatus.bug1) missingFixes.push('Change #target position from fixed to absolute AND pointer-events from none to auto');
         if (!bugStatus.bug2) missingFixes.push('Remove --target-state: running from #target CSS');
         
-        alert(`❌ Fix all 2 bugs first! Use DevTools (F12) to:\n\n${missingFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`);
+        alert('❌ Fix all 2 bugs first! Use DevTools (F12)');
     } else {
         alert('✅ All bugs fixed! Now try to click the moving target 3 times!');
     }
@@ -501,17 +497,6 @@ async function proceedToNext(event) {
         alert('Error: Game engine not loaded. Please refresh the page.');
     }
 }
-
-// Console hints
-console.log("🎯 God Usopp's Sniper Challenge");
-console.log("STEP 1: Fix all 2 bugs using DevTools");
-console.log("STEP 2: Click the moving target 3 times");
-console.log("STEP 3: Proceed to next page");
-console.log("");
-console.log("Bugs to fix:");
-console.log("1. Target position (fixed → absolute) AND pointer-events (none → auto)");
-console.log("2. Remove --target-state CSS property from #target");
-
 checkBugsFixed();
 </script>
 

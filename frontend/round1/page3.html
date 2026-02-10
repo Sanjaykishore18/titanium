@@ -186,7 +186,7 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  /* 🔴 BUG 1: Should be removed to enable keypad 🔴 */
+  /*BUG*/ 
   pointer-events: none;
   opacity: 0.4;
 }
@@ -317,7 +317,7 @@ body {
 <script>
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false   // Keypad doesn't have pointer-events: none
+  bug1: false
 };
 
 let input = "";
@@ -349,7 +349,6 @@ function checkCodeCorrect() {
 function checkEscapeConditions() {
   const keypad = document.getElementById('keypad');
   
-  // Check Bug 1: Keypad is enabled (no pointer-events: none)
   const keypadStyle = window.getComputedStyle(keypad);
   const pointerEvents = keypadStyle.pointerEvents;
   
@@ -374,7 +373,7 @@ async function handleEscape(event) {
   const escapeBtn = document.getElementById('escape');
   
   if (!bugStatus.bug1) {
-    alert('❌ Fix the bug first! Use DevTools (F12) to:\n\n1. Remove pointer-events: none from .keypad to enable it');
+    alert('❌ Fix the bug first!');
     return;
   }
   

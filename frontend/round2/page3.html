@@ -147,7 +147,6 @@ body::before {
     flex-direction: column;
     justify-content: center;
     padding: 60px 40px;
-    /* ❌ BUG 1: Container scaled way too small - everything tiny */
     transform: scale(0.1);
 }
 
@@ -243,7 +242,6 @@ h1::after {
     transition: all 0.3s ease;
     position: relative;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-    /* ❌ BUG 2: All targets positioned absolute at same spot - stack on top */
     position: absolute;
     top: 50px;
     left: 50px;
@@ -439,8 +437,8 @@ h1::after {
 <script>
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false,  // Shooting range scale is 1 (not 0.1)
-  bug2: false   // Targets position is relative (not absolute)
+  bug1: false,
+  bug2: false
 };
 
 let targetsHit = 0;
@@ -451,12 +449,10 @@ function checkBugsFixed() {
     const shootingRange = document.querySelector('.shooting-range');
     const targets = document.querySelectorAll('.target');
     
-    // Check Bug 1: Shooting range scale is 1
+   
     const rangeStyle = window.getComputedStyle(shootingRange);
     const transform = rangeStyle.transform;
-    // Check if scale is NOT 0.1 (transform matrix will show scale value)
-    // scale(0.1) creates matrix(0.1, 0, 0, 0.1, 0, 0)
-    // scale(1) creates matrix(1, 0, 0, 1, 0, 0) or "none"
+
     const isScaleNormal = transform === 'none' || (!transform.includes('0.1') && !transform.includes('0.01'));
     bugStatus.bug1 = isScaleNormal;
     
@@ -485,7 +481,7 @@ setInterval(checkBugsFixed, 300);
 
 function hitTarget(element) {
     if (!bugsFixed) {
-        alert('❌ Fix all 2 bugs first! Use DevTools (F12) to:\n\n1. Change .shooting-range transform from scale(0.1) to scale(1)\n2. Change .target position from absolute to relative');
+        alert('❌ Fix all 2 bugs first! Use DevTools (F12)');
         return;
     }
     

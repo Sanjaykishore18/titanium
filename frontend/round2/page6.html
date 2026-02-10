@@ -193,7 +193,6 @@ button {
     background: linear-gradient(135deg, #6366f1, #8b5cf6);
     color: white;
     border: none;
-    /* ❌ BUG 1: Button invisible */
     opacity: 0;
     padding: 1rem 2.5rem;
     font-size: 1rem;
@@ -206,7 +205,6 @@ button {
     position: relative;
     overflow: hidden;
     z-index: 1;
-    /* ❌ BUG 2: Button pushed way off screen */
     margin-top: 9000000px;
 }
 
@@ -242,7 +240,6 @@ button:active {
     background: rgba(0, 0, 0, 0.3);
     border-radius: 12px;
     border: 1px solid rgba(252, 211, 77, 0.2);
-    /* ❌ BUG 3: Translation hidden */
     visibility: hidden;
     opacity: 0;
     transform: translateY(10px);
@@ -389,25 +386,25 @@ button:active {
 <script>
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false,  // Decipher button opacity is 1 (not 0)
-  bug2: false,  // Decipher button margin-top is normal (not 9000000px)
-  bug3: false   // Translation visibility is visible (not hidden)
+  bug1: false,  
+  bug2: false,  
+  bug3: false
 };
 
 function checkBugsFixed() {
     const decipherBtn = document.getElementById('decipherBtn');
     const translation = document.getElementById('translation');
     
-    // Check Bug 1: Button opacity is 1
+    
     const btnStyle = window.getComputedStyle(decipherBtn);
     const opacity = parseFloat(btnStyle.opacity);
     bugStatus.bug1 = opacity > 0.5; // Consider > 0.5 as fixed
     
-    // Check Bug 2: Button margin-top is reasonable
+    
     const marginTop = parseFloat(btnStyle.marginTop);
     bugStatus.bug2 = marginTop < 1000; // Less than 1000px is reasonable
     
-    // Check Bug 3: Translation visibility is visible
+    
     const transStyle = window.getComputedStyle(translation);
     const visibility = transStyle.visibility;
     bugStatus.bug3 = visibility === 'visible';
@@ -432,7 +429,7 @@ function decipherPoneglyph() {
         if (!bugStatus.bug2) missingFixes.push('Change button margin-top from 9000000px to 20px (or remove it)');
         if (!bugStatus.bug3) missingFixes.push('Change #translation visibility from hidden to visible');
         
-        alert(`❌ Fix all 3 bugs first! Use DevTools (F12) to:\n\n${missingFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`);
+        alert('❌ Fix all 3 bugs first! Use DevTools (F12)');
         return;
     }
     
@@ -472,16 +469,7 @@ async function proceedToNext() {
     }
 }
 
-// Console hints
-console.log("📜 Robin's Ancient Poneglyph Challenge");
-console.log("STEP 1: Fix all 3 CSS bugs using DevTools");
-console.log("STEP 2: Click the DECIPHER TEXT button");
-console.log("STEP 3: Read the ancient message");
-console.log("");
-console.log("Bugs to fix:");
-console.log("1. Button opacity (0 → 1)");
-console.log("2. Button margin-top (9000000px → 20px or remove)");
-console.log("3. Translation visibility (hidden → visible)");
+
 
 checkBugsFixed();
 </script>

@@ -129,7 +129,6 @@ body {
 .lab-container {
     width: 100%;
     max-width: 900px;
-    /* ❌ BUG 1: Container rotated 180 degrees - everything upside down */
     transform: rotate(180deg);
 }
 
@@ -174,13 +173,13 @@ h1 {
 }
 
 .dna-strand {
-    /* ❌ BUG 2: Strands have negative width - causes layout issues */
+   
     width: -200px;
     height: 80px;
     background: linear-gradient(90deg, #ff6b6b 0%, #ffd93d 50%, #6bcf7f 100%);
     border-radius: 40px;
     cursor: pointer;
-    /* ❌ BUG 2 (part 2): Position absolute stacks all strands */
+
     position: absolute;
     transition: all 0.3s ease;
     display: flex;
@@ -228,7 +227,7 @@ h1 {
 
 .progress-bar-fill {
     height: 100%;
-    /* ❌ BUG 3: Progress bar has wrong direction - RTL instead of LTR */
+    /*ltr */
     direction: rtl;
     background: linear-gradient(90deg, #4ecdc4 0%, #95e1d3 100%);
     width: 0%;
@@ -338,7 +337,7 @@ h1 {
         <div class="hint">
             🧬 Analyze all 5 DNA strands to unlock the cure!
         </div>
-
+        <!-- console labpasscode = "DOCTOR"-->>
         <div class="dna-strands" id="dnaStrands">
             <div class="dna-strand" onclick="analyzeDNA(this, 1)">🧬</div>
             <div class="dna-strand" onclick="analyzeDNA(this, 2)">🧬</div>
@@ -373,9 +372,9 @@ h1 {
 <script>
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false,  // Lab container rotation is 0deg (not 180deg)
+  bug1: false,
   bug2: false,  // DNA strands width is positive and position is relative
-  bug3: false   // Progress bar direction is ltr (not rtl)
+  bug3: false
 };
 
 let analyzed = 0;
@@ -386,14 +385,13 @@ function checkBugsFixed() {
     const labContainer = document.querySelector('.lab-container');
     const strands = document.querySelectorAll('.dna-strand');
     const progressBar = document.getElementById('progressBar');
-    
-    // Check Bug 1: Lab container rotation is 0deg
+
     const containerStyle = window.getComputedStyle(labContainer);
     const transform = containerStyle.transform;
     const isRotationFixed = transform === 'none' || !transform.includes('-1');
     bugStatus.bug1 = isRotationFixed;
     
-    // Check Bug 2: DNA strands width is positive and position is relative
+  
     if (strands.length > 0) {
         const strandStyle = window.getComputedStyle(strands[0]);
         const width = parseFloat(strandStyle.width);
@@ -401,7 +399,6 @@ function checkBugsFixed() {
         bugStatus.bug2 = width > 0 && (position === 'relative' || position === 'static');
     }
     
-    // Check Bug 3: Progress bar direction is ltr
     const progressStyle = window.getComputedStyle(progressBar);
     const direction = progressStyle.direction;
     bugStatus.bug3 = direction === 'ltr';
@@ -426,7 +423,7 @@ function analyzeDNA(element, strandId) {
         if (!bugStatus.bug2) missingFixes.push('Change .dna-strand width from -200px to 200px AND position from absolute to relative');
         if (!bugStatus.bug3) missingFixes.push('Change .progress-bar-fill direction from rtl to ltr');
         
-        alert(`❌ Fix all 3 bugs first! Use DevTools (F12) to:\n\n${missingFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`);
+        alert('❌ Fix all 3 bugs first! Use DevTools (F12)');
         return;
     }
     
@@ -490,16 +487,6 @@ async function moveToNextPage() {
     }
 }
 
-// Console hints
-console.log("🔬 Chopper's DNA Analyzer Challenge");
-console.log("STEP 1: Fix all 3 CSS bugs using DevTools");
-console.log("STEP 2: Click all 5 DNA strands to analyze them");
-console.log("STEP 3: Unlock the lab by typing: labPasscode = 'DOCTOR'");
-console.log("");
-console.log("Bugs to fix:");
-console.log("1. Container rotation (180deg → 0deg)");
-console.log("2. DNA strand width (-200px → 200px) and position (absolute → relative)");
-console.log("3. Progress bar direction (rtl → ltr)");
 
 checkBugsFixed();
 </script>

@@ -176,8 +176,6 @@ body {
   opacity: 0.25;
   transition: 0.3s;
 }
-
-/* BUG: Hidden class that needs to be removed */
 .location.hidden {
   display: none;
 }
@@ -307,9 +305,9 @@ body {
 <script>
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false,  // Castle location doesn't have 'hidden' class
-  bug2: false,  // Radio Tower location doesn't have 'hidden' class
-  bug3: false   // Creek location doesn't have 'hidden' class
+  bug1: false,  
+  bug2: false,  
+  bug3: false
 };
 
 function checkEscapeConditions() {
@@ -357,7 +355,7 @@ async function handleEscape(event) {
     if (!bugStatus.bug2) missingLocations.push('Radio Tower');
     if (!bugStatus.bug3) missingLocations.push('Creek');
     
-    alert(`❌ Fix all 3 bugs first! Use DevTools (F12) to:\n\nRemove the 'hidden' class from these locations:\n${missingLocations.map((loc, i) => `${i + 1}. ${loc}`).join('\n')}`);
+    alert('❌ Fix all 3 bugs first! Use DevTools (F12)');
     return;
   }
   

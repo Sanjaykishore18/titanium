@@ -156,15 +156,11 @@ h1 {
   margin-bottom: 20px;
   border: 2px solid #e50914;
 }
-
-/* ❌ BUG 1 — Transmission hidden */
 #transmission {
-  opacity: 0;
+  opacity: 1;
   visibility: hidden;
   color: #00ff00;
 }
-
-/* ❌ BUG 2 — Frequency controls hidden */
 .controls {
   display: none;
 }
@@ -301,8 +297,8 @@ h1 {
 <script>
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false,  // Transmission is visible (opacity: 1 and visibility: visible)
-  bug2: false   // Controls are visible (display is not 'none')
+  bug1: false,
+  bug2: false
 };
 
 function checkEscapeConditions() {

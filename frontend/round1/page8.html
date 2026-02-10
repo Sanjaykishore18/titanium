@@ -193,7 +193,6 @@ body {
   100% { transform: translate(-50%, -50%) scale(1); }
 }
 
-/* RIFT (BUG 1: ROTATED WRONG) */
 .rift {
   position: absolute;
   bottom: 90px;
@@ -201,7 +200,7 @@ body {
   width: 160px;
   height: 160px;
   background: radial-gradient(circle, purple, black);
-  transform: translateX(-50%) rotate(180deg); /* ❌ BUG 1: Should be rotate(0deg) or no rotation */
+  transform: translateX(-50%) rotate(180deg);
   border-radius: 50%;
   box-shadow: 0 0 40px purple;
   z-index: 2;
@@ -220,10 +219,10 @@ body {
   font-size: 18px;
   letter-spacing: 2px;
   border-radius: 6px;
-  opacity: 1;            /* Not a bug - visible by default */
-  pointer-events: none;  /* ❌ BUG 2: Should be auto */
+  opacity: 1;          
+  pointer-events: none;
   cursor: not-allowed;
-  z-index: 0;            /* ❌ BUG 3: Should be higher (e.g., 5) to be visible */
+  z-index: 0;
   transition: 0.4s;
 }
 
@@ -319,30 +318,26 @@ body {
 <script>
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false,  // Rift rotation is 0deg (not 180deg)
-  bug2: false,  // Escape button pointer-events is auto (not none)
-  bug3: false   // Escape button z-index is >= 3 (not 0)
+  bug1: false,
+  bug2: false,
+  bug3: false
 };
 
 function checkEscapeConditions() {
   const rift = document.querySelector('.rift');
   const escapeBtn = document.getElementById('escapeBtn');
   
-  // Check Bug 1: Rift rotation is 0deg
   const riftStyle = window.getComputedStyle(rift);
   const riftTransform = riftStyle.transform;
-  // Check if rotation is removed (matrix will be identity or no rotation)
-  // rotate(180deg) creates matrix(-1, 0, 0, -1, ...)
-  // rotate(0deg) or no rotation creates matrix(1, 0, 0, 1, ...)
+
   const isRiftFixed = !riftTransform.includes('-1') || riftTransform === 'none';
   bugStatus.bug1 = isRiftFixed;
   
-  // Check Bug 2: Escape button pointer-events is auto
   const escapeStyle = window.getComputedStyle(escapeBtn);
   const pointerEvents = escapeStyle.pointerEvents;
   bugStatus.bug2 = pointerEvents === 'auto';
   
-  // Check Bug 3: Escape button z-index is high enough
+
   const zIndex = parseInt(escapeStyle.zIndex) || 0;
   bugStatus.bug3 = zIndex >= 3;
   
@@ -377,7 +372,7 @@ async function handleEscape(event) {
     if (!bugStatus.bug2) missingFixes.push('Set escape button pointer-events to auto');
     if (!bugStatus.bug3) missingFixes.push('Set escape button z-index to 5 or higher');
     
-    alert(`❌ Fix all 3 bugs first! Use DevTools (F12) to:\n\n${missingFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`);
+    alert('❌ Fix all 3 bugs first! Use DevTools (F12)');
     return;
   }
   

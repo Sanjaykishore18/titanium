@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="total-bugs" content="2">
-<title>Web Escape | Round 2 - Page 8 (Final) (2 Bugs)</title>
+<title>Web Escape | Round 2 - Page 8 (2 Bugs)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -239,7 +239,6 @@ button.btn-cola {
     position: relative;
     overflow: hidden;
     cursor: pointer;
-    /* ❌ BUG 1: Button is hidden! */
     display: none;
 }
 
@@ -353,7 +352,6 @@ button.btn-cola:active {
     </div>
 
     <div class="controls">
-        <!-- ❌ BUG 2: onclick has typo "add.Cola()" instead of "addCola()" -->
         <button class="btn-cola" onclick="add.Cola()" id="colaBtn">+33L COLA</button>
     </div>
 
@@ -374,8 +372,8 @@ button.btn-cola:active {
 <script>
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false,  // Cola button display is not none
-  bug2: false   // Cola button onclick function name is correct
+  bug1: false,
+  bug2: false
 };
 
 let fuel = 0;
@@ -438,7 +436,7 @@ function fireBeam() {
         if (!bugStatus.bug1) missingFixes.push('Change .btn-cola display from none to block (or remove the line)');
         if (!bugStatus.bug2) missingFixes.push('Fix button onclick from "add.Cola()" to "addCola()"');
         
-        alert(`❌ Fix all 2 bugs first! Use DevTools (F12) to:\n\n${missingFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`);
+        alert('❌ Fix all 2 bugs first! Use DevTools (F12)');
         return;
     }
     
@@ -493,18 +491,6 @@ async function completeRound() {
         }
     }, 500);
 }
-
-// Console hints
-console.log("⚡ Franky's Radical Beam Challenge");
-console.log("STEP 1: Fix all 2 bugs using DevTools");
-console.log("STEP 2: Click +33L COLA button 3 times to charge to 99L");
-console.log("STEP 3: Click one more time to reach 132L (100+ needed)");
-console.log("STEP 4: FIRE RADICAL BEAM!");
-console.log("");
-console.log("Bugs to fix:");
-console.log("1. Cola button display (none → block)");
-console.log("2. Cola button onclick (add.Cola() → addCola())");
-
 checkBugsFixed();
 updateSystem();
 </script>

@@ -183,12 +183,10 @@ h1 {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
     animation: falling 4s linear infinite;
     top: -150px;
-    
-    /* ❌ BUG 1: Stones are blurry */
+
     filter: blur(10px);
     opacity: 1;
-    
-    /* ❌ BUG 2: Animation is paused */
+
     animation-play-state: paused;
 }
 
@@ -378,8 +376,8 @@ h1 {
 <script>
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false,  // Stones don't have blur filter
-  bug2: false   // Animation is playing (not paused)
+  bug1: false, 
+  bug2: false
 };
 
 let slashedCount = 0;
@@ -392,12 +390,10 @@ function checkBugsFixed() {
     
     const firstStone = stones[0];
     const stoneStyle = window.getComputedStyle(firstStone);
-    
-    // Check Bug 1: No blur filter
+
     const filter = stoneStyle.filter;
     bugStatus.bug1 = filter === 'none' || !filter.includes('blur');
-    
-    // Check Bug 2: Animation is playing
+
     const animationState = stoneStyle.animationPlayState;
     bugStatus.bug2 = animationState === 'running';
     
@@ -419,7 +415,7 @@ setInterval(checkBugsFixed, 300);
 
 function slashStone(element, index) {
     if (!bugsFixed) {
-        alert('❌ Fix all 2 bugs first! Use DevTools (F12) to:\n\n1. Remove filter: blur(10px) from .falling-stone\n2. Change animation-play-state: paused to animation-play-state: running');
+        alert('❌ Fix all 2 bugs first! Use DevTools (F12)');
         return;
     }
     

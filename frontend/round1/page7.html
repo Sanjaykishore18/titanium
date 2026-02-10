@@ -168,7 +168,7 @@ body {
     rgba(0,200,255,0.6),
     transparent 60%);
   animation: ripple 2s infinite;
-  opacity: 0;   /* ❌ BUG 1: Should have opacity > 0 to show ripples */
+  opacity: 0;
 }
 
 /* PORTAL (BUGGED) */
@@ -183,7 +183,7 @@ body {
   background: #00ccff;
   box-shadow: 0 0 25px #00ccff, 0 0 50px #00ffff;
   animation: portalPulse 1.5s infinite;
-  opacity: 0;   /* ❌ BUG 2: Should have opacity > 0 to show portal */
+  opacity: 0;
 }
 
 @keyframes ripple {
@@ -336,8 +336,8 @@ body {
 <script>
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false,  // Ripples are visible (opacity > 0)
-  bug2: false   // Portal is visible (opacity > 0)
+  bug1: false,
+  bug2: false
 };
 
 function checkEscapeConditions() {
@@ -345,12 +345,10 @@ function checkEscapeConditions() {
   const portal = document.querySelector('.portal');
   const escapeBtn = document.getElementById('escapeBtn');
   
-  // Check Bug 1: Ripples are visible
   const rippleStyle = window.getComputedStyle(ripples);
   const rippleOpacity = parseFloat(rippleStyle.opacity);
   bugStatus.bug1 = rippleOpacity > 0;
-  
-  // Check Bug 2: Portal is visible
+
   const portalStyle = window.getComputedStyle(portal);
   const portalOpacity = parseFloat(portalStyle.opacity);
   bugStatus.bug2 = portalOpacity > 0;
@@ -385,7 +383,7 @@ async function handleEscape(event) {
     if (!bugStatus.bug1) missingFixes.push('Make ripples visible (change .ripples opacity from 0 to 1)');
     if (!bugStatus.bug2) missingFixes.push('Make portal visible (change .portal opacity from 0 to 1)');
     
-    alert(`❌ Fix all 2 bugs first! Use DevTools (F12) to:\n\n${missingFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`);
+    alert('❌ Fix all 2 bugs first! Use DevTools (F12)');
     return;
   }
   

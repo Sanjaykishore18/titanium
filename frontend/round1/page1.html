@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="total-bugs" content="3">
-<title>Web Escape | Round 1 - Page 9 (3 Bugs)</title>
+<title>Web Escape | Round 1 - Page 1 (3 Bugs)</title>
 <style>
 /* RESET */
 * {
@@ -361,7 +361,7 @@ async function proceedToNext(event) {
         if (!bugStatus.bug2) missingWaffles.push('Waffle 2 (bottom right)');
         if (!bugStatus.bug3) missingWaffles.push('Waffle 3 (top right)');
         
-        alert(`❌ Find all 3 hidden waffles first! Use DevTools (F12) to:\n\nReveal these waffles by changing opacity from 0 to 1:\n${missingWaffles.map((w, i) => `${i + 1}. ${w}`).join('\n')}`);
+        alert('❌ Find all 3 hidden waffles first! Use DevTools (F12)');
         return;
     }
     

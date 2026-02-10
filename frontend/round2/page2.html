@@ -159,7 +159,7 @@ h1 {
 .recipe-area {
     width: 80%;
     max-width: 900px;
-    /* ❌ BUG 1: Height 0 hides the ingredients! */
+    /* 350*/
     height: 0;
     overflow: hidden;
     display: flex;
@@ -179,8 +179,6 @@ h1 {
     width: 150px;
     transition: all 0.3s;
     position: relative;
-    
-    /* ❌ BUG 2: Z-index -1 makes them Click-Through/Unclickable */
     z-index: -1;
 }
 
@@ -213,8 +211,6 @@ h1 {
     color: #8B4500;
     font-weight: bold;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-    
-    /* ❌ BUG 3: Button is hidden! */
     visibility: hidden;
     z-index: 100;
 }
@@ -321,9 +317,9 @@ h1 {
 <script>
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false,  // Recipe area height is not 0
-  bug2: false,  // Ingredients z-index is not -1
-  bug3: false   // Cook button visibility is not hidden
+  bug1: false,
+  bug2: false,
+  bug3: false 
 };
 
 let selectedIngredients = [];
@@ -383,7 +379,7 @@ async function cookSoup() {
         if (!bugStatus.bug2) missingFixes.push('Change .ingredient z-index from -1 to 1 (or remove it)');
         if (!bugStatus.bug3) missingFixes.push('Change .cook-btn visibility from hidden to visible');
         
-        alert(`❌ Fix all 3 bugs first! Use DevTools (F12) to:\n\n${missingFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`);
+        alert('❌ Fix all 3 bugs first! Use DevTools (F12)');
         return;
     }
     
@@ -430,12 +426,6 @@ async function moveToNextPage() {
     }
 }
 
-console.log("👨‍🍳 Kitchen Status:");
-console.log("Bug 1: Ingredient Grid collapsed (Height: 0)");
-console.log("Bug 2: Ingredients unclickable (Z-Index: -1)");
-console.log("Bug 3: Cook Button invisible (Visibility: Hidden)");
-console.log("");
-console.log("🔑 Correct Recipe: Fish (🐟) + Rare Spice (🌶️) + Sea Salt (🧂)");
 
 checkBugsFixed();
 </script>

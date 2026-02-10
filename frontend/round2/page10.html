@@ -436,7 +436,7 @@ footer {
     color: black;
 }
 
-/* ❌ BUG 1: Real button hidden behind everything! */
+/* reverse positively*/
 #btn-4 {
     z-index: -9999 !important;
 }
@@ -719,15 +719,14 @@ footer {
 <script>
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false  // btn-4 z-index is not negative
+  bug1: false
 };
 
 function checkBugsFixed() {
     const btn4 = document.getElementById('btn-4');
     const btn4Style = window.getComputedStyle(btn4);
     const zIndex = parseInt(btn4Style.zIndex) || 0;
-    
-    // Check Bug 1: z-index is not negative
+
     bugStatus.bug1 = zIndex >= 0;
     
     // Update bug counter in header
@@ -747,7 +746,7 @@ function fakeButton() {
 
 function revealSecret() {
     if (!bugStatus.bug1) {
-        alert('❌ You found the right button, but it\'s still hidden!\n\nUse DevTools (F12) to fix the bug:\nChange #btn-4 z-index from -9999 to a positive value (e.g., 10000)');
+        alert('❌ You found the right button, but it\'s still hidden!\n\nUse DevTools (F12)');
         return;
     }
     
@@ -869,18 +868,6 @@ async function completeRound() {
         }, 2000);
     }
 }
-
-// Console hints
-console.log("🏴‍☠️ Luffy's Secret Page - Final Challenge!");
-console.log("OBJECTIVE: Bypass the gatekeeper and complete Round 2");
-console.log("");
-console.log("HINTS:");
-console.log("1. Three colorful buttons are fake (they move around)");
-console.log("2. The real 'Reveal Secret' button is hidden (check Elements tab)");
-console.log("3. Look for #btn-4 - it has z-index: -9999 hiding it");
-console.log("4. Change z-index to a high positive value (e.g., 10000)");
-console.log("5. Click the real button to remove the gatekeeper");
-console.log("6. Scroll down and click 'Complete Round 2!'");
 
 checkBugsFixed();
 </script>
