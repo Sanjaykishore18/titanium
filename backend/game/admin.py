@@ -1,5 +1,5 @@
 # ============================================================================
-# FINAL admin.py - CSV Export + Leaderboard Buttons for Django Admin
+# FIXED admin.py - Proper datetime formatting in CSV exports
 # Copy this to: game/admin.py
 # ============================================================================
 
@@ -8,6 +8,7 @@ from django.contrib.auth.models import Group
 from django.http import HttpResponse
 from django.urls import reverse
 from django.utils.html import format_html
+from django.utils.timezone import localtime
 import csv
 from .models import *
 
@@ -16,11 +17,13 @@ admin.site.unregister(Group)
 
 
 # ============================================================================
-# CSV EXPORT ACTION
+# CSV EXPORT ACTION - FIXED DATETIME FORMATTING
 # ============================================================================
 
 def export_to_csv(modeladmin, request, queryset):
-    """Export selected Team Round Progress to CSV"""
+    """
+    ✅ FIXED: Export selected Team Round Progress to CSV with proper datetime formatting
+    """
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="team_round_progress.csv"'
     
@@ -38,6 +41,10 @@ def export_to_csv(modeladmin, request, queryset):
     }
     
     for progress in queryset.select_related('team', 'round'):
+        # ✅ FIXED: Proper datetime formatting using localtime
+        start_time_str = localtime(progress.start_time).strftime('%Y-%m-%d %H:%M:%S') if progress.start_time else 'Not Started'
+        end_time_str = localtime(progress.end_time).strftime('%Y-%m-%d %H:%M:%S') if progress.end_time else 'In Progress'
+        
         writer.writerow([
             progress.team.id,
             progress.team.team_name,
@@ -48,8 +55,8 @@ def export_to_csv(modeladmin, request, queryset):
             progress.get_status_display(),
             'Yes' if progress.is_qualified else 'No',
             progress.pages_completed,
-            progress.start_time.strftime('%Y-%m-%d %H:%M:%S') if progress.start_time else 'Not Started',
-            progress.end_time.strftime('%Y-%m-%d %H:%M:%S') if progress.end_time else 'In Progress',
+            start_time_str,
+            end_time_str,
             progress.duration_seconds,
             'Yes' if progress.is_active else 'No'
         ])
@@ -60,7 +67,9 @@ export_to_csv.short_description = "📥 Export selected to CSV"
 
 
 def export_all_to_csv(modeladmin, request, queryset):
-    """Export ALL Team Round Progress to CSV"""
+    """
+    ✅ FIXED: Export ALL Team Round Progress to CSV with proper datetime formatting
+    """
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="all_team_round_progress.csv"'
     
@@ -80,6 +89,10 @@ def export_all_to_csv(modeladmin, request, queryset):
     all_progress = TeamRoundProgress.objects.select_related('team', 'round').order_by('team__team_name', 'round__round_number')
     
     for progress in all_progress:
+        # ✅ FIXED: Proper datetime formatting using localtime
+        start_time_str = localtime(progress.start_time).strftime('%Y-%m-%d %H:%M:%S') if progress.start_time else 'Not Started'
+        end_time_str = localtime(progress.end_time).strftime('%Y-%m-%d %H:%M:%S') if progress.end_time else 'In Progress'
+        
         writer.writerow([
             progress.team.id,
             progress.team.team_name,
@@ -90,8 +103,8 @@ def export_all_to_csv(modeladmin, request, queryset):
             progress.get_status_display(),
             'Yes' if progress.is_qualified else 'No',
             progress.pages_completed,
-            progress.start_time.strftime('%Y-%m-%d %H:%M:%S') if progress.start_time else 'Not Started',
-            progress.end_time.strftime('%Y-%m-%d %H:%M:%S') if progress.end_time else 'In Progress',
+            start_time_str,
+            end_time_str,
             progress.duration_seconds,
             'Yes' if progress.is_active else 'No'
         ])
@@ -203,16 +216,33 @@ class TeamRoundProgressAdmin(admin.ModelAdmin):
 
 
 # ============================================================================
-# PAGE PROGRESS ADMIN
+# PAGE PROGRESS ADMIN - DISPLAY TIME TAKEN
 # ============================================================================
 
 @admin.register(PageProgress)
 class PageProgressAdmin(admin.ModelAdmin):
-    list_display = ['team_round', 'page_number', 'completed', 'time_taken_seconds']
+    list_display = ['team_round', 'page_number', 'completed', 'time_taken_display', 'bugs_fixed_count']
     list_filter = ['completed', 'team_round__round']
     search_fields = ['team_round__team__team_name']
     list_select_related = ['team_round']
     ordering = ['team_round', 'page_number']
+    readonly_fields = ['started_at', 'completed_at', 'time_taken_seconds']
+    
+    def time_taken_display(self, obj):
+        """Display time taken in a readable format"""
+        if obj.time_taken_seconds > 0:
+            minutes = obj.time_taken_seconds // 60
+            seconds = obj.time_taken_seconds % 60
+            return f"{minutes}m {seconds}s ({obj.time_taken_seconds}s)"
+        return "0s"
+    
+    time_taken_display.short_description = "Time Taken"
+    
+    def bugs_fixed_count(self, obj):
+        """Display number of bugs fixed"""
+        return len(obj.bugs_fixed) if obj.bugs_fixed else 0
+    
+    bugs_fixed_count.short_description = "Bugs Fixed"
 
 
 # ============================================================================
@@ -221,7 +251,7 @@ class PageProgressAdmin(admin.ModelAdmin):
 
 @admin.register(GameActivity)
 class GameActivityAdmin(admin.ModelAdmin):
-    list_display = ['team', 'activity_type', 'timestamp']
+    list_display = ['team', 'activity_type', 'timestamp', 'description']
     list_filter = ['activity_type', 'timestamp']
     search_fields = ['team__team_name', 'description']
     date_hierarchy = 'timestamp'

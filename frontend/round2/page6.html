@@ -1,371 +1,490 @@
-<!-- ============================================================================
-     ROUND 1 - PAGE 2: The Upside Down Portal
-     Path: frontend/round1/page2.html
-     ============================================================================ -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Round 1 - Page 2: The Upside Down Portal</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="total-bugs" content="3">
+<title>Web Escape | Round 2 - Page 6 (3 Bugs)</title>
+<!-- Importing Google Fonts for Rich Aesthetics -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ============================================================================
+   GAME HEADER
+   ============================================================================ */
+.game-header {
+    background: rgba(0,0,0,0.95);
+    padding: 15px 30px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    border-bottom: 3px solid #667eea;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    font-family: 'Outfit', sans-serif;
+}
+
+.team-info {
+    color: #667eea;
+}
+
+.timer {
+    background: #dc3545;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 24px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+}
+
+.timer-warning {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.bugs-indicator {
+    background: #28a745;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.exit-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.exit-btn:hover {
+    background: #c82333;
+}
+
+/* Notifications */
+.notification {
+    position: fixed;
+    top: 110px;
+    right: -350px;
+    background: rgba(102, 126, 234, 0.95);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transition: right 0.3s;
+    z-index: 999;
+    max-width: 300px;
+}
+
+.notification.show {
+    right: 20px;
+}
+
+.notification-success {
+    background: rgba(40, 167, 69, 0.95);
+}
+
+.notification-error {
+    background: rgba(220, 53, 69, 0.95);
+}
+
+.notification-info {
+    background: rgba(23, 162, 184, 0.95);
+}
+
+/* ============================================================================
+   ORIGINAL GAME STYLES
+   ============================================================================ */
+
+:root {
+    --bg-color: #0b0c15;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --primary-glow: #8b5cf6;
+    --text-main: #e2e8f0;
+    --text-highlight: #fcd34d;
+    --accent: #ec4899;
+}
+
+body {
+    min-height: 100vh;
+    background-color: var(--bg-color);
+    background-image:
+        linear-gradient(rgba(11, 12, 21, 0.7), rgba(11, 12, 21, 0.7)),
+        url('./Asset/Robin.webp');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: var(--text-main);
+    font-family: 'Outfit', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+    padding-top: 100px;
+    padding-bottom: 50px;
+}
+
+.archaeology {
+    position: relative;
+    text-align: center;
+    max-width: 800px;
+    width: 100%;
+    padding: 2rem;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    margin-bottom: 2.5rem;
+    background: linear-gradient(135deg, var(--text-highlight), #f59e0b);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 20px rgba(252, 211, 77, 0.2);
+}
+
+.game-hint {
+    font-size: 1rem;
+    color: #FFD700;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+button {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    border: none;
+    /* ❌ BUG 1: Button invisible */
+    opacity: 0;
+    padding: 1rem 2.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    letter-spacing: 1px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    /* ❌ BUG 2: Button pushed way off screen */
+    margin-top: 9000000px;
+}
+
+button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    z-index: -1;
+    transition: opacity 0.3s;
+    opacity: 0;
+}
+
+button:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.6);
+}
+
+button:hover::before {
+    opacity: 1;
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+#translation {
+    margin-top: 3rem;
+    padding: 2rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    border: 1px solid rgba(252, 211, 77, 0.2);
+    /* ❌ BUG 3: Translation hidden */
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+#translation.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#translation p {
+    font-family: 'Cinzel', serif;
+    font-size: 1.8rem;
+    color: var(--text-highlight);
+    margin: 0;
+    text-shadow: 0 0 10px rgba(252, 211, 77, 0.5);
+}
+
+.particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.clue-container {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: rgba(236, 72, 153, 0.1);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    text-align: left;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: opacity 0.3s;
+}
+
+.clue-icon {
+    background: var(--accent);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-family: 'Outfit', sans-serif;
+    flex-shrink: 0;
+}
+
+.clue-text strong {
+    color: var(--accent);
+    display: block;
+    margin-bottom: 0.2rem;
+}
+
+.clue-text em {
+    color: var(--text-highlight);
+    font-style: normal;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .game-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
     
-    <!-- Game Styles -->
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a0a;
-            color: #fff;
-        }
-        
-        /* Game Header */
-        .game-header {
-            background: rgba(0,0,0,0.95);
-            padding: 15px 30px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            border-bottom: 3px solid #667eea;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .team-info {
-            color: #667eea;
-        }
-        
-        .timer {
-            background: #dc3545;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 24px;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-        }
-        
-        .timer-warning {
-            animation: pulse 1s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .bugs-indicator {
-            background: #28a745;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: bold;
-        }
-        
-        .exit-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.3s;
-        }
-        
-        .exit-btn:hover {
-            background: #c82333;
-        }
-        
-        /* Game Content */
-        .game-content {
-            margin-top: 100px;
-            min-height: calc(100vh - 100px);
-            padding: 40px 20px;
-        }
-        
-        .game-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: rgba(255,255,255,0.05);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        }
-        
-        .story-box {
-            background: rgba(139,0,0,0.2);
-            padding: 20px;
-            border-left: 5px solid #8B0000;
-            margin-bottom: 30px;
-            border-radius: 5px;
-        }
-        
-        .story-box p {
-            margin-bottom: 10px;
-            line-height: 1.6;
-        }
-        
-        .challenge-area {
-            background: rgba(255,255,255,0.1);
-            padding: 40px;
-            border-radius: 10px;
-            margin: 30px 0;
-            position: relative;
-        }
-        
-        .portal-container {
-            text-align: center;
-            padding: 40px;
-            background: radial-gradient(circle, rgba(139,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%);
-            border-radius: 15px;
-            margin: 20px 0;
-        }
-        
-        .bugs-checklist {
-            background: rgba(255,243,205,0.1);
-            padding: 20px;
-            border-radius: 8px;
-            margin: 30px 0;
-        }
-        
-        .bugs-checklist h4 {
-            color: #ffc107;
-            margin-bottom: 15px;
-        }
-        
-        .bugs-checklist ul {
-            list-style-position: inside;
-            color: #fff;
-        }
-        
-        .bugs-checklist li {
-            margin: 8px 0;
-            padding-left: 10px;
-        }
-        
-        .bugs-checklist code {
-            background: rgba(0,0,0,0.3);
-            padding: 2px 6px;
-            border-radius: 3px;
-            color: #ffc107;
-            font-family: 'Courier New', monospace;
-        }
-        
-        /* Buttons */
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin: 5px;
-        }
-        
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-        
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .btn-pulse {
-            animation: btnPulse 1s infinite;
-        }
-        
-        @keyframes btnPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        /* Debug Panel */
-        .debug-panel {
-            background: rgba(0,0,0,0.3);
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .debug-panel h4 {
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-        
-        .debug-panel p {
-            color: #aaa;
-            margin-bottom: 15px;
-        }
-        
-        /* Notifications */
-        .notification {
-            position: fixed;
-            top: 110px;
-            right: -350px;
-            background: rgba(102, 126, 234, 0.95);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: right 0.3s;
-            z-index: 999;
-            max-width: 300px;
-        }
-        
-        .notification.show {
-            right: 20px;
-        }
-        
-        .notification-success {
-            background: rgba(40, 167, 69, 0.95);
-        }
-        
-        .notification-error {
-            background: rgba(220, 53, 69, 0.95);
-        }
-        
-        .notification-info {
-            background: rgba(23, 162, 184, 0.95);
-        }
-        
-        /* Portal Animation */
-        .portal {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #8B0000 0%, #000 70%);
-            margin: 20px auto;
-            animation: portalSpin 3s linear infinite;
-            box-shadow: 0 0 50px rgba(139,0,0,0.8);
-        }
-        
-        @keyframes portalSpin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .game-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .game-container {
-                padding: 20px;
-            }
-            
-            .challenge-area {
-                padding: 20px;
-            }
-        }
-    </style>
+    h1 {
+        font-size: 1.5rem;
+    }
+    
+    #translation p {
+        font-size: 1.3rem;
+    }
+}
+</style>
 </head>
 <body>
-    <!-- GAME HEADER -->
-    <div class="game-header">
-        <div class="team-info">
-            <strong id="team-name">Loading...</strong><br>
-            <small>Round <span id="round-num">-</span> - Page <span id="page-num">-</span> | Score: <span id="current-score">0</span></small>
-        </div>
-        
-        <div class="timer" id="timer">--:--</div>
-        
-        <div class="bugs-indicator">
-            🐛 Bugs: <span id="bugs-fixed">0/3</span>
-        </div>
-        
-        <button class="exit-btn" onclick="exitGame()">
-            ← Exit Game
-        </button>
+
+<!-- GAME HEADER -->
+<div class="game-header">
+    <div class="team-info">
+        <strong id="team-name">Loading...</strong><br>
+        <small>Round <span id="round-num">-</span> - Page <span id="page-num">-</span> | Score: <span id="current-score">0</span></small>
+    </div>
+    
+    <div class="timer" id="timer">--:--</div>
+    
+    <div class="bugs-indicator">
+        🐛 Bugs: <span id="bugs-fixed">0/3</span>
+    </div>
+    
+    <button class="exit-btn" onclick="exitGame()">
+        ← Exit Game
+    </button>
+</div>
+
+<!-- GAME CONTENT -->
+<div class="particles">
+    <div style="position: absolute; top: 20%; left: 10%; width: 4px; height: 4px; background: white; opacity: 0.5; border-radius: 50%; box-shadow: 0 0 10px white;"></div>
+    <div style="position: absolute; top: 70%; right: 15%; width: 6px; height: 6px; background: var(--accent); opacity: 0.4; border-radius: 50%; box-shadow: 0 0 15px var(--accent);"></div>
+</div>
+
+<div class="archaeology">
+    <h1>ANCIENT PONEGLYPH</h1>
+    
+    <div class="game-hint">
+        💡 Use DevTools (F12) to fix 3 bugs!<br>
+        <small>Hint: Make the button visible, accessible, and show the translation!</small>
     </div>
 
-    <!-- GAME CONTENT -->
-    <div class="game-content">
-        <div class="game-container">
-            <h1 style="color: #8B0000; text-align: center; margin-bottom: 30px; font-size: 2.5em;">
-                🌀 The Upside Down Portal
-            </h1>
-            
-            <div class="story-box">
-                <p><strong>📖 Story:</strong> You've escaped the basement, but now you're facing a mysterious portal to the Upside Down. The portal is unstable and needs to be activated. Eleven left you a note: "The path reveals itself when all is aligned."</p>
-                <p><strong>🎯 Mission:</strong> Fix the 3 CSS bugs to stabilize the portal and reveal the escape path!</p>
-            </div>
+    <button onclick="decipherPoneglyph()" id="decipherBtn">DECIPHER TEXT</button>
+    <h1>"The stone whispers: what is there, yet unseen, awaits your touch."</h1>
 
-            <!-- GAME CHALLENGE AREA -->
-            <div class="challenge-area">
-                
-                <div class="portal-container">
-                    <!-- BUG 1: Portal with wrong width (width: 20px instead of 200px) -->
-                    <div id="portal" class="portal" style="width: 20px;">
-                        <div style="text-align: center; padding-top: 80px; font-size: 36px;">🌀</div>
-                    </div>
-                    
-                    <!-- BUG 2: Warning message with color matching background (color: rgba(255,255,255,0.05)) -->
-                    <p id="portal-warning" style="font-size: 24px; font-weight: bold; color: rgba(255,255,255,0.05); margin: 20px 0;">
-                        ⚠️ PORTAL UNSTABLE
-                    </p>
-                    
-                    <!-- BUG 3: Enter button with pointer-events: none -->
-                    <button id="enter-portal" style="pointer-events: none; background: #28a745; color: white; border: none; padding: 20px 40px; font-size: 20px; border-radius: 10px; cursor: pointer; margin-top: 20px; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);">
-                        ✨ ENTER PORTAL
-                    </button>
-                </div>
-            </div>
-
-            <!-- BUGS CHECKLIST -->
-            <div class="bugs-checklist">
-                <h4>💡 Bugs to Fix:</h4>
-                <ul>
-                    <li>Bug 1: Portal (id="portal") has <code>width: 20px</code> → Change to <code>width: 200px</code></li>
-                    <li>Bug 2: Warning message (id="portal-warning") has <code>color: rgba(255,255,255,0.05)</code> → Change to <code>color: #ff0000</code></li>
-                    <li>Bug 3: Enter button (id="enter-portal") has <code>pointer-events: none</code> → Change to <code>pointer-events: auto</code></li>
-                </ul>
-            </div>
-
-            <hr style="margin: 40px 0; border: none; border-top: 1px solid rgba(139,0,0,0.5);">
-
-            <!-- DEBUG PANEL (For Testing) -->
-            <div class="debug-panel">
-                <h4>🐛 Debug Panel (Testing Only)</h4>
-                <p>In a real game, players use DevTools. For testing purposes, you can use these buttons:</p>
-                <div style="margin: 20px 0;">
-                    <button onclick="fixBug('bug1')" class="btn btn-primary">Fix Bug 1 (Portal Width)</button>
-                    <button onclick="fixBug('bug2')" class="btn btn-primary">Fix Bug 2 (Warning Color)</button>
-                    <button onclick="fixBug('bug3')" class="btn btn-primary">Fix Bug 3 (Pointer Events)</button>
-                </div>
-                
-                <button id="complete-btn" onclick="completePage()" class="btn btn-success" style="width: 100%; font-size: 18px; padding: 15px; margin-top: 10px;" disabled>
-                    ✅ Complete Page & Continue (+10 Points)
-                </button>
-            </div>
-        </div>
+    <div id="translation">
+        <p>The One Piece is real! <br>
+        <h1>"Seek the place where the page begins, yet is hidden far below the surface."</h1>
+        </p>
+        <button onclick="proceedToNext()">Next Page -></button>
     </div>
 
-    <!-- Load Scripts -->
-    <script src="../assets/js/config.js"></script>
-    <script src="../assets/js/game-engine.js"></script>
+    <div class="clue-container">
+        <span class="clue-icon">?</span>
+        <p class="clue-text">
+            <strong>Archeologist's Note:</strong> "I cannot decipher this! The invocation seems... *misspelled* in the ancient texts.
+            And even if you speak it, the truth is *camouflaged* by the darkness itself. It is there, yet unseen."
+        </p>
+    </div>
+</div>
+
+<!-- Load Scripts -->
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/game-engine.js"></script>
+
+<script>
+// Track which bugs are fixed
+const bugStatus = {
+  bug1: false,  // Decipher button opacity is 1 (not 0)
+  bug2: false,  // Decipher button margin-top is normal (not 9000000px)
+  bug3: false   // Translation visibility is visible (not hidden)
+};
+
+function checkBugsFixed() {
+    const decipherBtn = document.getElementById('decipherBtn');
+    const translation = document.getElementById('translation');
+    
+    // Check Bug 1: Button opacity is 1
+    const btnStyle = window.getComputedStyle(decipherBtn);
+    const opacity = parseFloat(btnStyle.opacity);
+    bugStatus.bug1 = opacity > 0.5; // Consider > 0.5 as fixed
+    
+    // Check Bug 2: Button margin-top is reasonable
+    const marginTop = parseFloat(btnStyle.marginTop);
+    bugStatus.bug2 = marginTop < 1000; // Less than 1000px is reasonable
+    
+    // Check Bug 3: Translation visibility is visible
+    const transStyle = window.getComputedStyle(translation);
+    const visibility = transStyle.visibility;
+    bugStatus.bug3 = visibility === 'visible';
+    
+    // Update bug counter in header
+    const bugsFixedCount = Object.values(bugStatus).filter(v => v).length;
+    const bugCounter = document.getElementById('bugs-fixed');
+    if (bugCounter) {
+        bugCounter.textContent = `${bugsFixedCount}/3`;
+    }
+}
+
+// Check bugs periodically
+setInterval(checkBugsFixed, 300);
+
+function decipherPoneglyph() {
+    const allBugsFixed = bugStatus.bug1 && bugStatus.bug2 && bugStatus.bug3;
+    
+    if (!allBugsFixed) {
+        const missingFixes = [];
+        if (!bugStatus.bug1) missingFixes.push('Change button opacity from 0 to 1');
+        if (!bugStatus.bug2) missingFixes.push('Change button margin-top from 9000000px to 20px (or remove it)');
+        if (!bugStatus.bug3) missingFixes.push('Change #translation visibility from hidden to visible');
+        
+        alert(`❌ Fix all 3 bugs first! Use DevTools (F12) to:\n\n${missingFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`);
+        return;
+    }
+    
+    const translationEl = document.getElementById("translation");
+    
+    requestAnimationFrame(() => {
+        translationEl.classList.add("visible");
+    });
+
+    console.log("Poneglyph deciphered. The truth is revealed.");
+}
+
+async function proceedToNext() {
+    // Collect which bugs were fixed
+    const bugsFixed = [];
+    if (bugStatus.bug1) bugsFixed.push('bug1_button_visible');
+    if (bugStatus.bug2) bugsFixed.push('bug2_button_accessible');
+    if (bugStatus.bug3) bugsFixed.push('bug3_translation_visible');
+    
+    console.log('🐛 Bugs fixed:', bugsFixed);
+    console.log('✅ Poneglyph deciphered!');
+    
+    // Wait for gameEngine
+    let retries = 0;
+    const maxRetries = 20;
+    
+    while (!window.gameEngine && retries < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        retries++;
+    }
+    
+    if (window.gameEngine) {
+        await gameEngine.moveToNextPage(bugsFixed);
+    } else {
+        console.error('Game engine not loaded!');
+        alert('Error: Game engine not loaded. Please refresh the page.');
+    }
+}
+
+// Console hints
+console.log("📜 Robin's Ancient Poneglyph Challenge");
+console.log("STEP 1: Fix all 3 CSS bugs using DevTools");
+console.log("STEP 2: Click the DECIPHER TEXT button");
+console.log("STEP 3: Read the ancient message");
+console.log("");
+console.log("Bugs to fix:");
+console.log("1. Button opacity (0 → 1)");
+console.log("2. Button margin-top (9000000px → 20px or remove)");
+console.log("3. Translation visibility (hidden → visible)");
+
+checkBugsFixed();
+</script>
+
 </body>
 </html>

@@ -1,5 +1,5 @@
 // ============================================================================
-// CORRECTED CONFIG.JS - Fixed CSRF and token issues
+// CONFIG.JS - Configuration for multiplayer game
 // Save as: frontend/assets/js/config.js
 // ============================================================================
 
@@ -22,7 +22,7 @@ const CONFIG = {
         }
     },
     
-    // ✅ NEW: Get CSRF token from cookies
+    // ✅ Get CSRF token from cookies
     getCsrfToken: function() {
         const name = 'csrftoken';
         let cookieValue = null;

@@ -1,5 +1,5 @@
 # ============================================================================
-# FIXED views.py - Token synchronization for multiplayer
+# FIXED views.py - Race Condition Fix + Proper Scoring (10 points per page)
 # ============================================================================
 
 import csv
@@ -16,6 +16,7 @@ from django.contrib.auth.models import User
 from datetime import timedelta
 import hashlib
 import json
+from django.db import transaction  # ✅ ADDED FOR RACE CONDITION FIX
 from .models import *
 
 def is_superuser(user):
@@ -106,6 +107,7 @@ def team_dashboard(request):
             defaults={'status': 'not_started', 'score': 0}
         )
         
+        # Recalculate score based on completed pages (10 points per page)
         completed_pages_count = progress.page_progress.filter(completed=True).count()
         correct_score = completed_pages_count * 10
         
@@ -122,6 +124,7 @@ def team_dashboard(request):
     
     rounds_with_progress = list(zip(rounds, round_progress_list))
     
+    # Get all teams with overall scores (sum of all rounds)
     all_teams = Team.objects.annotate(
         members_count=Count('members', distinct=True)
     ).annotate(
@@ -148,7 +151,7 @@ def team_dashboard(request):
         'team_rank': team_rank,
         'total_teams': all_teams.count(),
         'top_teams': top_teams,
-        'total_score': total_score,
+        'total_score': total_score,  # Overall score across all rounds
     }
     
     return render(request, 'team_dashboard.html', context)
@@ -382,6 +385,9 @@ def api_start_game(request):
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 def api_validate_page(request):
+    """
+    ✅ FIXED: Race condition protection + 10 points per page (not per bug)
+    """
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -403,87 +409,124 @@ def api_validate_page(request):
             
             team = get_object_or_404(Team, id=team_id)
             round_obj = get_object_or_404(Round, round_number=round_number)
-            team_round = get_object_or_404(TeamRoundProgress, team=team, round=round_obj)
             
-            if timezone.now() > team_round.end_time:
-                team_round.status = 'time_over'
-                team_round.is_active = False
-                team_round.save()
-                return JsonResponse({
-                    'error': 'Time over',
-                    'redirect_dashboard': True
-                }, status=403)
+            # ✅ FLEXIBLE BUG VALIDATION
+            bugs_count = len(bugs_fixed)
             
-            if len(bugs_fixed) < 3:
+            if bugs_count < 1:
                 return JsonResponse({
-                    'error': 'All 3 bugs must be fixed',
-                    'bugs_required': 3,
-                    'bugs_fixed': len(bugs_fixed)
+                    'error': 'At least 1 bug must be fixed to proceed',
+                    'bugs_fixed': bugs_count
                 }, status=400)
             
-            page_progress, created = PageProgress.objects.get_or_create(
-                team_round=team_round,
-                page_number=page_number
-            )
-            
-            if not page_progress.completed:
-                page_progress.completed = True
-                page_progress.completed_at = timezone.now()
-                page_progress.bugs_fixed = bugs_fixed
-                page_progress.time_taken_seconds = int((page_progress.completed_at - page_progress.started_at).total_seconds())
-                page_progress.save()
-                
-                team_round.score += 10
-                team_round.current_page = page_number + 1
-                team_round.save()
-                
-                GameActivity.objects.create(
-                    team=team,
-                    activity_type='page_completed',
-                    description=f'Completed Round {round_number} Page {page_number}'
-                )
-            else:
-                team_round.current_page = page_number + 1
-                team_round.save()
-            
-            if page_number < 10:
-                next_page = page_number + 1
-                # ✅ Generate token for next page
-                next_token = generate_page_token(team_id, round_number, next_page, settings.SECRET_KEY)
-                
-                current_host = request.get_host().split(':')[0]
-                next_url = f"http://{current_host}:8080/round{round_number}/page{next_page}.html?token={next_token}&team={team_id}&round={round_number}&page={next_page}"
-                
+            if bugs_count > 3:
                 return JsonResponse({
-                    'success': True,
-                    'next_page_url': next_url,
-                    'current_score': team_round.score,
-                    'pages_completed': page_number,
-                    'total_pages': 10,
-                    'new_token': next_token,  # ✅ SEND NEW TOKEN TO FRONTEND
-                    'next_page': next_page     # ✅ SEND NEXT PAGE NUMBER
-                })
-            else:
-                team_round.status = 'completed'
-                team_round.is_active = False
-                team_round.end_time = timezone.now()
-                team_round.duration_seconds = int((team_round.end_time - team_round.start_time).total_seconds())
-                team_round.save()
-                
-                GameActivity.objects.create(
+                    'error': 'Invalid bug count (maximum 3 bugs per page)',
+                    'bugs_fixed': bugs_count
+                }, status=400)
+            
+            # ============================================================================
+            # ✅ RACE CONDITION FIX: Use transaction.atomic() + select_for_update()
+            # ============================================================================
+            with transaction.atomic():
+                # Lock the TeamRoundProgress row to prevent concurrent updates
+                team_round = TeamRoundProgress.objects.select_for_update().get(
                     team=team,
-                    activity_type='round_completed',
-                    description=f'Completed Round {round_number}',
-                    metadata={'score': team_round.score}
+                    round=round_obj
                 )
                 
-                return JsonResponse({
-                    'success': True,
-                    'round_completed': True,
-                    'final_score': team_round.score,
-                    'redirect_dashboard': True,
-                    'message': f'Round {round_number} Completed!'
-                })
+                # Check time
+                if timezone.now() > team_round.end_time:
+                    team_round.status = 'time_over'
+                    team_round.is_active = False
+                    team_round.save()
+                    return JsonResponse({
+                        'error': 'Time over',
+                        'redirect_dashboard': True
+                    }, status=403)
+                
+                # Lock the PageProgress row to prevent concurrent updates
+                page_progress, created = PageProgress.objects.select_for_update().get_or_create(
+                    team_round=team_round,
+                    page_number=page_number
+                )
+                
+                # Only award points if not already completed
+                if not page_progress.completed:
+                    # Calculate time taken
+                    now = timezone.now()
+                    time_taken = int((now - page_progress.started_at).total_seconds())
+                    
+                    # Mark page as completed
+                    page_progress.completed = True
+                    page_progress.completed_at = now
+                    page_progress.bugs_fixed = bugs_fixed
+                    page_progress.time_taken_seconds = time_taken
+                    page_progress.save()
+                    
+                    # ✅ FIXED: Award 10 points per PAGE (not per bug)
+                    points_awarded = 10
+                    
+                    # ✅ Use F() expression to prevent race conditions
+                    team_round.score = F('score') + points_awarded
+                    team_round.current_page = page_number + 1
+                    team_round.save()
+                    
+                    # ✅ Refresh from DB to get the actual score value
+                    team_round.refresh_from_db()
+                    
+                    GameActivity.objects.create(
+                        team=team,
+                        activity_type='page_completed',
+                        description=f'Completed Round {round_number} Page {page_number} ({bugs_count} bugs fixed, {time_taken}s, +{points_awarded} points)'
+                    )
+                else:
+                    # Page already completed, just move to next
+                    team_round.current_page = page_number + 1
+                    team_round.save()
+                    points_awarded = 0
+                
+                # Check if round is complete
+                if page_number < 10:
+                    next_page = page_number + 1
+                    next_token = generate_page_token(team_id, round_number, next_page, settings.SECRET_KEY)
+                    
+                    current_host = request.get_host().split(':')[0]
+                    next_url = f"http://{current_host}:8080/round{round_number}/page{next_page}.html?token={next_token}&team={team_id}&round={round_number}&page={next_page}"
+                    
+                    return JsonResponse({
+                        'success': True,
+                        'next_page_url': next_url,
+                        'current_score': team_round.score,
+                        'pages_completed': page_number,
+                        'total_pages': 10,
+                        'new_token': next_token,
+                        'next_page': next_page,
+                        'bugs_fixed_count': bugs_count,
+                        'points_awarded': points_awarded
+                    })
+                else:
+                    # Round completed
+                    team_round.status = 'completed'
+                    team_round.is_active = False
+                    team_round.end_time = timezone.now()
+                    team_round.duration_seconds = int((team_round.end_time - team_round.start_time).total_seconds())
+                    team_round.save()
+                    
+                    GameActivity.objects.create(
+                        team=team,
+                        activity_type='round_completed',
+                        description=f'Completed Round {round_number}',
+                        metadata={'score': team_round.score}
+                    )
+                    
+                    return JsonResponse({
+                        'success': True,
+                        'round_completed': True,
+                        'final_score': team_round.score,
+                        'redirect_dashboard': True,
+                        'message': f'Round {round_number} Completed!'
+                    })
         
         except Exception as e:
             print(f"ERROR in api_validate_page: {e}")
@@ -508,7 +551,6 @@ def api_get_game_state(request):
         
         time_remaining = int((team_round.end_time - timezone.now()).total_seconds())
         
-        # ✅ Generate current page token and send it
         from django.conf import settings
         current_page = team_round.current_page or 1
         current_token = generate_page_token(team_id, round_number, current_page, settings.SECRET_KEY)
@@ -519,7 +561,7 @@ def api_get_game_state(request):
             'time_remaining': max(0, time_remaining),
             'current_page': current_page,
             'status': team_round.status,
-            'current_token': current_token  # ✅ SEND CURRENT VALID TOKEN
+            'current_token': current_token
         })
     
     return JsonResponse({'error': 'Invalid request'}, status=400)
@@ -528,6 +570,9 @@ def api_get_game_state(request):
 
 @user_passes_test(is_superuser)
 def export_team_round_progress_csv(request):
+    """
+    ✅ FIXED: Proper datetime formatting in CSV export
+    """
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="team_round_progress.csv"'
     
@@ -562,6 +607,12 @@ def export_team_round_progress_csv(request):
         
         duration_minutes = round(duration_seconds / 60, 2) if duration_seconds > 0 else 0
         
+        # ✅ FIXED: Proper datetime formatting using localtime
+        from django.utils.timezone import localtime
+        
+        start_time_str = localtime(progress.start_time).strftime('%Y-%m-%d %H:%M:%S') if progress.start_time else 'Not Started'
+        end_time_str = localtime(progress.end_time).strftime('%Y-%m-%d %H:%M:%S') if progress.end_time else 'In Progress'
+        
         writer.writerow([
             progress.team.id,
             progress.team.team_name,
@@ -572,8 +623,8 @@ def export_team_round_progress_csv(request):
             progress.get_status_display(),
             'Yes' if progress.is_qualified else 'No',
             progress.pages_completed,
-            progress.start_time.strftime('%Y-%m-%d %H:%M:%S') if progress.start_time else 'Not Started',
-            progress.end_time.strftime('%Y-%m-%d %H:%M:%S') if progress.end_time else 'In Progress',
+            start_time_str,
+            end_time_str,
             duration_seconds,
             duration_minutes,
             'Yes' if progress.is_active else 'No'

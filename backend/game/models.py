@@ -1,5 +1,5 @@
 # ============================================================================
-# COMPLETE CORRECTED models.py with SIGNAL HANDLERS
+# COMPLETE CORRECTED models.py with SIGNAL HANDLERS AND OVERALL SCORING
 # Copy this ENTIRE file to: game/models.py
 # ============================================================================
 
@@ -26,9 +26,17 @@ class Team(models.Model):
     
     @property
     def total_score_calculated(self):
-        """Calculate total score from all round progress"""
+        """Calculate total score from all round progress - OVERALL SCORE FOR ALL 30 PAGES"""
         total = self.round_progress.aggregate(total=Sum('score'))['total']
         return total if total else 0
+    
+    @property
+    def total_pages_completed(self):
+        """Total pages completed across all rounds (max 30)"""
+        return PageProgress.objects.filter(
+            team_round__team=self,
+            completed=True
+        ).count()
 
 
 class TeamMember(models.Model):
@@ -86,7 +94,7 @@ class TeamRoundProgress(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='round_progress')
     round = models.ForeignKey(Round, on_delete=models.CASCADE, related_name='team_progress')
     current_page = models.IntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(10)])
-    score = models.IntegerField(default=0)
+    score = models.IntegerField(default=0)  # Score for THIS round (max 100 for 10 pages)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
     is_active = models.BooleanField(default=False)
     start_time = models.DateTimeField(null=True, blank=True)
@@ -103,6 +111,7 @@ class TeamRoundProgress(models.Model):
     
     @property
     def pages_completed(self):
+        """Pages completed in THIS round"""
         return self.page_progress.filter(completed=True).count()
 
 

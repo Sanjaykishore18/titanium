@@ -1,351 +1,554 @@
-<!-- ============================================================================
-     ROUND 1 - PAGE 1: The Flickering Basement
-     Path: frontend/round1/page1.html
-     ============================================================================ -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Round 1 - Page 1: The Flickering Basement</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="total-bugs" content="2">
+<title>Web Escape | Round 2 - Page 5 (2 Bugs)</title>
+<style>
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ============================================================================
+   GAME HEADER
+   ============================================================================ */
+.game-header {
+    background: rgba(0,0,0,0.95);
+    padding: 15px 30px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    border-bottom: 3px solid #667eea;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    font-family: 'Consolas', monospace;
+}
+
+.team-info {
+    color: #667eea;
+}
+
+.timer {
+    background: #dc3545;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 24px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+}
+
+.timer-warning {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.bugs-indicator {
+    background: #28a745;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.exit-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.exit-btn:hover {
+    background: #c82333;
+}
+
+/* Notifications */
+.notification {
+    position: fixed;
+    top: 110px;
+    right: -350px;
+    background: rgba(102, 126, 234, 0.95);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transition: right 0.3s;
+    z-index: 999;
+    max-width: 300px;
+}
+
+.notification.show {
+    right: 20px;
+}
+
+.notification-success {
+    background: rgba(40, 167, 69, 0.95);
+}
+
+.notification-error {
+    background: rgba(220, 53, 69, 0.95);
+}
+
+.notification-info {
+    background: rgba(23, 162, 184, 0.95);
+}
+
+/* ============================================================================
+   ORIGINAL GAME STYLES
+   ============================================================================ */
+
+body {
+    background: url(page17.png) no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Consolas', 'Courier New', monospace;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    padding-top: 100px;
+    color: #e5d4ed;
+    overflow: hidden;
+}
+
+.puzzle-container {
+    max-width: 800px;
+    width: 100%;
+    text-align: center;
+}
+
+h1 {
+    font-size: 3em;
+    margin-bottom: 20px;
+    color: #dda15e;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    letter-spacing: 2px;
+}
+
+.description {
+    margin-bottom: 40px;
+    font-size: 1.3em;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+.game-hint {
+    margin-bottom: 30px;
+    font-size: 1.1em;
+    color: #FFD700;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.sequence-display {
+    display: flex;
+    gap: 15px;
+    /* ❌ BUG 1: Sequence is hidden using clip-path! Players need to reset it. */
+    clip-path: circle(0%);
+    justify-content: center;
+    margin-bottom: 30px;
+    min-height: 80px;
+    align-items: center;
+}
+
+.sequence-item {
+    font-size: 2.5em;
+    background: rgba(255, 255, 255, 0.1);
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 2px solid rgba(221, 161, 94, 0.5);
+    transition: all 0.3s ease;
+}
+
+.sequence-item.active {
+    background: rgba(221, 161, 94, 0.8);
+    transform: scale(1.1);
+    box-shadow: 0 0 15px #dda15e;
+}
+
+.puzzle-grid {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.puzzle-btn {
+    font-size: 3em;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    width: 80px;
+    height: 80px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(2px);
+    /* ❌ BUG 2: Buttons are hidden but still in the DOM! */
+    visibility: hidden;
+}
+
+.puzzle-btn:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #dda15e;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.puzzle-btn:active {
+    transform: scale(0.95);
+}
+
+.status-message {
+    font-size: 1.5em;
+    min-height: 1.5em;
+    text-shadow: 1px 1px 2px black;
+    color: #dda15e;
+}
+
+.victory-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.victory-animation {
+    font-size: 5em;
+    margin-bottom: 20px;
+    animation: spin 1s ease infinite;
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .game-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
     
-    <!-- Game Styles -->
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a0a;
-            color: #fff;
-        }
-        
-        /* Game Header */
-        .game-header {
-            background: rgba(0,0,0,0.95);
-            padding: 15px 30px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            border-bottom: 3px solid #667eea;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .team-info {
-            color: #667eea;
-        }
-        
-        .timer {
-            background: #dc3545;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 24px;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-        }
-        
-        .timer-warning {
-            animation: pulse 1s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .bugs-indicator {
-            background: #28a745;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: bold;
-        }
-        
-        .exit-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.3s;
-        }
-        
-        .exit-btn:hover {
-            background: #c82333;
-        }
-        
-        /* Game Content */
-        .game-content {
-            margin-top: 100px;
-            min-height: calc(100vh - 100px);
-            padding: 40px 20px;
-        }
-        
-        .game-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: rgba(255,255,255,0.05);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        }
-        
-        .story-box {
-            background: rgba(139,0,0,0.2);
-            padding: 20px;
-            border-left: 5px solid #8B0000;
-            margin-bottom: 30px;
-            border-radius: 5px;
-        }
-        
-        .story-box p {
-            margin-bottom: 10px;
-            line-height: 1.6;
-        }
-        
-        .challenge-area {
-            background: rgba(255,255,255,0.1);
-            padding: 40px;
-            border-radius: 10px;
-            margin: 30px 0;
-        }
-        
-        .bugs-checklist {
-            background: rgba(255,243,205,0.1);
-            padding: 20px;
-            border-radius: 8px;
-            margin: 30px 0;
-        }
-        
-        .bugs-checklist h4 {
-            color: #ffc107;
-            margin-bottom: 15px;
-        }
-        
-        .bugs-checklist ul {
-            list-style-position: inside;
-            color: #fff;
-        }
-        
-        .bugs-checklist li {
-            margin: 8px 0;
-            padding-left: 10px;
-        }
-        
-        .bugs-checklist code {
-            background: rgba(0,0,0,0.3);
-            padding: 2px 6px;
-            border-radius: 3px;
-            color: #ffc107;
-            font-family: 'Courier New', monospace;
-        }
-        
-        /* Buttons */
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin: 5px;
-        }
-        
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-        
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .btn-pulse {
-            animation: btnPulse 1s infinite;
-        }
-        
-        @keyframes btnPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        /* Debug Panel */
-        .debug-panel {
-            background: rgba(0,0,0,0.3);
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .debug-panel h4 {
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-        
-        .debug-panel p {
-            color: #aaa;
-            margin-bottom: 15px;
-        }
-        
-        /* Notifications */
-        .notification {
-            position: fixed;
-            top: 110px;
-            right: -350px;
-            background: rgba(102, 126, 234, 0.95);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: right 0.3s;
-            z-index: 999;
-            max-width: 300px;
-        }
-        
-        .notification.show {
-            right: 20px;
-        }
-        
-        .notification-success {
-            background: rgba(40, 167, 69, 0.95);
-        }
-        
-        .notification-error {
-            background: rgba(220, 53, 69, 0.95);
-        }
-        
-        .notification-info {
-            background: rgba(23, 162, 184, 0.95);
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .game-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .game-container {
-                padding: 20px;
-            }
-            
-            .challenge-area {
-                padding: 20px;
-            }
-        }
-    </style>
+    h1 {
+        font-size: 2em;
+    }
+    
+    .description {
+        font-size: 1em;
+    }
+    
+    .sequence-item {
+        width: 50px;
+        height: 50px;
+        font-size: 2em;
+    }
+    
+    .puzzle-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 2em;
+    }
+}
+</style>
 </head>
 <body>
-    <!-- GAME HEADER -->
-    <div class="game-header">
-        <div class="team-info">
-            <strong id="team-name">Loading...</strong><br>
-            <small>Round <span id="round-num">-</span> - Page <span id="page-num">-</span> | Score: <span id="current-score">0</span></small>
-        </div>
-        
-        <div class="timer" id="timer">--:--</div>
-        
-        <div class="bugs-indicator">
-            🐛 Bugs: <span id="bugs-fixed">0/3</span>
-        </div>
-        
-        <button class="exit-btn" onclick="exitGame()">
-            ← Exit Game
-        </button>
+
+<!-- GAME HEADER -->
+<div class="game-header">
+    <div class="team-info">
+        <strong id="team-name">Loading...</strong><br>
+        <small>Round <span id="round-num">-</span> - Page <span id="page-num">-</span> | Score: <span id="current-score">0</span></small>
+    </div>
+    
+    <div class="timer" id="timer">--:--</div>
+    
+    <div class="bugs-indicator">
+        🐛 Bugs: <span id="bugs-fixed">0/2</span>
+    </div>
+    
+    <button class="exit-btn" onclick="exitGame()">
+        ← Exit Game
+    </button>
+</div>
+
+<!-- GAME CONTENT -->
+<div class="puzzle-container">
+    <h1>📜 Ancient Poneglyph</h1>
+    <div class="description">
+        Match the ancient sequence to unlock the truth.
+    </div>
+    
+    <div class="game-hint">
+        💡 Use DevTools (F12) to fix 2 bugs!<br>
+        <small>Hint: Reveal the sequence and show the input buttons!</small>
     </div>
 
-    <!-- GAME CONTENT -->
-    <div class="game-content">
-        <div class="game-container">
-            <h1 style="color: #8B0000; text-align: center; margin-bottom: 30px; font-size: 2.5em;">
-                🎭 The Flickering Basement
-            </h1>
+    <div class="sequence-display" id="sequenceDisplay">
+        <!-- Symbols will appear here -->
+    </div>
+
+    <div class="status-message" id="statusMessage">Memorize the sequence...</div>
+
+    <div class="puzzle-grid" id="inputGrid">
+        <!-- Buttons generated by JS -->
+    </div>
+</div>
+
+<div class="victory-overlay" id="victoryOverlay">
+    <div class="victory-animation">✨</div>
+    <h2 style="color: #dda15e; font-size: 3em;">Sequence Verified!</h2>
+</div>
+
+<!-- Load Scripts -->
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/game-engine.js"></script>
+
+<script>
+// Track which bugs are fixed
+const bugStatus = {
+  bug1: false,  // Sequence display clip-path is not circle(0%)
+  bug2: false   // Puzzle buttons visibility is not hidden
+};
+
+// Game Configuration
+const symbols = ['⚡', '🌊', '🔥', '🌪️', '⭐', '🌙'];
+let sequence = [];
+let playerSequence = [];
+const sequenceLength = 5;
+let isInputLocked = true;
+let ancientTruth = false; // Console override
+
+function checkBugsFixed() {
+    const sequenceDisplay = document.getElementById('sequenceDisplay');
+    const buttons = document.querySelectorAll('.puzzle-btn');
+    
+    // Check Bug 1: Sequence display is visible
+    const displayStyle = window.getComputedStyle(sequenceDisplay);
+    const clipPath = displayStyle.clipPath;
+    bugStatus.bug1 = clipPath === 'none' || !clipPath.includes('circle(0');
+    
+    // Check Bug 2: Buttons are visible
+    if (buttons.length > 0) {
+        const btnStyle = window.getComputedStyle(buttons[0]);
+        const visibility = btnStyle.visibility;
+        bugStatus.bug2 = visibility === 'visible';
+    }
+    
+    // Update bug counter in header
+    const bugsFixedCount = Object.values(bugStatus).filter(v => v).length;
+    const bugCounter = document.getElementById('bugs-fixed');
+    if (bugCounter) {
+        bugCounter.textContent = `${bugsFixedCount}/2`;
+    }
+}
+
+// Check bugs periodically
+setInterval(checkBugsFixed, 300);
+
+function initGame() {
+    // Check if bugs are fixed before starting
+    const allBugsFixed = bugStatus.bug1 && bugStatus.bug2;
+    
+    if (!allBugsFixed) {
+        setTimeout(() => {
+            const missingFixes = [];
+            if (!bugStatus.bug1) missingFixes.push('Change .sequence-display clip-path from circle(0%) to circle(100%) or remove it');
+            if (!bugStatus.bug2) missingFixes.push('Change .puzzle-btn visibility from hidden to visible');
             
-            <div class="story-box">
-                <p><strong>📖 Story:</strong> You wake up in the Byers' basement. The lights are flickering, and the alphabet wall is covered in Christmas lights. Joyce left a message saying "Find the light to escape," but the bulbs won't turn on.</p>
-                <p><strong>🎯 Mission:</strong> Fix all 3 bugs using DevTools to reveal the escape button!</p>
-            </div>
+            alert(`❌ Fix all 2 bugs first! Use DevTools (F12) to:\n\n${missingFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`);
+        }, 1000);
+        return;
+    }
+    
+    // Generate random sequence
+    sequence = [];
+    const display = document.getElementById('sequenceDisplay');
+    display.innerHTML = '';
 
-            <!-- GAME CHALLENGE AREA -->
-            <div class="challenge-area">
-                
-                <!-- BUG 1: Message with opacity 0 -->
-                <div id="message-bulbs" style="opacity: 0; text-align: center; font-size: 48px; margin: 30px 0; letter-spacing: 20px; font-weight: bold; color: #ffc107;">
-                    RUN
-                </div>
+    for (let i = 0; i < sequenceLength; i++) {
+        const randomSym = symbols[Math.floor(Math.random() * symbols.length)];
+        sequence.push(randomSym);
 
-                <!-- BUG 2: Escape button with display: none -->
-                <div style="text-align: center; margin: 40px 0;">
-                    <button id="escape-door" style="display: none; background: #28a745; color: white; border: none; padding: 20px 40px; font-size: 24px; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);">
-                        🚪 ESCAPE DOOR
-                    </button>
-                </div>
+        const span = document.createElement('div');
+        span.className = 'sequence-item';
+        span.textContent = '?';
+        span.id = `seq-${i}`;
+        display.appendChild(span);
+    }
 
-                <!-- BUG 3: Instructions with visibility hidden -->
-                <div id="instructions" style="visibility: hidden; background: rgba(255,243,205,0.1); padding: 15px; border-radius: 8px; margin-top: 30px; color: #ffc107; border: 1px solid rgba(255,193,7,0.3);">
-                    <p><strong>💡 Hint:</strong> Use DevTools (F12) → Inspect Element → Styles Panel</p>
-                    <ul style="margin-top: 10px; margin-left: 20px;">
-                        <li>Look for <code>display: none</code> and change to <code>display: block</code></li>
-                        <li>Check for <code>opacity: 0</code> and change to <code>opacity: 1</code></li>
-                        <li>Find <code>visibility: hidden</code> and change to <code>visibility: visible</code></li>
-                    </ul>
-                </div>
-            </div>
+    // Create buttons
+    const grid = document.getElementById('inputGrid');
+    grid.innerHTML = '';
+    symbols.forEach(sym => {
+        const btn = document.createElement('div');
+        btn.className = 'puzzle-btn';
+        btn.textContent = sym;
+        btn.onclick = () => handleInput(sym);
+        grid.appendChild(btn);
+    });
 
-            <!-- BUGS CHECKLIST -->
-            <div class="bugs-checklist">
-                <h4>💡 Bugs to Fix:</h4>
-                <ul>
-                    <li>Bug 1: Message (id="message-bulbs") has <code>opacity: 0</code> → Change to <code>opacity: 1</code></li>
-                    <li>Bug 2: Escape button (id="escape-door") has <code>display: none</code> → Change to <code>display: block</code></li>
-                    <li>Bug 3: Instructions (id="instructions") have <code>visibility: hidden</code> → Change to <code>visibility: visible</code></li>
-                </ul>
-            </div>
+    startSequenceDisplay();
+}
 
-            <hr style="margin: 40px 0; border: none; border-top: 1px solid rgba(139,0,0,0.5);">
+function startSequenceDisplay() {
+    isInputLocked = true;
+    document.getElementById('statusMessage').textContent = "Watch carefully...";
 
-            <!-- DEBUG PANEL (For Testing) -->
-            <div class="debug-panel">
-                <h4>🐛 Debug Panel (Testing Only)</h4>
-                <p>In a real game, players use DevTools. For testing purposes, you can use these buttons:</p>
-                <div style="margin: 20px 0;">
-                    <button onclick="fixBug('bug1')" class="btn btn-primary">Fix Bug 1 (Opacity)</button>
-                    <button onclick="fixBug('bug2')" class="btn btn-primary">Fix Bug 2 (Display)</button>
-                    <button onclick="fixBug('bug3')" class="btn btn-primary">Fix Bug 3 (Visibility)</button>
-                </div>
-                
-                <button id="complete-btn" onclick="completePage()" class="btn btn-success" style="width: 100%; font-size: 18px; padding: 15px; margin-top: 10px;" disabled>
-                    ✅ Complete Page & Continue (+10 Points)
-                </button>
-            </div>
-        </div>
-    </div>
+    let i = 0;
+    const interval = setInterval(() => {
+        if (i >= sequenceLength) {
+            clearInterval(interval);
+            setTimeout(() => {
+                // Hide Sequence
+                document.querySelectorAll('.sequence-item').forEach(el => {
+                    el.textContent = '?';
+                    el.classList.remove('active');
+                });
+                isInputLocked = false;
+                document.getElementById('statusMessage').textContent = "Repeat the sequence!";
+            }, 1000);
+            return;
+        }
 
-    <!-- Load Scripts -->
-    <script src="../assets/js/config.js"></script>
-    <script src="../assets/js/game-engine.js"></script>
+        // Reset previous
+        document.querySelectorAll('.sequence-item').forEach(el => el.classList.remove('active'));
+
+        // Show current
+        const currentEl = document.getElementById(`seq-${i}`);
+        currentEl.textContent = sequence[i];
+        currentEl.classList.add('active');
+
+        i++;
+    }, 1000);
+}
+
+function handleInput(symbol) {
+    if (isInputLocked) return;
+
+    const currentIndex = playerSequence.length;
+    const expected = sequence[currentIndex];
+
+    if (symbol === expected) {
+        // Correct
+        playerSequence.push(symbol);
+        document.getElementById(`seq-${currentIndex}`).textContent = symbol;
+        document.getElementById(`seq-${currentIndex}`).classList.add('active');
+
+        if (playerSequence.length === sequenceLength) {
+            winGame();
+        }
+    } else {
+        // Wrong
+        document.getElementById('statusMessage').textContent = "Incorrect! Retrying...";
+        document.getElementById('statusMessage').style.color = "#ff6b6b";
+        isInputLocked = true;
+        setTimeout(() => {
+            document.getElementById('statusMessage').style.color = "#dda15e";
+            playerSequence = [];
+            startSequenceDisplay();
+        }, 1000);
+    }
+}
+
+function winGame() {
+    isInputLocked = true;
+    document.getElementById('statusMessage').textContent = "Success!";
+    ancientTruth = true;
+    checkVictory();
+}
+
+async function checkVictory() {
+    if (ancientTruth === true) {
+        document.getElementById('victoryOverlay').style.display = 'flex';
+        setTimeout(async () => {
+            await moveToNextPage();
+        }, 1500);
+    }
+}
+
+async function moveToNextPage() {
+    // Collect which bugs were fixed
+    const bugsFixed = [];
+    if (bugStatus.bug1) bugsFixed.push('bug1_sequence_visible');
+    if (bugStatus.bug2) bugsFixed.push('bug2_buttons_visible');
+    
+    console.log('🐛 Bugs fixed:', bugsFixed);
+    console.log('✅ Sequence completed!');
+    
+    // Wait for gameEngine
+    let retries = 0;
+    const maxRetries = 20;
+    
+    while (!window.gameEngine && retries < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        retries++;
+    }
+    
+    if (window.gameEngine) {
+        await gameEngine.moveToNextPage(bugsFixed);
+    } else {
+        console.error('Game engine not loaded!');
+        alert('Error: Game engine not loaded. Please refresh the page.');
+    }
+}
+
+// Initialize on load
+window.onload = () => {
+    setTimeout(() => {
+        initGame();
+    }, 500);
+};
+
+// Console hints
+console.log("📜 Robin's Sequence Challenge");
+console.log("STEP 1: Fix all 2 CSS bugs using DevTools");
+console.log("STEP 2: Watch the sequence carefully");
+console.log("STEP 3: Click the symbols in the correct order");
+console.log("");
+console.log("Bugs to fix:");
+console.log("1. Sequence display clip-path (circle(0%) → circle(100%))");
+console.log("2. Puzzle buttons visibility (hidden → visible)");
+
+checkBugsFixed();
+</script>
+
 </body>
 </html>

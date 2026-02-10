@@ -1,371 +1,426 @@
-<!-- ============================================================================
-     ROUND 1 - PAGE 2: The Upside Down Portal
-     Path: frontend/round1/page2.html
-     ============================================================================ -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Round 1 - Page 2: The Upside Down Portal</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="total-bugs" content="3">
+<title>Web Escape | Round 3 - FREEDOM (3 Bugs)</title>
+<style>
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ============================================================================
+   GAME HEADER
+   ============================================================================ */
+.game-header {
+    background: rgba(0,0,0,0.95);
+    padding: 15px 30px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    border-bottom: 3px solid #667eea;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    font-family: monospace;
+}
+
+.team-info {
+    color: #667eea;
+}
+
+.timer {
+    background: #dc3545;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 24px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+}
+
+.timer-warning {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.bugs-indicator {
+    background: #28a745;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.exit-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.exit-btn:hover {
+    background: #c82333;
+}
+
+/* Notifications */
+.notification {
+    position: fixed;
+    top: 110px;
+    right: -350px;
+    background: rgba(102, 126, 234, 0.95);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transition: right 0.3s;
+    z-index: 999;
+    max-width: 300px;
+}
+
+.notification.show {
+    right: 20px;
+}
+
+.notification-success {
+    background: rgba(40, 167, 69, 0.95);
+}
+
+.notification-error {
+    background: rgba(220, 53, 69, 0.95);
+}
+
+.notification-info {
+    background: rgba(23, 162, 184, 0.95);
+}
+
+/* ============================================================================
+   ORIGINAL GAME STYLES
+   ============================================================================ */
+
+body {
+    min-height: 100vh;
+    background: url("./images/page30 bg.png") center/cover no-repeat;
+    color: #eaffea;
+    font-family: monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 80px;
+}
+
+.game-hint-fixed {
+    position: fixed;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 255, 153, 0.95);
+    padding: 15px;
+    border-radius: 8px;
+    max-width: 700px;
+    color: #000;
+    font-weight: bold;
+    text-align: center;
+    z-index: 999;
+    font-size: 0.9rem;
+}
+
+.freedom-panel {
+    width: 480px;
+    padding: 36px;
+    border-radius: 16px;
+    text-align: center;
+    background-color: rgb(8, 5, 5);
+    opacity: 0.95;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+}
+
+h1 {
+    color: #00ff99;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    font-size: 2.5rem;
+}
+
+.lock {
+    display: flex;
+    justify-content: space-between;
+    margin: 30px 0;
+    gap: 10px;
+}
+
+input { 
+    width: 30%;
+    padding: 14px;
+    font-size: 20px;
+    text-align: center;
+    background: #000;
+    color: #00ff99;
+    border: 1px solid #00ff99;
+    border-radius: 8px;
+    font-family: monospace;
+}
+
+/* ❌ BUG 2: Middle digit invisible! */
+#digit2 {
+    opacity: 0;
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    background: #00ff99;
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 20px;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+button:hover {
+    background: #00cc7a;
+    transform: scale(1.02);
+}
+
+.hint {
+    margin-top: 18px;
+    font-size: 13px;
+    opacity: 1;
+    line-height: 1.6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .game-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
     
-    <!-- Game Styles -->
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a0a;
-            color: #fff;
-        }
-        
-        /* Game Header */
-        .game-header {
-            background: rgba(0,0,0,0.95);
-            padding: 15px 30px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            border-bottom: 3px solid #667eea;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .team-info {
-            color: #667eea;
-        }
-        
-        .timer {
-            background: #dc3545;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 24px;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-        }
-        
-        .timer-warning {
-            animation: pulse 1s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .bugs-indicator {
-            background: #28a745;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: bold;
-        }
-        
-        .exit-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.3s;
-        }
-        
-        .exit-btn:hover {
-            background: #c82333;
-        }
-        
-        /* Game Content */
-        .game-content {
-            margin-top: 100px;
-            min-height: calc(100vh - 100px);
-            padding: 40px 20px;
-        }
-        
-        .game-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: rgba(255,255,255,0.05);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        }
-        
-        .story-box {
-            background: rgba(139,0,0,0.2);
-            padding: 20px;
-            border-left: 5px solid #8B0000;
-            margin-bottom: 30px;
-            border-radius: 5px;
-        }
-        
-        .story-box p {
-            margin-bottom: 10px;
-            line-height: 1.6;
-        }
-        
-        .challenge-area {
-            background: rgba(255,255,255,0.1);
-            padding: 40px;
-            border-radius: 10px;
-            margin: 30px 0;
-            position: relative;
-        }
-        
-        .portal-container {
-            text-align: center;
-            padding: 40px;
-            background: radial-gradient(circle, rgba(139,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%);
-            border-radius: 15px;
-            margin: 20px 0;
-        }
-        
-        .bugs-checklist {
-            background: rgba(255,243,205,0.1);
-            padding: 20px;
-            border-radius: 8px;
-            margin: 30px 0;
-        }
-        
-        .bugs-checklist h4 {
-            color: #ffc107;
-            margin-bottom: 15px;
-        }
-        
-        .bugs-checklist ul {
-            list-style-position: inside;
-            color: #fff;
-        }
-        
-        .bugs-checklist li {
-            margin: 8px 0;
-            padding-left: 10px;
-        }
-        
-        .bugs-checklist code {
-            background: rgba(0,0,0,0.3);
-            padding: 2px 6px;
-            border-radius: 3px;
-            color: #ffc107;
-            font-family: 'Courier New', monospace;
-        }
-        
-        /* Buttons */
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin: 5px;
-        }
-        
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-        
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .btn-pulse {
-            animation: btnPulse 1s infinite;
-        }
-        
-        @keyframes btnPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        /* Debug Panel */
-        .debug-panel {
-            background: rgba(0,0,0,0.3);
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .debug-panel h4 {
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-        
-        .debug-panel p {
-            color: #aaa;
-            margin-bottom: 15px;
-        }
-        
-        /* Notifications */
-        .notification {
-            position: fixed;
-            top: 110px;
-            right: -350px;
-            background: rgba(102, 126, 234, 0.95);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: right 0.3s;
-            z-index: 999;
-            max-width: 300px;
-        }
-        
-        .notification.show {
-            right: 20px;
-        }
-        
-        .notification-success {
-            background: rgba(40, 167, 69, 0.95);
-        }
-        
-        .notification-error {
-            background: rgba(220, 53, 69, 0.95);
-        }
-        
-        .notification-info {
-            background: rgba(23, 162, 184, 0.95);
-        }
-        
-        /* Portal Animation */
-        .portal {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #8B0000 0%, #000 70%);
-            margin: 20px auto;
-            animation: portalSpin 3s linear infinite;
-            box-shadow: 0 0 50px rgba(139,0,0,0.8);
-        }
-        
-        @keyframes portalSpin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .game-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .game-container {
-                padding: 20px;
-            }
-            
-            .challenge-area {
-                padding: 20px;
-            }
-        }
-    </style>
+    .freedom-panel {
+        width: 90%;
+        max-width: 480px;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+}
+</style>
 </head>
 <body>
-    <!-- GAME HEADER -->
-    <div class="game-header">
-        <div class="team-info">
-            <strong id="team-name">Loading...</strong><br>
-            <small>Round <span id="round-num">-</span> - Page <span id="page-num">-</span> | Score: <span id="current-score">0</span></small>
-        </div>
-        
-        <div class="timer" id="timer">--:--</div>
-        
-        <div class="bugs-indicator">
-            🐛 Bugs: <span id="bugs-fixed">0/3</span>
-        </div>
-        
-        <button class="exit-btn" onclick="exitGame()">
-            ← Exit Game
-        </button>
-    </div>
 
-    <!-- GAME CONTENT -->
-    <div class="game-content">
-        <div class="game-container">
-            <h1 style="color: #8B0000; text-align: center; margin-bottom: 30px; font-size: 2.5em;">
-                🌀 The Upside Down Portal
+<!-- GAME HEADER -->
+<div class="game-header">
+    <div class="team-info">
+        <strong id="team-name">Loading...</strong><br>
+        <small>Round <span id="round-num">-</span> - Page <span id="page-num">-</span> | Score: <span id="current-score">0</span></small>
+    </div>
+    
+    <div class="timer" id="timer">--:--</div>
+    
+    <div class="bugs-indicator">
+        🐛 Bugs: <span id="bugs-fixed">0/3</span>
+    </div>
+    
+    <button class="exit-btn" onclick="exitGame()">
+        ← Exit Game
+    </button>
+</div>
+
+<!-- GAME HINT -->
+<div class="game-hint-fixed">
+    💡 Use DevTools (F12) to fix 3 bugs!<br>
+    <small>Hint: Fix input types, visibility, and ID typos!</small>
+</div>
+
+<!-- GAME CONTENT -->
+<div class="freedom-panel">
+    <h1>🚪 FINAL DOOR</h1>
+    <div class="hint">
+        "Three digits. One escape.<br>
+        What you don't see matters most."
+    </div>
+    <div class="lock">
+        <!-- ❌ BUG 1: type="number" prevents maxlength from working -->
+        <input type="number" id="digit1" maxlength="1" placeholder="•">
+        <!-- ❌ BUG 2: opacity: 0 hides this digit -->
+        <input type="text" id="digit2" maxlength="1" placeholder="•">
+        <!-- ❌ BUG 3: ID typo "digti3" should be "digit3" -->
+        <input type="text" id="digti3" maxlength="1" placeholder="•">
+    </div>
+    <button id="unlockBtn">UNLOCK FREEDOM</button>
+    <div class="hint">
+        💡 Hint: Visibility is deception. Names matter.<br>
+        <small>Correct code: 7 4 2</small>
+    </div>
+</div>
+
+<!-- Load Scripts -->
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/game-engine.js"></script>
+
+<script>
+// Track which bugs are fixed
+const bugStatus = {
+  bug1: false,  // digit1 input type is "text" (not "number")
+  bug2: false,  // digit2 opacity is > 0.5
+  bug3: false   // Third input has id="digit3" (not "digti3")
+};
+
+const btn = document.getElementById('unlockBtn');
+
+function checkBugsFixed() {
+    const digit1 = document.getElementById('digit1');
+    const digit2 = document.getElementById('digit2');
+    const digit3Correct = document.getElementById('digit3');
+    
+    // Check Bug 1: digit1 type is "text"
+    if (digit1) {
+        bugStatus.bug1 = digit1.type === 'text';
+    }
+    
+    // Check Bug 2: digit2 is visible
+    if (digit2) {
+        const digit2Style = window.getComputedStyle(digit2);
+        const opacity = parseFloat(digit2Style.opacity);
+        bugStatus.bug2 = opacity > 0.5;
+    }
+    
+    // Check Bug 3: digit3 exists with correct ID
+    bugStatus.bug3 = digit3Correct !== null;
+    
+    // Update bug counter in header
+    const bugsFixedCount = Object.values(bugStatus).filter(v => v).length;
+    const bugCounter = document.getElementById('bugs-fixed');
+    if (bugCounter) {
+        bugCounter.textContent = `${bugsFixedCount}/3`;
+    }
+}
+
+// Check bugs periodically
+setInterval(checkBugsFixed, 300);
+
+btn.addEventListener('click', async () => {
+    const allBugsFixed = bugStatus.bug1 && bugStatus.bug2 && bugStatus.bug3;
+    
+    if (!allBugsFixed) {
+        const missingFixes = [];
+        if (!bugStatus.bug1) missingFixes.push('Change #digit1 input type from "number" to "text"');
+        if (!bugStatus.bug2) missingFixes.push('Change #digit2 opacity from 0 to 1');
+        if (!bugStatus.bug3) missingFixes.push('Change third input id from "digti3" to "digit3"');
+        
+        alert(`❌ Fix all 3 bugs first! Use DevTools (F12) to:\n\n${missingFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`);
+        return;
+    }
+    
+    const d1 = document.getElementById('digit1').value;
+    const d2 = document.getElementById('digit2').value;
+    const d3 = document.getElementById('digit3').value;
+    
+    /*
+      Correct code: 7 4 2
+    */
+    if (d1 === "7" && d2 === "4" && d3 === "2") {
+        alert("✅ You escaped. Freedom is yours. 🕊️");
+        await achieveFreedom();
+    } else {
+        let feedback = "❌ The door refuses to open.\n\n";
+        feedback += `Your code: ${d1 || '?'} ${d2 || '?'} ${d3 || '?'}\n`;
+        feedback += `Correct code: 7 4 2\n\n`;
+        feedback += "Try again!";
+        alert(feedback);
+    }
+});
+
+async function achieveFreedom() {
+    // Collect which bugs were fixed
+    const bugsFixed = [];
+    if (bugStatus.bug1) bugsFixed.push('bug1_input_type_fixed');
+    if (bugStatus.bug2) bugsFixed.push('bug2_visibility_restored');
+    if (bugStatus.bug3) bugsFixed.push('bug3_id_typo_fixed');
+    
+    console.log('🐛 Bugs fixed:', bugsFixed);
+    console.log('🕊️ Freedom achieved!');
+    console.log('✅ Code entered: 7 4 2');
+    
+    // Show success screen
+    document.body.innerHTML = `
+        <div style='
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #000, #003300);
+            color: #00ff99;
+            font-family: monospace;
+            text-align: center;
+            padding: 20px;
+        '>
+            <h1 style='font-size: 4rem; margin-bottom: 20px; text-shadow: 0 0 20px #00ff99;'>
+                🕊️ FREEDOM ACHIEVED 🕊️
             </h1>
-            
-            <div class="story-box">
-                <p><strong>📖 Story:</strong> You've escaped the basement, but now you're facing a mysterious portal to the Upside Down. The portal is unstable and needs to be activated. Eleven left you a note: "The path reveals itself when all is aligned."</p>
-                <p><strong>🎯 Mission:</strong> Fix the 3 CSS bugs to stabilize the portal and reveal the escape path!</p>
-            </div>
-
-            <!-- GAME CHALLENGE AREA -->
-            <div class="challenge-area">
-                
-                <div class="portal-container">
-                    <!-- BUG 1: Portal with wrong width (width: 20px instead of 200px) -->
-                    <div id="portal" class="portal" style="width: 20px;">
-                        <div style="text-align: center; padding-top: 80px; font-size: 36px;">🌀</div>
-                    </div>
-                    
-                    <!-- BUG 2: Warning message with color matching background (color: rgba(255,255,255,0.05)) -->
-                    <p id="portal-warning" style="font-size: 24px; font-weight: bold; color: rgba(255,255,255,0.05); margin: 20px 0;">
-                        ⚠️ PORTAL UNSTABLE
-                    </p>
-                    
-                    <!-- BUG 3: Enter button with pointer-events: none -->
-                    <button id="enter-portal" style="pointer-events: none; background: #28a745; color: white; border: none; padding: 20px 40px; font-size: 20px; border-radius: 10px; cursor: pointer; margin-top: 20px; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);">
-                        ✨ ENTER PORTAL
-                    </button>
-                </div>
-            </div>
-
-            <!-- BUGS CHECKLIST -->
-            <div class="bugs-checklist">
-                <h4>💡 Bugs to Fix:</h4>
-                <ul>
-                    <li>Bug 1: Portal (id="portal") has <code>width: 20px</code> → Change to <code>width: 200px</code></li>
-                    <li>Bug 2: Warning message (id="portal-warning") has <code>color: rgba(255,255,255,0.05)</code> → Change to <code>color: #ff0000</code></li>
-                    <li>Bug 3: Enter button (id="enter-portal") has <code>pointer-events: none</code> → Change to <code>pointer-events: auto</code></li>
-                </ul>
-            </div>
-
-            <hr style="margin: 40px 0; border: none; border-top: 1px solid rgba(139,0,0,0.5);">
-
-            <!-- DEBUG PANEL (For Testing) -->
-            <div class="debug-panel">
-                <h4>🐛 Debug Panel (Testing Only)</h4>
-                <p>In a real game, players use DevTools. For testing purposes, you can use these buttons:</p>
-                <div style="margin: 20px 0;">
-                    <button onclick="fixBug('bug1')" class="btn btn-primary">Fix Bug 1 (Portal Width)</button>
-                    <button onclick="fixBug('bug2')" class="btn btn-primary">Fix Bug 2 (Warning Color)</button>
-                    <button onclick="fixBug('bug3')" class="btn btn-primary">Fix Bug 3 (Pointer Events)</button>
-                </div>
-                
-                <button id="complete-btn" onclick="completePage()" class="btn btn-success" style="width: 100%; font-size: 18px; padding: 15px; margin-top: 10px;" disabled>
-                    ✅ Complete Page & Continue (+10 Points)
-                </button>
-            </div>
+            <p style='font-size: 1.5rem; margin-bottom: 30px;'>
+                Round 3 Complete!
+            </p>
+            <p style='font-size: 1.2rem; opacity: 0.8;'>
+                Returning to lobby...
+            </p>
         </div>
-    </div>
+    `;
+    
+    // Wait for gameEngine
+    let retries = 0;
+    const maxRetries = 20;
+    
+    while (!window.gameEngine && retries < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        retries++;
+    }
+    
+    setTimeout(async () => {
+        if (window.gameEngine) {
+            await gameEngine.completeRound();
+        } else {
+            console.error('Game engine not loaded!');
+            console.log('🎉 Refresh or return to lobby manually');
+        }
+    }, 3000);
+}
 
-    <!-- Load Scripts -->
-    <script src="../assets/js/config.js"></script>
-    <script src="../assets/js/game-engine.js"></script>
+// Console hints
+console.log("🚪 Final Door - FREEDOM Challenge");
+console.log("STEP 1: Fix all 3 bugs using DevTools");
+console.log("STEP 2: Enter the correct 3-digit code: 7 4 2");
+console.log("STEP 3: Click UNLOCK FREEDOM to complete Round 3!");
+console.log("");
+console.log("Bugs to fix:");
+console.log("1. #digit1 input type (number → text) - for maxlength to work");
+console.log("2. #digit2 opacity (0 → 1) - to see middle digit");
+console.log("3. Third input id (digti3 → digit3) - typo fix");
+console.log("");
+console.log("💡 Correct code: 7 4 2");
+
+checkBugsFixed();
+</script>
+
 </body>
 </html>

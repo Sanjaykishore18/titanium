@@ -1,371 +1,825 @@
-<!-- ============================================================================
-     ROUND 1 - PAGE 2: The Upside Down Portal
-     Path: frontend/round1/page2.html
-     ============================================================================ -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Round 1 - Page 2: The Upside Down Portal</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="total-bugs" content="1">
+<title>Web Escape | Round 2 - FINAL (1 Bug)</title>
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Bangers&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+
+/* ============================================================================
+   GAME HEADER
+   ============================================================================ */
+.game-header {
+    background: rgba(0,0,0,0.95);
+    padding: 15px 30px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10000;
+    border-bottom: 3px solid #667eea;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    font-family: 'Roboto', sans-serif;
+}
+
+.team-info {
+    color: #667eea;
+}
+
+.timer {
+    background: #dc3545;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 24px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+}
+
+.timer-warning {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.bugs-indicator {
+    background: #28a745;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.exit-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.exit-btn:hover {
+    background: #c82333;
+}
+
+/* ============================================================================
+   ORIGINAL GAME STYLES
+   ============================================================================ */
+
+body {
+    background: url('Asset/luffy_bg.png') no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Roboto', sans-serif;
+    color: #f1faee;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding-top: 80px;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 31, 63, 0.7);
+    z-index: -1;
+}
+
+header {
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    border-bottom: 2px solid #ffd60a;
+    position: fixed;
+    top: 80px;
+    width: 100%;
+    z-index: 1000;
+}
+
+.logo {
+    font-family: 'Pirata One', cursive;
+    font-size: 2rem;
+    color: #ffd60a;
+    text-shadow: 2px 2px #d32f2f;
+}
+
+nav ul {
+    display: flex;
+    list-style: none;
+    gap: 30px;
+}
+
+nav a {
+    text-decoration: none;
+    color: #fff;
+    font-family: 'Bangers', cursive;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+    transition: color 0.3s;
+}
+
+nav a:hover {
+    color: #ffd60a;
+}
+
+section {
+    padding: 100px 20px 60px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.section-title {
+    font-family: 'Pirata One', cursive;
+    font-size: 4rem;
+    color: #ffd60a;
+    text-shadow: 3px 3px 0 #d32f2f;
+    margin-bottom: 50px;
+    text-align: center;
+    border-bottom: 3px solid #e63946;
+    padding-bottom: 10px;
+}
+
+#home {
+    text-align: center;
+}
+
+.hero-content {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 50px;
+    border-radius: 20px;
+    border: 3px solid #e63946;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    max-width: 800px;
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+h1 {
+    font-family: 'Pirata One', cursive;
+    font-size: 5rem;
+    color: #ffd60a;
+    text-shadow: 3px 3px 0 #000, 5px 5px 0 #e63946;
+    margin-bottom: 10px;
+}
+
+h2 {
+    font-family: 'Bangers', cursive;
+    color: #e63946;
+    font-size: 2rem;
+    text-shadow: 2px 2px #000;
+    margin-bottom: 20px;
+}
+
+p {
+    font-size: 1.2em;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    color: #eee;
+}
+
+.quote {
+    font-family: 'Bangers', cursive;
+    color: #ffd60a;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-left: 5px solid #ffd60a;
+    font-size: 1.5rem;
+    margin: 20px auto;
+    text-shadow: 1px 1px #000;
+    display: inline-block;
+}
+
+.crew-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    width: 100%;
+    max-width: 1200px;
+}
+
+.crew-card {
+    background: #fffdf0;
+    padding: 15px;
+    border-radius: 5px;
+    color: #333;
+    text-align: center;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5);
+    transform: rotate(-2deg);
+    transition: transform 0.3s;
+}
+
+.crew-card:nth-child(even) {
+    transform: rotate(2deg);
+}
+
+.crew-card:hover {
+    transform: rotate(0) scale(1.05);
+    z-index: 10;
+}
+
+.crew-img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border: 2px solid #333;
+    margin-bottom: 15px;
+    filter: sepia(0.2);
+}
+
+.crew-name {
+    font-family: 'Pirata One', cursive;
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.crew-role {
+    font-family: 'Bangers', cursive;
+    font-size: 1.2rem;
+    color: #666;
+    text-transform: uppercase;
+}
+
+.bounty-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    max-width: 800px;
+}
+
+.bounty-item {
+    background: url('https://www.transparenttextures.com/patterns/aged-paper.png'), #f4e4bc;
+    padding: 20px 40px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 2px dashed #8b4513;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s;
+}
+
+.bounty-item:hover {
+    transform: translateX(10px);
+}
+
+.bounty-name {
+    font-family: 'Pirata One', cursive;
+    font-size: 2.5rem;
+    color: #333;
+}
+
+.bounty-amount {
+    font-family: 'Bangers', cursive;
+    font-size: 2rem;
+    color: #d32f2f;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.berry-symbol {
+    width: 30px;
+    height: 30px;
+    background: #d32f2f;
+    border-radius: 50%;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+    font-family: sans-serif;
+}
+
+footer {
+    background: rgba(0, 0, 0, 0.9);
+    color: #888;
+    text-align: center;
+    padding: 30px;
+    margin-top: auto;
+}
+
+#gatekeeper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 9000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    transition: opacity 1s ease-in-out;
+}
+
+.gate-title {
+    font-family: 'Pirata One', cursive;
+    font-size: 4rem;
+    color: #d32f2f;
+    text-shadow: 0 0 10px #ff0000;
+    letter-spacing: 5px;
+    margin-bottom: 20px;
+    animation: gatePulse 2s infinite;
+}
+
+.gate-text {
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.2rem;
+    color: #888;
+    margin-bottom: 40px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.moving-btn {
+    background: transparent;
+    border: 2px solid #ffd60a;
+    color: #ffd60a;
+    padding: 10px 30px;
+    font-family: 'Bangers', cursive;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(255, 214, 10, 0.3);
+    text-transform: uppercase;
+    position: fixed;
+    z-index: 9001;
+}
+
+.moving-btn:hover {
+    background: #ffd60a;
+    color: #000;
+    box-shadow: 0 0 30px rgba(255, 214, 10, 0.8);
+    transform: scale(1.1);
+}
+
+.clue-scroll {
+    margin-top: 40px;
+    padding: 20px;
+    border: 1px dashed #ffd60a;
+    background: rgba(255, 214, 10, 0.1);
+    border-radius: 10px;
+    max-width: 600px;
+    text-align: left;
+}
+
+#btn-1 {
+    border-color: #ff0055;
+    color: #ff0055;
+    box-shadow: 0 0 15px rgba(255, 0, 85, 0.3);
+}
+
+#btn-1:hover {
+    background: #ff0055;
+    color: white;
+}
+
+#btn-2 {
+    border-color: #00ff88;
+    color: #00ff88;
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+}
+
+#btn-2:hover {
+    background: #00ff88;
+    color: black;
+}
+
+#btn-3 {
+    border-color: #00ccff;
+    color: #00ccff;
+    box-shadow: 0 0 15px rgba(0, 204, 255, 0.3);
+}
+
+#btn-3:hover {
+    background: #00ccff;
+    color: black;
+}
+
+/* ❌ BUG 1: Real button hidden behind everything! */
+#btn-4 {
+    z-index: -9999 !important;
+}
+
+.clue-title {
+    color: #d32f2f;
+    font-family: 'Bangers', cursive;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    display: block;
+    text-align: center;
+}
+
+.clue-item {
+    color: #ccc;
+    font-family: 'Roboto', monospace;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    list-style-type: none;
+}
+
+.clue-highlight {
+    color: #ffd60a;
+    font-weight: bold;
+}
+
+@keyframes gatePulse {
+    0%, 100% {
+        opacity: 0.7;
+        transform: scale(0.98);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.02);
+    }
+}
+
+#Btn {
+    display: block;
+    margin: 40px auto;
+    background: linear-gradient(45deg, #e63946, #d32f2f);
+    color: #fff;
+    padding: 15px 50px;
+    font-family: 'Pirata One', cursive;
+    font-size: 2rem;
+    border: 2px solid #ffd60a;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(230, 57, 70, 0.4);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+#Btn:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(230, 57, 70, 0.6);
+    background: linear-gradient(45deg, #d32f2f, #b71c1c);
+}
+
+#Btn:active {
+    transform: translateY(2px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .game-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
     
-    <!-- Game Styles -->
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a0a;
-            color: #fff;
-        }
-        
-        /* Game Header */
-        .game-header {
-            background: rgba(0,0,0,0.95);
-            padding: 15px 30px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            border-bottom: 3px solid #667eea;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .team-info {
-            color: #667eea;
-        }
-        
-        .timer {
-            background: #dc3545;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 24px;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-        }
-        
-        .timer-warning {
-            animation: pulse 1s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .bugs-indicator {
-            background: #28a745;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: bold;
-        }
-        
-        .exit-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.3s;
-        }
-        
-        .exit-btn:hover {
-            background: #c82333;
-        }
-        
-        /* Game Content */
-        .game-content {
-            margin-top: 100px;
-            min-height: calc(100vh - 100px);
-            padding: 40px 20px;
-        }
-        
-        .game-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: rgba(255,255,255,0.05);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        }
-        
-        .story-box {
-            background: rgba(139,0,0,0.2);
-            padding: 20px;
-            border-left: 5px solid #8B0000;
-            margin-bottom: 30px;
-            border-radius: 5px;
-        }
-        
-        .story-box p {
-            margin-bottom: 10px;
-            line-height: 1.6;
-        }
-        
-        .challenge-area {
-            background: rgba(255,255,255,0.1);
-            padding: 40px;
-            border-radius: 10px;
-            margin: 30px 0;
-            position: relative;
-        }
-        
-        .portal-container {
-            text-align: center;
-            padding: 40px;
-            background: radial-gradient(circle, rgba(139,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%);
-            border-radius: 15px;
-            margin: 20px 0;
-        }
-        
-        .bugs-checklist {
-            background: rgba(255,243,205,0.1);
-            padding: 20px;
-            border-radius: 8px;
-            margin: 30px 0;
-        }
-        
-        .bugs-checklist h4 {
-            color: #ffc107;
-            margin-bottom: 15px;
-        }
-        
-        .bugs-checklist ul {
-            list-style-position: inside;
-            color: #fff;
-        }
-        
-        .bugs-checklist li {
-            margin: 8px 0;
-            padding-left: 10px;
-        }
-        
-        .bugs-checklist code {
-            background: rgba(0,0,0,0.3);
-            padding: 2px 6px;
-            border-radius: 3px;
-            color: #ffc107;
-            font-family: 'Courier New', monospace;
-        }
-        
-        /* Buttons */
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin: 5px;
-        }
-        
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-        
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .btn-pulse {
-            animation: btnPulse 1s infinite;
-        }
-        
-        @keyframes btnPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        /* Debug Panel */
-        .debug-panel {
-            background: rgba(0,0,0,0.3);
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .debug-panel h4 {
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-        
-        .debug-panel p {
-            color: #aaa;
-            margin-bottom: 15px;
-        }
-        
-        /* Notifications */
-        .notification {
-            position: fixed;
-            top: 110px;
-            right: -350px;
-            background: rgba(102, 126, 234, 0.95);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: right 0.3s;
-            z-index: 999;
-            max-width: 300px;
-        }
-        
-        .notification.show {
-            right: 20px;
-        }
-        
-        .notification-success {
-            background: rgba(40, 167, 69, 0.95);
-        }
-        
-        .notification-error {
-            background: rgba(220, 53, 69, 0.95);
-        }
-        
-        .notification-info {
-            background: rgba(23, 162, 184, 0.95);
-        }
-        
-        /* Portal Animation */
-        .portal {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #8B0000 0%, #000 70%);
-            margin: 20px auto;
-            animation: portalSpin 3s linear infinite;
-            box-shadow: 0 0 50px rgba(139,0,0,0.8);
-        }
-        
-        @keyframes portalSpin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .game-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .game-container {
-                padding: 20px;
-            }
-            
-            .challenge-area {
-                padding: 20px;
-            }
-        }
-    </style>
+    h1 {
+        font-size: 3rem;
+    }
+    
+    .section-title {
+        font-size: 2.5rem;
+    }
+}
+</style>
 </head>
 <body>
-    <!-- GAME HEADER -->
-    <div class="game-header">
-        <div class="team-info">
-            <strong id="team-name">Loading...</strong><br>
-            <small>Round <span id="round-num">-</span> - Page <span id="page-num">-</span> | Score: <span id="current-score">0</span></small>
-        </div>
-        
-        <div class="timer" id="timer">--:--</div>
-        
-        <div class="bugs-indicator">
-            🐛 Bugs: <span id="bugs-fixed">0/3</span>
-        </div>
-        
-        <button class="exit-btn" onclick="exitGame()">
-            ← Exit Game
-        </button>
+
+<!-- GAME HEADER -->
+<div class="game-header">
+    <div class="team-info">
+        <strong id="team-name">Loading...</strong><br>
+        <small>Round <span id="round-num">-</span> - Page <span id="page-num">-</span> | Score: <span id="current-score">0</span></small>
     </div>
+    
+    <div class="timer" id="timer">--:--</div>
+    
+    <div class="bugs-indicator">
+        🐛 Bugs: <span id="bugs-fixed">0/1</span>
+    </div>
+    
+    <button class="exit-btn" onclick="exitGame()">
+        ← Exit Game
+    </button>
+</div>
 
-    <!-- GAME CONTENT -->
-    <div class="game-content">
-        <div class="game-container">
-            <h1 style="color: #8B0000; text-align: center; margin-bottom: 30px; font-size: 2.5em;">
-                🌀 The Upside Down Portal
-            </h1>
-            
-            <div class="story-box">
-                <p><strong>📖 Story:</strong> You've escaped the basement, but now you're facing a mysterious portal to the Upside Down. The portal is unstable and needs to be activated. Eleven left you a note: "The path reveals itself when all is aligned."</p>
-                <p><strong>🎯 Mission:</strong> Fix the 3 CSS bugs to stabilize the portal and reveal the escape path!</p>
-            </div>
+<!-- GATEKEEPER OVERLAY -->
+<button id="btn-4" class="moving-btn" onclick="revealSecret()">Reveal Secret</button>
 
-            <!-- GAME CHALLENGE AREA -->
-            <div class="challenge-area">
-                
-                <div class="portal-container">
-                    <!-- BUG 1: Portal with wrong width (width: 20px instead of 200px) -->
-                    <div id="portal" class="portal" style="width: 20px;">
-                        <div style="text-align: center; padding-top: 80px; font-size: 36px;">🌀</div>
-                    </div>
-                    
-                    <!-- BUG 2: Warning message with color matching background (color: rgba(255,255,255,0.05)) -->
-                    <p id="portal-warning" style="font-size: 24px; font-weight: bold; color: rgba(255,255,255,0.05); margin: 20px 0;">
-                        ⚠️ PORTAL UNSTABLE
-                    </p>
-                    
-                    <!-- BUG 3: Enter button with pointer-events: none -->
-                    <button id="enter-portal" style="pointer-events: none; background: #28a745; color: white; border: none; padding: 20px 40px; font-size: 20px; border-radius: 10px; cursor: pointer; margin-top: 20px; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);">
-                        ✨ ENTER PORTAL
-                    </button>
-                </div>
-            </div>
+<div id="gatekeeper">
+    <h1 class="gate-title">TOP SECRET</h1>
+    <p class="gate-text">Restricted Access: Grand Line Personnel Only</p>
 
-            <!-- BUGS CHECKLIST -->
-            <div class="bugs-checklist">
-                <h4>💡 Bugs to Fix:</h4>
-                <ul>
-                    <li>Bug 1: Portal (id="portal") has <code>width: 20px</code> → Change to <code>width: 200px</code></li>
-                    <li>Bug 2: Warning message (id="portal-warning") has <code>color: rgba(255,255,255,0.05)</code> → Change to <code>color: #ff0000</code></li>
-                    <li>Bug 3: Enter button (id="enter-portal") has <code>pointer-events: none</code> → Change to <code>pointer-events: auto</code></li>
-                </ul>
-            </div>
+    <button id="btn-1" class="moving-btn" onclick="fakeButton()">Reveal Secret</button>
+    <button id="btn-2" class="moving-btn" onclick="fakeButton()">Reveal Secret</button>
+    <button id="btn-3" class="moving-btn" onclick="fakeButton()">Reveal Secret</button>
 
-            <hr style="margin: 40px 0; border: none; border-top: 1px solid rgba(139,0,0,0.5);">
+    <div class="clue-scroll">
+        <span class="clue-title">🏴‍☠️ Navigator's Log (Debug Clues) 🏴‍☠️</span>
+        <div class="clue-item">1. "Three shadows dance to lead you astray"</div>
+        <div class="clue-item">2. "The true path is buried <span class="clue-highlight">beneath</span> the darkness (Check z-index)"</div>
+        <div class="clue-item">3. "Sometimes the answer lies <span class="clue-highlight">outside</span> the gate(keeper)..."</div>
+    </div>
+</div>
 
-            <!-- DEBUG PANEL (For Testing) -->
-            <div class="debug-panel">
-                <h4>🐛 Debug Panel (Testing Only)</h4>
-                <p>In a real game, players use DevTools. For testing purposes, you can use these buttons:</p>
-                <div style="margin: 20px 0;">
-                    <button onclick="fixBug('bug1')" class="btn btn-primary">Fix Bug 1 (Portal Width)</button>
-                    <button onclick="fixBug('bug2')" class="btn btn-primary">Fix Bug 2 (Warning Color)</button>
-                    <button onclick="fixBug('bug3')" class="btn btn-primary">Fix Bug 3 (Pointer Events)</button>
-                </div>
-                
-                <button id="complete-btn" onclick="completePage()" class="btn btn-success" style="width: 100%; font-size: 18px; padding: 15px; margin-top: 10px;" disabled>
-                    ✅ Complete Page & Continue (+10 Points)
-                </button>
-            </div>
+<!-- MAIN CONTENT (Hidden behind gatekeeper) -->
+<div class="overlay"></div>
+
+<header>
+    <div class="logo">STRAW HAT PIRATES</div>
+    <nav>
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#crew">Crew</a></li>
+            <li><a href="#bounty">Bounty</a></li>
+        </ul>
+    </nav>
+</header>
+
+<section id="home">
+    <div class="hero-content">
+        <h1>Monkey D. Luffy</h1>
+        <h2>Captain of the Straw Hat Pirates</h2>
+        <h1>You Found The One Piece</h1>
+
+        <div class="quote">
+            "I'm gonna be King of the Pirates!" 👒
+        </div>
+
+        <p>
+            You have successfully completed Round 2!! <br>
+            Congratulations on completing all challenges!<br>
+            Scroll down to see the crew and complete the round...
+        </p>
+    </div>
+</section>
+
+<section id="crew">
+    <h2 class="section-title">The Nakama</h2>
+    <div class="crew-grid">
+        <div class="crew-card">
+            <img src="Asset/Luffy.png" alt="Luffy" class="crew-img">
+            <div class="crew-name">Monkey D. Luffy</div>
+            <div class="crew-role">Captain</div>
+        </div>
+        <div class="crew-card">
+            <img src="Asset/zorobounty.jpg" alt="Zoro" class="crew-img">
+            <div class="crew-name">Roronoa Zoro</div>
+            <div class="crew-role">Swordsman</div>
+        </div>
+        <div class="crew-card">
+            <img src="Asset/sanji.webp" alt="Sanji" class="crew-img">
+            <div class="crew-name">Vinsmoke Sanji</div>
+            <div class="crew-role">Cook</div>
+        </div>
+        <div class="crew-card">
+            <img src="Asset/jimbe.jpg" alt="Jimbei" class="crew-img">
+            <div class="crew-name">Jimbei</div>
+            <div class="crew-role">Helmsman</div>
+        </div>
+        <div class="crew-card">
+            <img src="Asset/Usopp.jpg" alt="Usopp" class="crew-img">
+            <div class="crew-name">God Usopp</div>
+            <div class="crew-role">Sniper</div>
+        </div>
+        <div class="crew-card">
+            <img src="Asset/nami.png" alt="Nami" class="crew-img">
+            <div class="crew-name">Cat Burglar Nami</div>
+            <div class="crew-role">Navigator</div>
+        </div>
+        <div class="crew-card">
+            <img src="Asset/nico robin.avif" alt="Robin" class="crew-img">
+            <div class="crew-name">Nico Robin</div>
+            <div class="crew-role">Archaeologist</div>
+        </div>
+        <div class="crew-card">
+            <img src="Asset/franky01.jpg" alt="Franky" class="crew-img">
+            <div class="crew-name">Franky</div>
+            <div class="crew-role">Shipwright</div>
+        </div>
+        <div class="crew-card">
+            <img src="Asset/Brook.avif" alt="Brook" class="crew-img">
+            <div class="crew-name">Brook</div>
+            <div class="crew-role">Musician</div>
+        </div>
+        <div class="crew-card">
+            <img src="Asset/chopper.avif" alt="Chopper" class="crew-img">
+            <div class="crew-name">Tony Tony Chopper</div>
+            <div class="crew-role">Doctor</div>
         </div>
     </div>
+</section>
 
-    <!-- Load Scripts -->
-    <script src="../assets/js/config.js"></script>
-    <script src="../assets/js/game-engine.js"></script>
+<section id="bounty">
+    <h2 class="section-title">Current Bounties</h2>
+    <div class="bounty-list">
+        <div class="bounty-item">
+            <div class="bounty-name">Monkey D. Luffy</div>
+            <div class="bounty-amount">
+                <div class="berry-symbol">B</div> 3,000,000,000
+            </div>
+        </div>
+        <div class="bounty-item">
+            <div class="bounty-name">Roronoa Zoro</div>
+            <div class="bounty-amount">
+                <div class="berry-symbol">B</div> 1,111,000,000
+            </div>
+        </div>
+        <div class="bounty-item">
+            <div class="bounty-name">Jimbei</div>
+            <div class="bounty-amount">
+                <div class="berry-symbol">B</div> 1,100,000,000
+            </div>
+        </div>
+        <div class="bounty-item">
+            <div class="bounty-name">Sanji</div>
+            <div class="bounty-amount">
+                <div class="berry-symbol">B</div> 1,032,000,000
+            </div>
+        </div>
+        <div class="bounty-item">
+            <div class="bounty-name">Nico Robin</div>
+            <div class="bounty-amount">
+                <div class="berry-symbol">B</div> 930,000,000
+            </div>
+        </div>
+        <div class="bounty-item">
+            <div class="bounty-name">God Usopp</div>
+            <div class="bounty-amount">
+                <div class="berry-symbol">B</div> 500,000,000
+            </div>
+        </div>
+        <div class="bounty-item">
+            <div class="bounty-name">Franky</div>
+            <div class="bounty-amount">
+                <div class="berry-symbol">B</div> 394,000,000
+            </div>
+        </div>
+        <div class="bounty-item">
+            <div class="bounty-name">Brook</div>
+            <div class="bounty-amount">
+                <div class="berry-symbol">B</div> 383,000,000
+            </div>
+        </div>
+        <div class="bounty-item">
+            <div class="bounty-name">Nami</div>
+            <div class="bounty-amount">
+                <div class="berry-symbol">B</div> 366,000,000
+            </div>
+        </div>
+        <div class="bounty-item">
+            <div class="bounty-name">Tony Tony Chopper</div>
+            <div class="bounty-amount">
+                <div class="berry-symbol">B</div> 1,000
+            </div>
+        </div>
+        <button id="Btn" onclick="completeRound()">Complete Round 2!</button>
+    </div>
+</section>
+
+<!-- Load Scripts -->
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/game-engine.js"></script>
+
+<script>
+// Track which bugs are fixed
+const bugStatus = {
+  bug1: false  // btn-4 z-index is not negative
+};
+
+function checkBugsFixed() {
+    const btn4 = document.getElementById('btn-4');
+    const btn4Style = window.getComputedStyle(btn4);
+    const zIndex = parseInt(btn4Style.zIndex) || 0;
+    
+    // Check Bug 1: z-index is not negative
+    bugStatus.bug1 = zIndex >= 0;
+    
+    // Update bug counter in header
+    const bugsFixedCount = Object.values(bugStatus).filter(v => v).length;
+    const bugCounter = document.getElementById('bugs-fixed');
+    if (bugCounter) {
+        bugCounter.textContent = `${bugsFixedCount}/1`;
+    }
+}
+
+// Check bugs periodically
+setInterval(checkBugsFixed, 300);
+
+function fakeButton() {
+    alert('❌ Wrong button! This leads to a dead end.\n\nHint: Read the clues carefully. The true path is "beneath" the darkness...');
+}
+
+function revealSecret() {
+    if (!bugStatus.bug1) {
+        alert('❌ You found the right button, but it\'s still hidden!\n\nUse DevTools (F12) to fix the bug:\nChange #btn-4 z-index from -9999 to a positive value (e.g., 10000)');
+        return;
+    }
+    
+    const gatekeeper = document.getElementById('gatekeeper');
+    gatekeeper.style.opacity = '0';
+    setTimeout(() => {
+        gatekeeper.style.display = 'none';
+    }, 1000);
+    
+    console.log('🏴‍☠️ Gatekeeper defeated! Welcome to the Straw Hat Pirates!');
+}
+
+const btns = document.querySelectorAll("#btn-1, #btn-2, #btn-3");
+
+function moveButton() {
+    const maxX = window.innerWidth - 150;
+    const maxY = window.innerHeight - 100;
+
+    btns.forEach(btn => {
+        btn.style.left = Math.floor(Math.random() * maxX) + "px";
+        btn.style.top = Math.floor(Math.random() * maxY) + "px";
+    });
+}
+
+setInterval(moveButton, 100);
+
+async function completeRound() {
+    const gatekeeperVisible = document.getElementById('gatekeeper').style.display !== 'none';
+    
+    if (gatekeeperVisible) {
+        alert('❌ You must first bypass the gatekeeper to complete the round!\n\nFind and click the hidden "Reveal Secret" button.');
+        return;
+    }
+    
+    // Collect which bugs were fixed
+    const bugsFixed = [];
+    if (bugStatus.bug1) bugsFixed.push('bug1_found_hidden_button');
+    
+    console.log('🐛 Bugs fixed:', bugsFixed);
+    console.log('🏴‍☠️ Round 2 Complete! One Piece found!');
+    
+    // Wait for gameEngine
+    let retries = 0;
+    const maxRetries = 20;
+    
+    while (!window.gameEngine && retries < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        retries++;
+    }
+    
+    if (window.gameEngine) {
+        await gameEngine.completeRound();
+    } else {
+        console.error('Game engine not loaded!');
+        alert('🎉 Round 2 Complete!\n\nYou found the One Piece! Refresh or return to lobby.');
+    }
+}
+
+// Console hints
+console.log("🏴‍☠️ Luffy's Secret Page - Final Challenge!");
+console.log("OBJECTIVE: Bypass the gatekeeper and complete Round 2");
+console.log("");
+console.log("HINTS:");
+console.log("1. Three colorful buttons are fake (they move around)");
+console.log("2. The real 'Reveal Secret' button is hidden (check Elements tab)");
+console.log("3. Look for #btn-4 - it has z-index: -9999 hiding it");
+console.log("4. Change z-index to a high positive value (e.g., 10000)");
+console.log("5. Click the real button to remove the gatekeeper");
+console.log("6. Scroll down and click 'Complete Round 2!'");
+
+checkBugsFixed();
+</script>
+
 </body>
 </html>

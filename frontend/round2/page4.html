@@ -1,371 +1,508 @@
-<!-- ============================================================================
-     ROUND 1 - PAGE 2: The Upside Down Portal
-     Path: frontend/round1/page2.html
-     ============================================================================ -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Round 1 - Page 2: The Upside Down Portal</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<parameter name="total-bugs" content="3">
+<title>Web Escape | Round 2 - Page 4 (3 Bugs)</title>
+<style>
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ============================================================================
+   GAME HEADER
+   ============================================================================ */
+.game-header {
+    background: rgba(0,0,0,0.95);
+    padding: 15px 30px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    border-bottom: 3px solid #667eea;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    font-family: 'Consolas', monospace;
+}
+
+.team-info {
+    color: #667eea;
+}
+
+.timer {
+    background: #dc3545;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 24px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+}
+
+.timer-warning {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.bugs-indicator {
+    background: #28a745;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.exit-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.exit-btn:hover {
+    background: #c82333;
+}
+
+/* Notifications */
+.notification {
+    position: fixed;
+    top: 110px;
+    right: -350px;
+    background: rgba(102, 126, 234, 0.95);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transition: right 0.3s;
+    z-index: 999;
+    max-width: 300px;
+}
+
+.notification.show {
+    right: 20px;
+}
+
+.notification-success {
+    background: rgba(40, 167, 69, 0.95);
+}
+
+.notification-error {
+    background: rgba(220, 53, 69, 0.95);
+}
+
+.notification-info {
+    background: rgba(23, 162, 184, 0.95);
+}
+
+/* ============================================================================
+   ORIGINAL GAME STYLES
+   ============================================================================ */
+
+body {
+    background: url(page16.png) no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Consolas', 'Courier New', monospace;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #481bd1;
+    padding: 20px;
+    padding-top: 100px;
+}
+
+.lab-container {
+    width: 100%;
+    max-width: 900px;
+    /* ❌ BUG 1: Container rotated 180 degrees - everything upside down */
+    transform: rotate(180deg);
+}
+
+.screen {
+    background: transparent;
+    border: none;
+    padding: 30px;
+    box-shadow: none;
+}
+
+h1 {
+    text-align: center;
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    text-shadow: 0 0 10px #4ecdc4;
+    letter-spacing: 3px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #ff6b6b;
+    margin-bottom: 30px;
+    font-size: 1.1em;
+}
+
+.game-hint {
+    text-align: center;
+    color: #ffd93d;
+    margin-bottom: 20px;
+    font-size: 1em;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.dna-strands {
+    display: flex;
+    gap: 15px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.dna-strand {
+    /* ❌ BUG 2: Strands have negative width - causes layout issues */
+    width: -200px;
+    height: 80px;
+    background: linear-gradient(90deg, #ff6b6b 0%, #ffd93d 50%, #6bcf7f 100%);
+    border-radius: 40px;
+    cursor: pointer;
+    /* ❌ BUG 2 (part 2): Position absolute stacks all strands */
+    position: absolute;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.dna-strand:hover {
+    transform: scale(1.1);
+    box-shadow: 0 10px 30px rgba(78, 205, 196, 0.5);
+}
+
+.dna-strand.analyzed {
+    opacity: 0.4;
+    cursor: default;
+    animation: strandPulse 2s infinite;
+}
+
+@keyframes strandPulse {
+    0%, 100% {
+        opacity: 0.4;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+.progress-section {
+    margin-top: 30px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.progress-bar-container {
+    height: 30px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 15px;
+    overflow: hidden;
+    border: 2px solid #4ecdc4;
+    margin-bottom: 10px;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    /* ❌ BUG 3: Progress bar has wrong direction - RTL instead of LTR */
+    direction: rtl;
+    background: linear-gradient(90deg, #4ecdc4 0%, #95e1d3 100%);
+    width: 0%;
+    transition: width 0.5s ease;
+    border-radius: 15px;
+}
+
+.stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.2em;
+    margin-top: 10px;
+}
+
+.success-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.success-message {
+    background: linear-gradient(135deg, #4ecdc4 0%, #44a39c 100%);
+    padding: 50px;
+    border-radius: 30px;
+    text-align: center;
+    font-size: 2.5em;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    animation: zoomIn 0.5s ease;
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(0);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+
+.hint {
+    text-align: center;
+    color: #ffd93d;
+    margin-top: 20px;
+    font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .game-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
     
-    <!-- Game Styles -->
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a0a;
-            color: #fff;
-        }
-        
-        /* Game Header */
-        .game-header {
-            background: rgba(0,0,0,0.95);
-            padding: 15px 30px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            border-bottom: 3px solid #667eea;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .team-info {
-            color: #667eea;
-        }
-        
-        .timer {
-            background: #dc3545;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 24px;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-        }
-        
-        .timer-warning {
-            animation: pulse 1s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .bugs-indicator {
-            background: #28a745;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: bold;
-        }
-        
-        .exit-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.3s;
-        }
-        
-        .exit-btn:hover {
-            background: #c82333;
-        }
-        
-        /* Game Content */
-        .game-content {
-            margin-top: 100px;
-            min-height: calc(100vh - 100px);
-            padding: 40px 20px;
-        }
-        
-        .game-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: rgba(255,255,255,0.05);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        }
-        
-        .story-box {
-            background: rgba(139,0,0,0.2);
-            padding: 20px;
-            border-left: 5px solid #8B0000;
-            margin-bottom: 30px;
-            border-radius: 5px;
-        }
-        
-        .story-box p {
-            margin-bottom: 10px;
-            line-height: 1.6;
-        }
-        
-        .challenge-area {
-            background: rgba(255,255,255,0.1);
-            padding: 40px;
-            border-radius: 10px;
-            margin: 30px 0;
-            position: relative;
-        }
-        
-        .portal-container {
-            text-align: center;
-            padding: 40px;
-            background: radial-gradient(circle, rgba(139,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%);
-            border-radius: 15px;
-            margin: 20px 0;
-        }
-        
-        .bugs-checklist {
-            background: rgba(255,243,205,0.1);
-            padding: 20px;
-            border-radius: 8px;
-            margin: 30px 0;
-        }
-        
-        .bugs-checklist h4 {
-            color: #ffc107;
-            margin-bottom: 15px;
-        }
-        
-        .bugs-checklist ul {
-            list-style-position: inside;
-            color: #fff;
-        }
-        
-        .bugs-checklist li {
-            margin: 8px 0;
-            padding-left: 10px;
-        }
-        
-        .bugs-checklist code {
-            background: rgba(0,0,0,0.3);
-            padding: 2px 6px;
-            border-radius: 3px;
-            color: #ffc107;
-            font-family: 'Courier New', monospace;
-        }
-        
-        /* Buttons */
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin: 5px;
-        }
-        
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-        
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .btn-pulse {
-            animation: btnPulse 1s infinite;
-        }
-        
-        @keyframes btnPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        /* Debug Panel */
-        .debug-panel {
-            background: rgba(0,0,0,0.3);
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .debug-panel h4 {
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-        
-        .debug-panel p {
-            color: #aaa;
-            margin-bottom: 15px;
-        }
-        
-        /* Notifications */
-        .notification {
-            position: fixed;
-            top: 110px;
-            right: -350px;
-            background: rgba(102, 126, 234, 0.95);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: right 0.3s;
-            z-index: 999;
-            max-width: 300px;
-        }
-        
-        .notification.show {
-            right: 20px;
-        }
-        
-        .notification-success {
-            background: rgba(40, 167, 69, 0.95);
-        }
-        
-        .notification-error {
-            background: rgba(220, 53, 69, 0.95);
-        }
-        
-        .notification-info {
-            background: rgba(23, 162, 184, 0.95);
-        }
-        
-        /* Portal Animation */
-        .portal {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #8B0000 0%, #000 70%);
-            margin: 20px auto;
-            animation: portalSpin 3s linear infinite;
-            box-shadow: 0 0 50px rgba(139,0,0,0.8);
-        }
-        
-        @keyframes portalSpin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .game-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .game-container {
-                padding: 20px;
-            }
-            
-            .challenge-area {
-                padding: 20px;
-            }
-        }
-    </style>
+    h1 {
+        font-size: 2em;
+    }
+    
+    .subtitle {
+        font-size: 0.9em;
+    }
+    
+    .dna-strand {
+        font-size: 1.5em;
+    }
+}
+</style>
 </head>
 <body>
-    <!-- GAME HEADER -->
-    <div class="game-header">
-        <div class="team-info">
-            <strong id="team-name">Loading...</strong><br>
-            <small>Round <span id="round-num">-</span> - Page <span id="page-num">-</span> | Score: <span id="current-score">0</span></small>
-        </div>
-        
-        <div class="timer" id="timer">--:--</div>
-        
-        <div class="bugs-indicator">
-            🐛 Bugs: <span id="bugs-fixed">0/3</span>
-        </div>
-        
-        <button class="exit-btn" onclick="exitGame()">
-            ← Exit Game
-        </button>
+
+<!-- GAME HEADER -->
+<div class="game-header">
+    <div class="team-info">
+        <strong id="team-name">Loading...</strong><br>
+        <small>Round <span id="round-num">-</span> - Page <span id="page-num">-</span> | Score: <span id="current-score">0</span></small>
     </div>
+    
+    <div class="timer" id="timer">--:--</div>
+    
+    <div class="bugs-indicator">
+        🐛 Bugs: <span id="bugs-fixed">0/3</span>
+    </div>
+    
+    <button class="exit-btn" onclick="exitGame()">
+        ← Exit Game
+    </button>
+</div>
 
-    <!-- GAME CONTENT -->
-    <div class="game-content">
-        <div class="game-container">
-            <h1 style="color: #8B0000; text-align: center; margin-bottom: 30px; font-size: 2.5em;">
-                🌀 The Upside Down Portal
-            </h1>
-            
-            <div class="story-box">
-                <p><strong>📖 Story:</strong> You've escaped the basement, but now you're facing a mysterious portal to the Upside Down. The portal is unstable and needs to be activated. Eleven left you a note: "The path reveals itself when all is aligned."</p>
-                <p><strong>🎯 Mission:</strong> Fix the 3 CSS bugs to stabilize the portal and reveal the escape path!</p>
+<!-- GAME CONTENT -->
+<div class="lab-container">
+    <div class="screen">
+        <h1>🔬 DNA ANALYZER 3000</h1>
+        <div class="subtitle">Chopper's Advanced Medical Lab</div>
+        
+        <div class="game-hint">
+            💡 Use DevTools (F12) to fix 3 bugs!<br>
+            <small>Hint: Fix rotation, width, and progress direction!</small>
+        </div>
+
+        <div class="hint">
+            🧬 Analyze all 5 DNA strands to unlock the cure!
+        </div>
+
+        <div class="dna-strands" id="dnaStrands">
+            <div class="dna-strand" onclick="analyzeDNA(this, 1)">🧬</div>
+            <div class="dna-strand" onclick="analyzeDNA(this, 2)">🧬</div>
+            <div class="dna-strand" onclick="analyzeDNA(this, 3)">🧬</div>
+            <div class="dna-strand" onclick="analyzeDNA(this, 4)">🧬</div>
+            <div class="dna-strand" onclick="analyzeDNA(this, 5)">🧬</div>
+        </div>
+
+        <div class="progress-section">
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progressBar"></div>
             </div>
-
-            <!-- GAME CHALLENGE AREA -->
-            <div class="challenge-area">
-                
-                <div class="portal-container">
-                    <!-- BUG 1: Portal with wrong width (width: 20px instead of 200px) -->
-                    <div id="portal" class="portal" style="width: 20px;">
-                        <div style="text-align: center; padding-top: 80px; font-size: 36px;">🌀</div>
-                    </div>
-                    
-                    <!-- BUG 2: Warning message with color matching background (color: rgba(255,255,255,0.05)) -->
-                    <p id="portal-warning" style="font-size: 24px; font-weight: bold; color: rgba(255,255,255,0.05); margin: 20px 0;">
-                        ⚠️ PORTAL UNSTABLE
-                    </p>
-                    
-                    <!-- BUG 3: Enter button with pointer-events: none -->
-                    <button id="enter-portal" style="pointer-events: none; background: #28a745; color: white; border: none; padding: 20px 40px; font-size: 20px; border-radius: 10px; cursor: pointer; margin-top: 20px; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);">
-                        ✨ ENTER PORTAL
-                    </button>
-                </div>
-            </div>
-
-            <!-- BUGS CHECKLIST -->
-            <div class="bugs-checklist">
-                <h4>💡 Bugs to Fix:</h4>
-                <ul>
-                    <li>Bug 1: Portal (id="portal") has <code>width: 20px</code> → Change to <code>width: 200px</code></li>
-                    <li>Bug 2: Warning message (id="portal-warning") has <code>color: rgba(255,255,255,0.05)</code> → Change to <code>color: #ff0000</code></li>
-                    <li>Bug 3: Enter button (id="enter-portal") has <code>pointer-events: none</code> → Change to <code>pointer-events: auto</code></li>
-                </ul>
-            </div>
-
-            <hr style="margin: 40px 0; border: none; border-top: 1px solid rgba(139,0,0,0.5);">
-
-            <!-- DEBUG PANEL (For Testing) -->
-            <div class="debug-panel">
-                <h4>🐛 Debug Panel (Testing Only)</h4>
-                <p>In a real game, players use DevTools. For testing purposes, you can use these buttons:</p>
-                <div style="margin: 20px 0;">
-                    <button onclick="fixBug('bug1')" class="btn btn-primary">Fix Bug 1 (Portal Width)</button>
-                    <button onclick="fixBug('bug2')" class="btn btn-primary">Fix Bug 2 (Warning Color)</button>
-                    <button onclick="fixBug('bug3')" class="btn btn-primary">Fix Bug 3 (Pointer Events)</button>
-                </div>
-                
-                <button id="complete-btn" onclick="completePage()" class="btn btn-success" style="width: 100%; font-size: 18px; padding: 15px; margin-top: 10px;" disabled>
-                    ✅ Complete Page & Continue (+10 Points)
-                </button>
+            <div class="stats">
+                <div>Analyzed: <span id="count">0 / 5</span></div>
+                <div>Status: <span id="status">IDLE</span></div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Load Scripts -->
-    <script src="../assets/js/config.js"></script>
-    <script src="../assets/js/game-engine.js"></script>
+<div class="success-overlay" id="successOverlay">
+    <div class="success-message">
+        ✅ DNA ANALYSIS COMPLETE!<br>
+        <div style="font-size: 0.5em; margin-top: 20px;">Cure Formula Unlocked!</div>
+    </div>
+</div>
+
+<!-- Load Scripts -->
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/game-engine.js"></script>
+
+<script>
+// Track which bugs are fixed
+const bugStatus = {
+  bug1: false,  // Lab container rotation is 0deg (not 180deg)
+  bug2: false,  // DNA strands width is positive and position is relative
+  bug3: false   // Progress bar direction is ltr (not rtl)
+};
+
+let analyzed = 0;
+const total = 5;
+let labPasscode = null; // Must be set to "DOCTOR" in console
+
+function checkBugsFixed() {
+    const labContainer = document.querySelector('.lab-container');
+    const strands = document.querySelectorAll('.dna-strand');
+    const progressBar = document.getElementById('progressBar');
+    
+    // Check Bug 1: Lab container rotation is 0deg
+    const containerStyle = window.getComputedStyle(labContainer);
+    const transform = containerStyle.transform;
+    const isRotationFixed = transform === 'none' || !transform.includes('-1');
+    bugStatus.bug1 = isRotationFixed;
+    
+    // Check Bug 2: DNA strands width is positive and position is relative
+    if (strands.length > 0) {
+        const strandStyle = window.getComputedStyle(strands[0]);
+        const width = parseFloat(strandStyle.width);
+        const position = strandStyle.position;
+        bugStatus.bug2 = width > 0 && (position === 'relative' || position === 'static');
+    }
+    
+    // Check Bug 3: Progress bar direction is ltr
+    const progressStyle = window.getComputedStyle(progressBar);
+    const direction = progressStyle.direction;
+    bugStatus.bug3 = direction === 'ltr';
+    
+    // Update bug counter in header
+    const bugsFixedCount = Object.values(bugStatus).filter(v => v).length;
+    const bugCounter = document.getElementById('bugs-fixed');
+    if (bugCounter) {
+        bugCounter.textContent = `${bugsFixedCount}/3`;
+    }
+}
+
+// Check bugs periodically
+setInterval(checkBugsFixed, 300);
+
+function analyzeDNA(element, strandId) {
+    const allBugsFixed = bugStatus.bug1 && bugStatus.bug2 && bugStatus.bug3;
+    
+    if (!allBugsFixed) {
+        const missingFixes = [];
+        if (!bugStatus.bug1) missingFixes.push('Change .lab-container transform from rotate(180deg) to rotate(0deg)');
+        if (!bugStatus.bug2) missingFixes.push('Change .dna-strand width from -200px to 200px AND position from absolute to relative');
+        if (!bugStatus.bug3) missingFixes.push('Change .progress-bar-fill direction from rtl to ltr');
+        
+        alert(`❌ Fix all 3 bugs first! Use DevTools (F12) to:\n\n${missingFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`);
+        return;
+    }
+    
+    if (element.classList.contains('analyzed')) return;
+
+    element.classList.add('analyzed');
+    analyzed++;
+
+    updateProgress();
+
+    if (analyzed === total) {
+        checkCompletion();
+    }
+}
+
+function updateProgress() {
+    const percentage = (analyzed / total) * 100;
+    document.getElementById('progressBar').style.width = percentage + '%';
+    document.getElementById('count').textContent = `${analyzed} / ${total}`;
+    document.getElementById('status').textContent = analyzed === total ? 'COMPLETE' : 'ANALYZING';
+}
+
+async function checkCompletion() {
+    if (labPasscode === "DOCTOR") {
+        document.getElementById('successOverlay').style.display = 'flex';
+        setTimeout(async () => {
+            await moveToNextPage();
+        }, 1500);
+    } else {
+        setTimeout(() => {
+            alert('All strands analyzed, but lab is locked! \n\nOpen DevTools Console and type:\nlabPasscode = "DOCTOR"\n\nThen analyze the last strand again!');
+        }, 300);
+    }
+}
+
+async function moveToNextPage() {
+    // Collect which bugs were fixed
+    const bugsFixed = [];
+    if (bugStatus.bug1) bugsFixed.push('bug1_rotation_fixed');
+    if (bugStatus.bug2) bugsFixed.push('bug2_strands_visible');
+    if (bugStatus.bug3) bugsFixed.push('bug3_progress_direction_fixed');
+    
+    console.log('🐛 Bugs fixed:', bugsFixed);
+    console.log('✅ All DNA strands analyzed!');
+    console.log('✅ Lab unlocked with passcode: DOCTOR');
+    
+    // Wait for gameEngine
+    let retries = 0;
+    const maxRetries = 20;
+    
+    while (!window.gameEngine && retries < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        retries++;
+    }
+    
+    if (window.gameEngine) {
+        await gameEngine.moveToNextPage(bugsFixed);
+    } else {
+        console.error('Game engine not loaded!');
+        alert('Error: Game engine not loaded. Please refresh the page.');
+    }
+}
+
+// Console hints
+console.log("🔬 Chopper's DNA Analyzer Challenge");
+console.log("STEP 1: Fix all 3 CSS bugs using DevTools");
+console.log("STEP 2: Click all 5 DNA strands to analyze them");
+console.log("STEP 3: Unlock the lab by typing: labPasscode = 'DOCTOR'");
+console.log("");
+console.log("Bugs to fix:");
+console.log("1. Container rotation (180deg → 0deg)");
+console.log("2. DNA strand width (-200px → 200px) and position (absolute → relative)");
+console.log("3. Progress bar direction (rtl → ltr)");
+
+checkBugsFixed();
+</script>
+
 </body>
 </html>

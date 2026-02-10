@@ -1,351 +1,519 @@
-<!-- ============================================================================
-     ROUND 1 - PAGE 1: The Flickering Basement
-     Path: frontend/round1/page1.html
-     ============================================================================ -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Round 1 - Page 1: The Flickering Basement</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="total-bugs" content="2">
+<title>Web Escape | Round 3 - Page 1 (2 Bugs)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Permanent+Marker&display=swap" rel="stylesheet">
+<style>
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ============================================================================
+   GAME HEADER
+   ============================================================================ */
+.game-header {
+    background: rgba(0,0,0,0.95);
+    padding: 15px 30px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    border-bottom: 3px solid #667eea;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    font-family: 'Fredoka', sans-serif;
+}
+
+.team-info {
+    color: #667eea;
+}
+
+.timer {
+    background: #dc3545;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 24px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+}
+
+.timer-warning {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.bugs-indicator {
+    background: #28a745;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.exit-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.exit-btn:hover {
+    background: #c82333;
+}
+
+/* Notifications */
+.notification {
+    position: fixed;
+    top: 110px;
+    right: -350px;
+    background: rgba(102, 126, 234, 0.95);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transition: right 0.3s;
+    z-index: 999;
+    max-width: 300px;
+}
+
+.notification.show {
+    right: 20px;
+}
+
+.notification-success {
+    background: rgba(40, 167, 69, 0.95);
+}
+
+.notification-error {
+    background: rgba(220, 53, 69, 0.95);
+}
+
+.notification-info {
+    background: rgba(23, 162, 184, 0.95);
+}
+
+/* ============================================================================
+   ORIGINAL GAME STYLES
+   ============================================================================ */
+
+:root {
+    --pop-green: #aeea00;
+    --jungle-green: #1b5e20;
+    --wood-brown: #3e2723;
+    --parchment: #fff3e0;
+    --usopp-yellow: #ffeb3b;
+    --usopp-red: #d50000;
+}
+
+body {
+    min-height: 100vh;
+    background-color: #1a2e1a;
+    background-image: url('./Asset/Usopp.jpg');
+    background-size: cover;
+    background-position: center;
+    font-family: 'Fredoka', sans-serif;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+    user-select: none;
+    padding-top: 100px;
+}
+
+body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.6) 90%);
+    pointer-events: none;
+}
+
+.sniper-nest {
+    position: relative;
+    background: transparent;
+    border: none;
+    width: 100%;
+    max-width: 800px;
+    text-align: center;
+    box-shadow: none;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    z-index: 10;
+}
+
+.leaf {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: var(--jungle-green);
+    border-radius: 0 50% 0 50%;
+    transform: rotate(-45deg);
+    z-index: -1;
+    opacity: 0.8;
+}
+
+.leaf.top-left {
+    top: 10%;
+    left: 10%;
+}
+
+.leaf.top-right {
+    top: 10%;
+    right: 10%;
+    transform: rotate(45deg);
+}
+
+.leaf.bottom-left {
+    bottom: 10%;
+    left: 10%;
+    transform: rotate(-135deg);
+}
+
+.leaf.bottom-right {
+    bottom: 10%;
+    right: 10%;
+    transform: rotate(135deg);
+}
+
+h1 {
+    font-family: 'Permanent Marker', cursive;
+    color: var(--usopp-yellow);
+    font-size: 3.5rem;
+    margin-bottom: 0.5rem;
+    text-shadow: 3px 3px 0px #000, 0 0 20px rgba(0, 0, 0, 0.8);
+    letter-spacing: 2px;
+}
+
+.bounty-text {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 2rem;
+    text-shadow: 2px 2px 4px #000;
+    font-family: 'Permanent Marker', cursive;
+}
+
+.game-hint {
+    font-size: 1.1rem;
+    color: var(--pop-green);
+    background: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+#target {
+    /* ❌ BUG 1: Position fixed makes it unmovable and pointer-events none makes it unclickable */
+    position: fixed;
+    top: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, red 40%, white 40%, white 60%, red 60%);
+    border-radius: 50%;
+    transition: top 0.2s ease, left 0.2s ease;
+    cursor: pointer;
+    z-index: 100;
+    box-shadow: 0 0 15px var(--pop-green);
+    /* ❌ BUG 2: CSS custom property for state - should be managed in JavaScript */
+    --target-state: running;
+}
+
+#status-msg {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 2rem;
+    min-height: 2rem;
+    color: var(--pop-green);
+    text-shadow: 2px 2px 0 #000, 0 0 10px rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.4);
+    padding: 10px 20px;
+    border-radius: 10px;
+}
+
+button.hint-btn {
+    margin-top: 2rem;
+    background: transparent;
+    color: var(--pop-green);
+    padding: 0.8rem 2rem;
+    border: 2px solid var(--pop-green);
+    font-family: 'Permanent Marker', cursive;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-shadow: 2px 2px 0 #000;
+    border-radius: 10px;
+}
+
+button.hint-btn:hover {
+    background: var(--pop-green);
+    color: #000;
+    text-shadow: none;
+    transform: scale(1.1) rotate(-2deg);
+}
+
+#nav-next {
+    display: none;
+    margin-top: 2rem;
+    background: transparent;
+    color: var(--pop-green);
+    padding: 0.8rem 1.5rem;
+    border: 2px solid var(--pop-green);
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 2rem;
+    font-family: 'Permanent Marker', cursive;
+    text-shadow: 2px 2px 0 #000;
+    display: inline-block;
+    transition: all 0.2s;
+}
+
+#nav-next:hover {
+    background: var(--pop-green);
+    color: #000;
+    text-shadow: none;
+    transform: scale(1.1);
+}
+
+.hint-text {
+    margin-top: 3rem;
+    font-size: 0.9rem;
+    color: #ddd;
+    opacity: 0.7;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .game-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
     
-    <!-- Game Styles -->
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a0a;
-            color: #fff;
-        }
-        
-        /* Game Header */
-        .game-header {
-            background: rgba(0,0,0,0.95);
-            padding: 15px 30px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            border-bottom: 3px solid #667eea;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .team-info {
-            color: #667eea;
-        }
-        
-        .timer {
-            background: #dc3545;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 24px;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-        }
-        
-        .timer-warning {
-            animation: pulse 1s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .bugs-indicator {
-            background: #28a745;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: bold;
-        }
-        
-        .exit-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.3s;
-        }
-        
-        .exit-btn:hover {
-            background: #c82333;
-        }
-        
-        /* Game Content */
-        .game-content {
-            margin-top: 100px;
-            min-height: calc(100vh - 100px);
-            padding: 40px 20px;
-        }
-        
-        .game-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: rgba(255,255,255,0.05);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        }
-        
-        .story-box {
-            background: rgba(139,0,0,0.2);
-            padding: 20px;
-            border-left: 5px solid #8B0000;
-            margin-bottom: 30px;
-            border-radius: 5px;
-        }
-        
-        .story-box p {
-            margin-bottom: 10px;
-            line-height: 1.6;
-        }
-        
-        .challenge-area {
-            background: rgba(255,255,255,0.1);
-            padding: 40px;
-            border-radius: 10px;
-            margin: 30px 0;
-        }
-        
-        .bugs-checklist {
-            background: rgba(255,243,205,0.1);
-            padding: 20px;
-            border-radius: 8px;
-            margin: 30px 0;
-        }
-        
-        .bugs-checklist h4 {
-            color: #ffc107;
-            margin-bottom: 15px;
-        }
-        
-        .bugs-checklist ul {
-            list-style-position: inside;
-            color: #fff;
-        }
-        
-        .bugs-checklist li {
-            margin: 8px 0;
-            padding-left: 10px;
-        }
-        
-        .bugs-checklist code {
-            background: rgba(0,0,0,0.3);
-            padding: 2px 6px;
-            border-radius: 3px;
-            color: #ffc107;
-            font-family: 'Courier New', monospace;
-        }
-        
-        /* Buttons */
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin: 5px;
-        }
-        
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-        
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .btn-pulse {
-            animation: btnPulse 1s infinite;
-        }
-        
-        @keyframes btnPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        /* Debug Panel */
-        .debug-panel {
-            background: rgba(0,0,0,0.3);
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .debug-panel h4 {
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-        
-        .debug-panel p {
-            color: #aaa;
-            margin-bottom: 15px;
-        }
-        
-        /* Notifications */
-        .notification {
-            position: fixed;
-            top: 110px;
-            right: -350px;
-            background: rgba(102, 126, 234, 0.95);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: right 0.3s;
-            z-index: 999;
-            max-width: 300px;
-        }
-        
-        .notification.show {
-            right: 20px;
-        }
-        
-        .notification-success {
-            background: rgba(40, 167, 69, 0.95);
-        }
-        
-        .notification-error {
-            background: rgba(220, 53, 69, 0.95);
-        }
-        
-        .notification-info {
-            background: rgba(23, 162, 184, 0.95);
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .game-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .game-container {
-                padding: 20px;
-            }
-            
-            .challenge-area {
-                padding: 20px;
-            }
-        }
-    </style>
+    h1 {
+        font-size: 2.5rem;
+    }
+    
+    .bounty-text {
+        font-size: 1.3rem;
+    }
+}
+</style>
 </head>
 <body>
-    <!-- GAME HEADER -->
-    <div class="game-header">
-        <div class="team-info">
-            <strong id="team-name">Loading...</strong><br>
-            <small>Round <span id="round-num">-</span> - Page <span id="page-num">-</span> | Score: <span id="current-score">0</span></small>
-        </div>
-        
-        <div class="timer" id="timer">--:--</div>
-        
-        <div class="bugs-indicator">
-            🐛 Bugs: <span id="bugs-fixed">0/3</span>
-        </div>
-        
-        <button class="exit-btn" onclick="exitGame()">
-            ← Exit Game
-        </button>
+
+<!-- GAME HEADER -->
+<div class="game-header">
+    <div class="team-info">
+        <strong id="team-name">Loading...</strong><br>
+        <small>Round <span id="round-num">-</span> - Page <span id="page-num">-</span> | Score: <span id="current-score">0</span></small>
+    </div>
+    
+    <div class="timer" id="timer">--:--</div>
+    
+    <div class="bugs-indicator">
+        🐛 Bugs: <span id="bugs-fixed">0/2</span>
+    </div>
+    
+    <button class="exit-btn" onclick="exitGame()">
+        ← Exit Game
+    </button>
+</div>
+
+<!-- GAME CONTENT -->
+<div class="sniper-nest">
+    <div class="leaf top-left"></div>
+    <div class="leaf top-right"></div>
+    <div class="leaf bottom-left"></div>
+    <div class="leaf bottom-right"></div>
+
+    <h1>GOD USOPP CHALLENGE</h1>
+    <p class="bounty-text">"You'll never catch me! I'm too fast for normal pirates!"</p>
+    
+    <div class="game-hint">
+        💡 Use DevTools (F12) to fix 2 bugs!<br>
+        <small>Hint: Make the target clickable and movable!</small>
     </div>
 
-    <!-- GAME CONTENT -->
-    <div class="game-content">
-        <div class="game-container">
-            <h1 style="color: #8B0000; text-align: center; margin-bottom: 30px; font-size: 2.5em;">
-                🎭 The Flickering Basement
-            </h1>
-            
-            <div class="story-box">
-                <p><strong>📖 Story:</strong> You wake up in the Byers' basement. The lights are flickering, and the alphabet wall is covered in Christmas lights. Joyce left a message saying "Find the light to escape," but the bulbs won't turn on.</p>
-                <p><strong>🎯 Mission:</strong> Fix all 3 bugs using DevTools to reveal the escape button!</p>
-            </div>
+    <div id="target"></div>
 
-            <!-- GAME CHALLENGE AREA -->
-            <div class="challenge-area">
-                
-                <!-- BUG 1: Message with opacity 0 -->
-                <div id="message-bulbs" style="opacity: 0; text-align: center; font-size: 48px; margin: 30px 0; letter-spacing: 20px; font-weight: bold; color: #ffc107;">
-                    RUN
-                </div>
+    <div id="status-msg">Hits: <span id="score">0</span> / 3</div>
+    <button class="hint-btn" onclick="showHint()">Show Hint</button>
 
-                <!-- BUG 2: Escape button with display: none -->
-                <div style="text-align: center; margin: 40px 0;">
-                    <button id="escape-door" style="display: none; background: #28a745; color: white; border: none; padding: 20px 40px; font-size: 24px; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);">
-                        🚪 ESCAPE DOOR
-                    </button>
-                </div>
+    <a href="#" id="nav-next" style="display: none;" onclick="proceedToNext(event)">Proceed to Next Island -></a>
+</div>
 
-                <!-- BUG 3: Instructions with visibility hidden -->
-                <div id="instructions" style="visibility: hidden; background: rgba(255,243,205,0.1); padding: 15px; border-radius: 8px; margin-top: 30px; color: #ffc107; border: 1px solid rgba(255,193,7,0.3);">
-                    <p><strong>💡 Hint:</strong> Use DevTools (F12) → Inspect Element → Styles Panel</p>
-                    <ul style="margin-top: 10px; margin-left: 20px;">
-                        <li>Look for <code>display: none</code> and change to <code>display: block</code></li>
-                        <li>Check for <code>opacity: 0</code> and change to <code>opacity: 1</code></li>
-                        <li>Find <code>visibility: hidden</code> and change to <code>visibility: visible</code></li>
-                    </ul>
-                </div>
-            </div>
+<!-- Load Scripts -->
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/game-engine.js"></script>
 
-            <!-- BUGS CHECKLIST -->
-            <div class="bugs-checklist">
-                <h4>💡 Bugs to Fix:</h4>
-                <ul>
-                    <li>Bug 1: Message (id="message-bulbs") has <code>opacity: 0</code> → Change to <code>opacity: 1</code></li>
-                    <li>Bug 2: Escape button (id="escape-door") has <code>display: none</code> → Change to <code>display: block</code></li>
-                    <li>Bug 3: Instructions (id="instructions") have <code>visibility: hidden</code> → Change to <code>visibility: visible</code></li>
-                </ul>
-            </div>
+<script>
+// Track which bugs are fixed
+const bugStatus = {
+  bug1: false,  // Target position is absolute and pointer-events is auto
+  bug2: false   // Target doesn't have --target-state CSS property
+};
 
-            <hr style="margin: 40px 0; border: none; border-top: 1px solid rgba(139,0,0,0.5);">
+let score = 0;
+const target = document.getElementById('target');
+const scoreDisplay = document.getElementById('score');
+const msgDisplay = document.getElementById('status-msg');
+const navBtn = document.getElementById('nav-next');
 
-            <!-- DEBUG PANEL (For Testing) -->
-            <div class="debug-panel">
-                <h4>🐛 Debug Panel (Testing Only)</h4>
-                <p>In a real game, players use DevTools. For testing purposes, you can use these buttons:</p>
-                <div style="margin: 20px 0;">
-                    <button onclick="fixBug('bug1')" class="btn btn-primary">Fix Bug 1 (Opacity)</button>
-                    <button onclick="fixBug('bug2')" class="btn btn-primary">Fix Bug 2 (Display)</button>
-                    <button onclick="fixBug('bug3')" class="btn btn-primary">Fix Bug 3 (Visibility)</button>
-                </div>
-                
-                <button id="complete-btn" onclick="completePage()" class="btn btn-success" style="width: 100%; font-size: 18px; padding: 15px; margin-top: 10px;" disabled>
-                    ✅ Complete Page & Continue (+10 Points)
-                </button>
-            </div>
-        </div>
-    </div>
+function checkBugsFixed() {
+    const targetStyle = window.getComputedStyle(target);
+    
+    // Check Bug 1: Position is absolute AND pointer-events is auto
+    const position = targetStyle.position;
+    const pointerEvents = targetStyle.pointerEvents;
+    bugStatus.bug1 = position === 'absolute' && pointerEvents === 'auto';
+    
+    // Check Bug 2: --target-state CSS property should not be used
+    // (This is harder to check, but we'll check if the property exists)
+    const customProp = targetStyle.getPropertyValue('--target-state');
+    bugStatus.bug2 = !customProp || customProp.trim() === '';
+    
+    // Update bug counter in header
+    const bugsFixedCount = Object.values(bugStatus).filter(v => v).length;
+    const bugCounter = document.getElementById('bugs-fixed');
+    if (bugCounter) {
+        bugCounter.textContent = `${bugsFixedCount}/2`;
+    }
+}
 
-    <!-- Load Scripts -->
-    <script src="../assets/js/config.js"></script>
-    <script src="../assets/js/game-engine.js"></script>
+// Check bugs periodically
+setInterval(checkBugsFixed, 300);
+
+function showHint() {
+    const allBugsFixed = bugStatus.bug1 && bugStatus.bug2;
+    
+    if (!allBugsFixed) {
+        const missingFixes = [];
+        if (!bugStatus.bug1) missingFixes.push('Change #target position from fixed to absolute AND pointer-events from none to auto');
+        if (!bugStatus.bug2) missingFixes.push('Remove --target-state: running from #target CSS');
+        
+        alert(`❌ Fix all 2 bugs first! Use DevTools (F12) to:\n\n${missingFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`);
+    } else {
+        alert('✅ All bugs fixed! Now try to click the moving target 3 times!');
+    }
+}
+
+target.addEventListener('mouseover', moveTarget);
+
+function moveTarget() {
+    // Check CSS custom property for state
+    const style = window.getComputedStyle(target);
+    const state = style.getPropertyValue('--target-state').trim();
+
+    if (state !== 'running') {
+        return;
+    }
+
+    const maxX = window.innerWidth - 60;
+    const maxY = window.innerHeight - 60;
+
+    const randomX = Math.random() * maxX;
+    const randomY = Math.random() * maxY;
+
+    target.style.left = randomX + 'px';
+    target.style.top = randomY + 'px';
+    target.style.transform = 'none';
+}
+
+target.addEventListener('click', function () {
+    const allBugsFixed = bugStatus.bug1 && bugStatus.bug2;
+    
+    if (!allBugsFixed) {
+        alert('Fix all bugs first!');
+        return;
+    }
+    
+    score++;
+    scoreDisplay.innerText = score;
+
+    target.style.background = "var(--pop-green)";
+    setTimeout(() => {
+        target.style.background = "radial-gradient(circle, red 40%, white 40%, white 60%, red 60%)";
+    }, 200);
+
+    if (score >= 3) {
+        winGame();
+    } else {
+        moveTarget();
+    }
+});
+
+function winGame() {
+    msgDisplay.innerHTML = "<span style='color:var(--jungle-green); background:rgba(255,255,255,0.8); padding:5px; border-radius:5px;'>TARGET CLEARED! BRAVE WARRIOR!</span>";
+    target.style.display = 'none';
+    target.style.setProperty('--target-state', 'stopped');
+    navBtn.style.display = 'inline-block';
+}
+
+async function proceedToNext(event) {
+    event.preventDefault();
+    
+    // Collect which bugs were fixed
+    const bugsFixed = [];
+    if (bugStatus.bug1) bugsFixed.push('bug1_target_clickable');
+    if (bugStatus.bug2) bugsFixed.push('bug2_state_managed_properly');
+    
+    console.log('🐛 Bugs fixed:', bugsFixed);
+    console.log('🎯 All 3 targets hit!');
+    
+    // Wait for gameEngine
+    let retries = 0;
+    const maxRetries = 20;
+    
+    while (!window.gameEngine && retries < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        retries++;
+    }
+    
+    if (window.gameEngine) {
+        await gameEngine.moveToNextPage(bugsFixed);
+    } else {
+        console.error('Game engine not loaded!');
+        alert('Error: Game engine not loaded. Please refresh the page.');
+    }
+}
+
+// Console hints
+console.log("🎯 God Usopp's Sniper Challenge");
+console.log("STEP 1: Fix all 2 bugs using DevTools");
+console.log("STEP 2: Click the moving target 3 times");
+console.log("STEP 3: Proceed to next page");
+console.log("");
+console.log("Bugs to fix:");
+console.log("1. Target position (fixed → absolute) AND pointer-events (none → auto)");
+console.log("2. Remove --target-state CSS property from #target");
+
+checkBugsFixed();
+</script>
+
 </body>
 </html>
