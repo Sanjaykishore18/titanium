@@ -12,7 +12,7 @@ class GameEngine {
         this.timer = null;
         this.ws = null;
         this.reconnectAttempts = 0;
-        this.maxReconnectAttempts = 5;
+        this.maxReconnectAttempts = 10;
     }
 
     async init() {

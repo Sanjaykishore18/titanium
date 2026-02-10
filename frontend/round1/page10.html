@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="total-bugs" content="0">
-<title>Web Escape | Round 1 - Page 9 (Final Stage)</title>
+<meta name="total-bugs" content="1">
+<title>Web Escape | Round 1 - Page 10 (Final Stage)</title>
 <style>
 /* RESET */
 * {
@@ -188,6 +188,12 @@ button:hover {
   transform: scale(1.05);
 }
 
+button:disabled {
+  background: #666;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .msg {
   margin-top: 15px;
   height: 20px;
@@ -245,7 +251,7 @@ button:hover {
   <p class="hint">💡 Hint: Not everything is meant to be read normally.<br>Try looking at the console...</p>
   <input type="text" id="key" placeholder="Enter the final key" autocomplete="off">
   <br>
-  <button onclick="verify()">UNLOCK</button>
+  <button onclick="verify()" id="submitBtn">UNLOCK</button>
   <div class="msg" id="msg"></div>
 </div>
 
@@ -282,14 +288,17 @@ function verify() {
 
 async function completeRound() {
   const msgDiv = document.getElementById("msg");
+  const submitBtn = document.getElementById("submitBtn");
+  
   msgDiv.style.color = "#0f0";
-  msgDiv.innerText = "🎉 CORRECT! Completing round...";
+  msgDiv.innerText = "✓ CORRECT! Completing round...";
+  submitBtn.disabled = true;
   
-  console.log("🎉 Round 1 completed!");
+  console.log("🎉 Correct answer! Completing round...");
   
-  // Wait for gameEngine
+  // Wait for gameEngine to load
   let retries = 0;
-  const maxRetries = 20;
+  const maxRetries = 30;
   
   while (!window.gameEngine && retries < maxRetries) {
     await new Promise(resolve => setTimeout(resolve, 100));
@@ -297,18 +306,29 @@ async function completeRound() {
   }
   
   if (window.gameEngine) {
-    // Mark round as complete
-    await gameEngine.completeRound();
+    try {
+      // ✅ Use moveToNextPage with empty bugs array (page 10 has no bugs)
+      // This will trigger the backend validation and redirect to dashboard
+      console.log("Calling gameEngine.moveToNextPage()...");
+      await gameEngine.moveToNextPage(['final-puzzle']);
+      
+    } catch (error) {
+      console.error('Error completing round:', error);
+      
+      // Fallback: redirect to dashboard anyway
+      setTimeout(() => {
+        const host = window.location.hostname;
+        window.location.href = `http://${host}:8000/dashboard/`;
+      }, 2000);
+    }
   } else {
-    console.error('Game engine not loaded!');
-    // Fallback: Show success message
-    document.body.innerHTML = `
-      <div style="color:#0f0;text-align:center;padding-top:100px;">
-        <h1 style="font-size:3rem;text-shadow:0 0 20px #0f0;">ROUND 1 COMPLETED</h1>
-        <p style="font-size:1.5rem;margin-top:20px;">You escaped the Upside Down.</p>
-        <p style="font-size:1rem;margin-top:40px;color:#ccc;">Refresh the page or return to lobby.</p>
-      </div>
-    `;
+    console.error('Game engine not loaded! Redirecting to dashboard...');
+    
+    // Fallback: redirect to dashboard
+    setTimeout(() => {
+      const host = window.location.hostname;
+      window.location.href = `http://${host}:8000/dashboard/`;
+    }, 2000);
   }
 }
 

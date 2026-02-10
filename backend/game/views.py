@@ -287,7 +287,7 @@ def admin_round_control(request, round_number):
         
         return redirect('admin_dashboard')
     
-    return redirect('admin_dashboard')
+    return ('admin_dashboard')
 
 @user_passes_test(is_superuser)
 def admin_leaderboard(request):
@@ -397,7 +397,15 @@ def api_validate_page(request):
             page_number = data.get('page_number')
             bugs_fixed = data.get('bugs_fixed', [])
             team_id = data.get('team_id')
-            
+
+            # Normalize numeric inputs (clients may send strings)
+            try:
+                round_number = int(round_number)
+                page_number = int(page_number)
+                team_id = int(team_id)
+            except (TypeError, ValueError):
+                return JsonResponse({'error': 'Invalid numeric parameters'}, status=400)
+
             from django.conf import settings
             expected_token = generate_page_token(team_id, round_number, page_number, settings.SECRET_KEY)
             
@@ -512,19 +520,28 @@ def api_validate_page(request):
                     team_round.end_time = timezone.now()
                     team_round.duration_seconds = int((team_round.end_time - team_round.start_time).total_seconds())
                     team_round.save()
-                    
+
+                    # Ensure numeric fields updated after any F() expressions
+                    team_round.refresh_from_db()
+
                     GameActivity.objects.create(
                         team=team,
                         activity_type='round_completed',
                         description=f'Completed Round {round_number}',
                         metadata={'score': team_round.score}
                     )
-                    
+
+                    # Provide explicit backend dashboard URL (include port 8000)
+                    current_host = request.get_host().split(':')[0]
+                    redirect_url = f"http://{current_host}:8000/dashboard"
+
                     return JsonResponse({
                         'success': True,
                         'round_completed': True,
                         'final_score': team_round.score,
+                        'current_score': team_round.score,
                         'redirect_dashboard': True,
+                        'redirect_url': redirect_url,
                         'message': f'Round {round_number} Completed!'
                     })
         
