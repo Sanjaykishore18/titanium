@@ -125,10 +125,18 @@ def team_dashboard(request):
     rounds_with_progress = list(zip(rounds, round_progress_list))
     
     # Get all teams with overall scores (sum of all rounds)
+    from django.db.models import Subquery, OuterRef
+    
+    team_scores = TeamRoundProgress.objects.filter(
+        team=OuterRef('pk')
+    ).values('team').annotate(
+        total=Sum('score')
+    ).values('total')
+    
     all_teams = Team.objects.annotate(
         members_count=Count('members', distinct=True)
     ).annotate(
-        total_score=Coalesce(Sum('round_progress__score', distinct=True), 0),
+        total_score=Coalesce(Subquery(team_scores), 0),
         rounds_completed=Count(
             'round_progress',
             filter=Q(round_progress__status__in=['completed', 'qualified']),
@@ -160,18 +168,23 @@ def team_dashboard(request):
 
 @user_passes_test(is_superuser)
 def admin_dashboard(request):
+    from django.db.models import Subquery, OuterRef
+    
     total_teams = Team.objects.count()
     total_participants = TeamMember.objects.count()
     
     rounds = Round.objects.all().order_by('round_number')
     
+    team_scores = TeamRoundProgress.objects.filter(
+        team=OuterRef('pk')
+    ).values('team').annotate(
+        total=Sum('score')
+    ).values('total')
+    
     teams = Team.objects.annotate(
         members_count=Count('members', distinct=True)
     ).annotate(
-        # Sum across related TeamRoundProgress rows. Remove `distinct=True` from Sum
-        # because it collapses identical score values (e.g. two rounds with 100)
-        # resulting in incorrect totals like 110 instead of 210.
-        total_score=Coalesce(Sum('round_progress__score'), 0),
+        total_score=Coalesce(Subquery(team_scores), 0),
         pages_completed=Count('round_progress__page_progress', filter=Q(round_progress__page_progress__completed=True), distinct=True)
     ).order_by('-total_score', 'created_at')
     
@@ -214,10 +227,18 @@ def admin_create_team(request):
 
 @user_passes_test(is_superuser)
 def admin_teams(request):
+    from django.db.models import Subquery, OuterRef
+    
+    team_scores = TeamRoundProgress.objects.filter(
+        team=OuterRef('pk')
+    ).values('team').annotate(
+        total=Sum('score')
+    ).values('total')
+    
     teams = Team.objects.annotate(
         member_count=Count('members', distinct=True)
     ).annotate(
-        total_score=Coalesce(Sum('round_progress__score', distinct=True), 0)
+        total_score=Coalesce(Subquery(team_scores), 0)
     ).order_by('-created_at')
     
     context = {'teams': teams}
@@ -294,10 +315,18 @@ def admin_round_control(request, round_number):
 
 @user_passes_test(is_superuser)
 def admin_leaderboard(request):
+    from django.db.models import Subquery, OuterRef
+    
+    team_scores = TeamRoundProgress.objects.filter(
+        team=OuterRef('pk')
+    ).values('team').annotate(
+        total=Sum('score')
+    ).values('total')
+    
     teams = Team.objects.annotate(
         members_count=Count('members', distinct=True)
     ).annotate(
-        total_score=Coalesce(Sum('round_progress__score', distinct=True), 0),
+        total_score=Coalesce(Subquery(team_scores), 0),
         pages_completed=Count('round_progress__page_progress', filter=Q(round_progress__page_progress__completed=True), distinct=True)
     ).order_by('-total_score', 'created_at')
     
@@ -661,10 +690,19 @@ def export_team_round_progress_csv(request):
 # ============= PUBLIC LEADERBOARD =============
 
 def public_leaderboard(request):
+    from django.db.models import Subquery, OuterRef
+    
+    # Subquery to correctly sum each team's round scores (avoids JOIN multiplication bug)
+    team_scores = TeamRoundProgress.objects.filter(
+        team=OuterRef('pk')
+    ).values('team').annotate(
+        total=Sum('score')
+    ).values('total')
+    
     teams = Team.objects.annotate(
         members_count=Count('members', distinct=True)
     ).annotate(
-        total_score=Coalesce(Sum('round_progress__score', distinct=True), 0),
+        total_score=Coalesce(Subquery(team_scores), 0),
         pages_completed=Count('round_progress__page_progress', filter=Q(round_progress__page_progress__completed=True), distinct=True)
     ).order_by('-total_score', 'created_at')
     
