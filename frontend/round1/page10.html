@@ -289,42 +289,86 @@ function verify() {
 async function completeRound() {
   const msgDiv = document.getElementById("msg");
   const submitBtn = document.getElementById("submitBtn");
-  
+
   msgDiv.style.color = "#0f0";
   msgDiv.innerText = "✓ CORRECT! Completing round...";
   submitBtn.disabled = true;
-  
-  console.log("🎉 Correct answer! Completing round...");
-  
-  // Wait for gameEngine to load
-  let retries = 0;
-  const maxRetries = 30;
-  
-  while (!window.gameEngine && retries < maxRetries) {
-    await new Promise(resolve => setTimeout(resolve, 100));
+
+  // Wait for gameEngine/localStorage to be ready
+  let retries = 0, maxRetries = 70;
+  while (!localStorage.getItem('team_id') && retries < maxRetries) {
+    await new Promise(r => setTimeout(r, 100));
     retries++;
   }
-  
-  if (window.gameEngine) {
-    try {
-      // ✅ Use moveToNextPage with empty bugs array (page 10 has no bugs)
-      // This will trigger the backend validation and redirect to dashboard
-      console.log("Calling gameEngine.moveToNextPage()...");
-      await gameEngine.moveToNextPage(['final-puzzle']);
-      
-    } catch (error) {
-      console.error('Error completing round:', error);
-      
-      // Fallback: redirect to dashboard anyway
-      setTimeout(() => {
+
+  try {
+    const teamId = localStorage.getItem('team_id');
+    const token = localStorage.getItem('game_token');
+    const round = parseInt(localStorage.getItem('current_round')) || 1;
+    const page = 10;
+
+    console.log('Calling backend validate API for final page...', { teamId, round, page });
+
+    const resp = await fetch(
+      CONFIG.BACKEND_URL + CONFIG.API.VALIDATE_PAGE,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          team_id: teamId,
+          token: token,
+          round_number: round,
+          page_number: page,
+          bugs_fixed: ['final-puzzle']
+        })
+      }
+    );
+
+    const data = await resp.json();
+
+    console.log('Backend response:', data);
+
+    if (data.error) {
+      console.error('Validate API error:', data);
+      if (data.redirect_dashboard) {
         const host = window.location.hostname;
         window.location.href = `http://${host}:8000/dashboard/`;
-      }, 2000);
+        return;
+      }
+      alert(data.error || 'Validation failed');
+      submitBtn.disabled = false;
+      return;
     }
-  } else {
-    console.error('Game engine not loaded! Redirecting to dashboard...');
-    
-    // Fallback: redirect to dashboard
+
+    // Update UI score
+    const scoreEl = document.getElementById('current-score');
+    if (scoreEl && (data.final_score || data.current_score)) {
+      scoreEl.textContent = data.final_score || data.current_score;
+      console.log('Score updated to:', data.final_score || data.current_score);
+    }
+
+    // Broadcast to teammates if websocket open
+    if (window.gameEngine && window.gameEngine.ws && window.gameEngine.ws.readyState === WebSocket.OPEN) {
+      window.gameEngine.ws.send(JSON.stringify({
+        type: 'round_completed',
+        round_number: round,
+        final_page: page,
+        final_score: data.final_score || data.current_score,
+        new_token: data.new_token || token
+      }));
+      console.log('Broadcasted round_completed to teammates');
+    }
+
+    // Redirect to backend dashboard (include port)
+    const host = window.location.hostname;
+    console.log('🎉 Round completed! Redirecting to dashboard...');
+    setTimeout(() => {
+      window.location.href = `http://${host}:8000/dashboard/`;
+    }, 500);
+
+  } catch (err) {
+    console.error('Error completing round:', err);
     setTimeout(() => {
       const host = window.location.hostname;
       window.location.href = `http://${host}:8000/dashboard/`;

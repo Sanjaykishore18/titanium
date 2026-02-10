@@ -257,9 +257,21 @@ function checkBugsFixed() {
     const moveBtnElement = document.getElementById("moveBTN");
     
     // Check Bug 1: Move button is visible
-    const btnStyle = window.getComputedStyle(moveBtnElement);
-    const display = btnStyle.display;
-    bugStatus.bug1 = display !== 'none';
+    // Add null check before getComputedStyle
+    if (moveBtnElement) {
+        const btnStyle = window.getComputedStyle(moveBtnElement);
+        const display = btnStyle.display;
+        bugStatus.bug1 = display !== 'none';
+    } else {
+        // If moveBTN doesn't exist, it means ID was changed (bug 2 fixed)
+        // Check the new ID instead
+        const correctBtn = document.getElementById("moveBtn");
+        if (correctBtn) {
+            const btnStyle = window.getComputedStyle(correctBtn);
+            const display = btnStyle.display;
+            bugStatus.bug1 = display !== 'none';
+        }
+    }
     
     // Check Bug 2: Button ID is "moveBtn" (not "moveBTN")
     const correctBtn = document.getElementById("moveBtn");

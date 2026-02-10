@@ -4,8 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="total-bugs" content="2">
-<title>Web Escape | Round 2 - Page 5 (2 Bugs)</title>
+<title>Web Escape | Round 2 - Page 1 (2 Bugs)</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Orbitron:wght@400;700&display=swap');
+
 /* RESET */
 * {
   margin: 0;
@@ -30,7 +32,7 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 15px;
-    font-family: 'Consolas', monospace;
+    font-family: 'Orbitron', sans-serif;
 }
 
 .team-info {
@@ -114,150 +116,189 @@
    ============================================================================ */
 
 body {
-    background: url(page17.png) no-repeat center center fixed;
+    background: #0a0f0d url(page12.png) no-repeat center center;
     background-size: cover;
-    font-family: 'Consolas', 'Courier New', monospace;
+    font-family: 'Orbitron', sans-serif;
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    padding-top: 100px;
-    color: #e5d4ed;
+    color: #fff;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 80px;
 }
 
-.puzzle-container {
-    max-width: 800px;
-    width: 100%;
+.header {
     text-align: center;
+    padding: 40px;
+    z-index: 10;
 }
 
 h1 {
-    font-size: 3em;
-    margin-bottom: 20px;
-    color: #dda15e;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-    letter-spacing: 2px;
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: 4em;
+    color: #2ecc71;
+    text-shadow: 0 0 20px rgba(46, 204, 113, 0.5);
+    margin-bottom: 10px;
+    letter-spacing: 10px;
 }
 
-.description {
-    margin-bottom: 40px;
-    font-size: 1.3em;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-    background: rgba(0, 0, 0, 0.2);
-    padding: 10px;
-    border-radius: 10px;
-    display: inline-block;
+.task-hint {
+    color: #bdc3c7;
+    font-size: 1.2em;
+    letter-spacing: 2px;
+    text-transform: uppercase;
 }
 
 .game-hint {
-    margin-bottom: 30px;
-    font-size: 1.1em;
-    color: #FFD700;
+    color: #ffd700;
+    font-size: 1em;
+    margin-top: 15px;
     background: rgba(0, 0, 0, 0.7);
     padding: 10px;
     border-radius: 5px;
-    display: inline-block;
 }
 
-.sequence-display {
+.trial-ground {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.falling-stone {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle at 30% 30%, #555, #222);
+    border-radius: 20px;
+    clip-path: polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%);
     display: flex;
-    gap: 15px;
-    /* ❌ BUG 1: Sequence is hidden using clip-path! Players need to reset it. */
-    clip-path: circle(0%);
-    justify-content: center;
-    margin-bottom: 30px;
-    min-height: 80px;
     align-items: center;
-}
-
-.sequence-item {
-    font-size: 2.5em;
-    background: rgba(255, 255, 255, 0.1);
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    border: 2px solid rgba(221, 161, 94, 0.5);
-    transition: all 0.3s ease;
-}
-
-.sequence-item.active {
-    background: rgba(221, 161, 94, 0.8);
-    transform: scale(1.1);
-    box-shadow: 0 0 15px #dda15e;
-}
-
-.puzzle-grid {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 20px;
-    margin-bottom: 30px;
-}
-
-.puzzle-btn {
-    font-size: 3em;
-    background: transparent;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    width: 80px;
-    height: 80px;
-    border-radius: 15px;
     cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(2px);
-    /* ❌ BUG 2: Buttons are hidden but still in the DOM! */
-    visibility: hidden;
+    pointer-events: all;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    animation: falling 4s linear infinite;
+    top: -150px;
+    
+    /* ❌ BUG 1: Stones are blurry */
+    filter: blur(10px);
+    opacity: 1;
+    
+    /* ❌ BUG 2: Animation is paused */
+    animation-play-state: paused;
 }
 
-.puzzle-btn:hover {
-    transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.1);
-    border-color: #dda15e;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+@keyframes falling {
+    0% {
+        transform: translateY(0) rotate(0deg);
+    }
+    100% {
+        transform: translateY(110vh) rotate(360deg);
+    }
 }
 
-.puzzle-btn:active {
-    transform: scale(0.95);
+.falling-stone:nth-child(1) {
+    left: 20%;
+    animation-delay: 0s;
 }
 
-.status-message {
-    font-size: 1.5em;
-    min-height: 1.5em;
-    text-shadow: 1px 1px 2px black;
-    color: #dda15e;
+.falling-stone:nth-child(2) {
+    left: 50%;
+    animation-delay: 1.5s;
 }
 
-.victory-overlay {
+.falling-stone:nth-child(3) {
+    left: 80%;
+    animation-delay: 3s;
+}
+
+.falling-stone.slashed {
+    animation: none;
+    opacity: 0;
+    transform: scale(2);
+    transition: all 0.3s;
+    pointer-events: none;
+}
+
+.slash-effect {
+    position: fixed;
+    height: 4px;
+    background: #fff;
+    box-shadow: 0 0 20px #2ecc71, 0 0 40px #fff;
+    pointer-events: none;
+    z-index: 1000;
+    transform-origin: left;
+    opacity: 0;
+}
+
+@keyframes slashAnim {
+    0% {
+        transform: scaleX(0);
+        opacity: 1;
+    }
+    100% {
+        transform: scaleX(1);
+        opacity: 0;
+    }
+}
+
+.success-overlay {
     display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.9);
-    z-index: 1000;
+    background: radial-gradient(circle, rgba(46, 204, 113, 0.4) 0%, rgba(0, 0, 0, 0.9) 100%);
+    z-index: 2000;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    flex-direction: column;
 }
 
-.victory-animation {
+.victory-text {
+    font-family: 'Cinzel Decorative', cursive;
     font-size: 5em;
-    margin-bottom: 20px;
-    animation: spin 1s ease infinite;
+    color: #fff;
+    text-shadow: 0 0 30px #2ecc71;
+    animation: textPulse 1s infinite;
 }
 
-@keyframes spin {
-    100% {
-        transform: rotate(360deg);
+@keyframes textPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
     }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+.inventory {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+    z-index: 100;
+}
+
+.sword-icon {
+    font-size: 3em;
+    opacity: 0.2;
+    transition: all 0.5s;
+}
+
+.sword-icon.active {
+    opacity: 1;
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 10px #2ecc71);
 }
 
 /* Responsive */
@@ -268,23 +309,17 @@ h1 {
     }
     
     h1 {
-        font-size: 2em;
+        font-size: 2.5em;
+        letter-spacing: 5px;
     }
     
-    .description {
-        font-size: 1em;
+    .task-hint {
+        font-size: 0.9em;
     }
     
-    .sequence-item {
-        width: 50px;
-        height: 50px;
-        font-size: 2em;
-    }
-    
-    .puzzle-btn {
-        width: 60px;
-        height: 60px;
-        font-size: 2em;
+    .falling-stone {
+        width: 80px;
+        height: 80px;
     }
 }
 </style>
@@ -310,31 +345,30 @@ h1 {
 </div>
 
 <!-- GAME CONTENT -->
-<div class="puzzle-container">
-    <h1>📜 Ancient Poneglyph</h1>
-    <div class="description">
-        Match the ancient sequence to unlock the truth.
-    </div>
-    
+<div class="header">
+    <h1>SANTORYU TRIAL</h1>
+    <div class="task-hint">SLASH THE FALLING STONES TO MASTER THE THREE SWORD STYLE</div>
     <div class="game-hint">
         💡 Use DevTools (F12) to fix 2 bugs!<br>
-        <small>Hint: Reveal the sequence and show the input buttons!</small>
-    </div>
-
-    <div class="sequence-display" id="sequenceDisplay">
-        <!-- Symbols will appear here -->
-    </div>
-
-    <div class="status-message" id="statusMessage">Memorize the sequence...</div>
-
-    <div class="puzzle-grid" id="inputGrid">
-        <!-- Buttons generated by JS -->
+        <small>Hint: Make the stones clear and animated!</small>
     </div>
 </div>
 
-<div class="victory-overlay" id="victoryOverlay">
-    <div class="victory-animation">✨</div>
-    <h2 style="color: #dda15e; font-size: 3em;">Sequence Verified!</h2>
+<div class="trial-ground" id="stoneContainer">
+    <div class="falling-stone" onclick="slashStone(this, 0)"></div>
+    <div class="falling-stone" onclick="slashStone(this, 1)"></div>
+    <div class="falling-stone" onclick="slashStone(this, 2)"></div>
+</div>
+
+<div class="inventory">
+    <div class="sword-icon" id="sword-0">⚔️</div>
+    <div class="sword-icon" id="sword-1">⚔️</div>
+    <div class="sword-icon" id="sword-2">⚔️</div>
+</div>
+
+<div class="success-overlay" id="victoryScreen">
+    <div class="victory-text">SANTORYU MASTERED</div>
+    <div style="color: #2ecc71; font-size: 1.5em; margin-top: 20px; letter-spacing: 5px;">PROCEED TO THE NEXT CHALLENGE</div>
 </div>
 
 <!-- Load Scripts -->
@@ -344,33 +378,31 @@ h1 {
 <script>
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false,  // Sequence display clip-path is not circle(0%)
-  bug2: false   // Puzzle buttons visibility is not hidden
+  bug1: false,  // Stones don't have blur filter
+  bug2: false   // Animation is playing (not paused)
 };
 
-// Game Configuration
-const symbols = ['⚡', '🌊', '🔥', '🌪️', '⭐', '🌙'];
-let sequence = [];
-let playerSequence = [];
-const sequenceLength = 5;
-let isInputLocked = true;
-let ancientTruth = false; // Console override
+let slashedCount = 0;
+const totalStones = 3;
+let bugsFixed = false;
 
 function checkBugsFixed() {
-    const sequenceDisplay = document.getElementById('sequenceDisplay');
-    const buttons = document.querySelectorAll('.puzzle-btn');
+    const stones = document.querySelectorAll('.falling-stone');
+    if (stones.length === 0) return;
     
-    // Check Bug 1: Sequence display is visible
-    const displayStyle = window.getComputedStyle(sequenceDisplay);
-    const clipPath = displayStyle.clipPath;
-    bugStatus.bug1 = clipPath === 'none' || !clipPath.includes('circle(0');
+    const firstStone = stones[0];
+    const stoneStyle = window.getComputedStyle(firstStone);
     
-    // Check Bug 2: Buttons are visible
-    if (buttons.length > 0) {
-        const btnStyle = window.getComputedStyle(buttons[0]);
-        const visibility = btnStyle.visibility;
-        bugStatus.bug2 = visibility === 'visible';
-    }
+    // Check Bug 1: No blur filter
+    const filter = stoneStyle.filter;
+    bugStatus.bug1 = filter === 'none' || !filter.includes('blur');
+    
+    // Check Bug 2: Animation is playing
+    const animationState = stoneStyle.animationPlayState;
+    bugStatus.bug2 = animationState === 'running';
+    
+    // Check if all bugs are fixed
+    const allBugsFixed = bugStatus.bug1 && bugStatus.bug2;
     
     // Update bug counter in header
     const bugsFixedCount = Object.values(bugStatus).filter(v => v).length;
@@ -378,140 +410,62 @@ function checkBugsFixed() {
     if (bugCounter) {
         bugCounter.textContent = `${bugsFixedCount}/2`;
     }
+    
+    bugsFixed = allBugsFixed;
 }
 
 // Check bugs periodically
 setInterval(checkBugsFixed, 300);
 
-function initGame() {
-    // Check if bugs are fixed before starting
-    const allBugsFixed = bugStatus.bug1 && bugStatus.bug2;
-    
-    if (!allBugsFixed) {
-        setTimeout(() => {
-            const missingFixes = [];
-            if (!bugStatus.bug1) missingFixes.push('Change .sequence-display clip-path from circle(0%) to circle(100%) or remove it');
-            if (!bugStatus.bug2) missingFixes.push('Change .puzzle-btn visibility from hidden to visible');
-            
-            alert(`❌ Fix all 2 bugs first! Use DevTools (F12) to:\n\n${missingFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`);
-        }, 1000);
+function slashStone(element, index) {
+    if (!bugsFixed) {
+        alert('❌ Fix all 2 bugs first! Use DevTools (F12) to:\n\n1. Remove filter: blur(10px) from .falling-stone\n2. Change animation-play-state: paused to animation-play-state: running');
         return;
     }
     
-    // Generate random sequence
-    sequence = [];
-    const display = document.getElementById('sequenceDisplay');
-    display.innerHTML = '';
+    if (element.classList.contains('slashed')) return;
 
-    for (let i = 0; i < sequenceLength; i++) {
-        const randomSym = symbols[Math.floor(Math.random() * symbols.length)];
-        sequence.push(randomSym);
+    createSlashEffect(element);
 
-        const span = document.createElement('div');
-        span.className = 'sequence-item';
-        span.textContent = '?';
-        span.id = `seq-${i}`;
-        display.appendChild(span);
-    }
+    element.classList.add('slashed');
+    document.getElementById(`sword-${index}`).classList.add('active');
+    slashedCount++;
 
-    // Create buttons
-    const grid = document.getElementById('inputGrid');
-    grid.innerHTML = '';
-    symbols.forEach(sym => {
-        const btn = document.createElement('div');
-        btn.className = 'puzzle-btn';
-        btn.textContent = sym;
-        btn.onclick = () => handleInput(sym);
-        grid.appendChild(btn);
-    });
-
-    startSequenceDisplay();
-}
-
-function startSequenceDisplay() {
-    isInputLocked = true;
-    document.getElementById('statusMessage').textContent = "Watch carefully...";
-
-    let i = 0;
-    const interval = setInterval(() => {
-        if (i >= sequenceLength) {
-            clearInterval(interval);
-            setTimeout(() => {
-                // Hide Sequence
-                document.querySelectorAll('.sequence-item').forEach(el => {
-                    el.textContent = '?';
-                    el.classList.remove('active');
-                });
-                isInputLocked = false;
-                document.getElementById('statusMessage').textContent = "Repeat the sequence!";
-            }, 1000);
-            return;
-        }
-
-        // Reset previous
-        document.querySelectorAll('.sequence-item').forEach(el => el.classList.remove('active'));
-
-        // Show current
-        const currentEl = document.getElementById(`seq-${i}`);
-        currentEl.textContent = sequence[i];
-        currentEl.classList.add('active');
-
-        i++;
-    }, 1000);
-}
-
-function handleInput(symbol) {
-    if (isInputLocked) return;
-
-    const currentIndex = playerSequence.length;
-    const expected = sequence[currentIndex];
-
-    if (symbol === expected) {
-        // Correct
-        playerSequence.push(symbol);
-        document.getElementById(`seq-${currentIndex}`).textContent = symbol;
-        document.getElementById(`seq-${currentIndex}`).classList.add('active');
-
-        if (playerSequence.length === sequenceLength) {
-            winGame();
-        }
-    } else {
-        // Wrong
-        document.getElementById('statusMessage').textContent = "Incorrect! Retrying...";
-        document.getElementById('statusMessage').style.color = "#ff6b6b";
-        isInputLocked = true;
+    if (slashedCount === totalStones) {
         setTimeout(() => {
-            document.getElementById('statusMessage').style.color = "#dda15e";
-            playerSequence = [];
-            startSequenceDisplay();
-        }, 1000);
+            document.getElementById('victoryScreen').style.display = 'flex';
+            setTimeout(async () => {
+                await moveToNextPage();
+            }, 2000);
+        }, 500);
     }
 }
 
-function winGame() {
-    isInputLocked = true;
-    document.getElementById('statusMessage').textContent = "Success!";
-    ancientTruth = true;
-    checkVictory();
-}
+function createSlashEffect(target) {
+    const rect = target.getBoundingClientRect();
+    const effect = document.createElement('div');
+    effect.className = 'slash-effect';
 
-async function checkVictory() {
-    if (ancientTruth === true) {
-        document.getElementById('victoryOverlay').style.display = 'flex';
-        setTimeout(async () => {
-            await moveToNextPage();
-        }, 1500);
-    }
+    const angle = Math.random() * 360;
+    const length = 300;
+
+    effect.style.left = (rect.left + rect.width / 2) + 'px';
+    effect.style.top = (rect.top + rect.height / 2) + 'px';
+    effect.style.width = length + 'px';
+    effect.style.transform = `rotate(${angle}deg) translate(-50%, -50%)`;
+    effect.style.animation = 'slashAnim 0.3s forwards';
+
+    document.body.appendChild(effect);
+    setTimeout(() => effect.remove(), 400);
 }
 
 async function moveToNextPage() {
     // Collect which bugs were fixed
-    const bugsFixed = [];
-    if (bugStatus.bug1) bugsFixed.push('bug1_sequence_visible');
-    if (bugStatus.bug2) bugsFixed.push('bug2_buttons_visible');
+    const bugsFixedArray = [];
+    if (bugStatus.bug1) bugsFixedArray.push('bug1_blur_removed');
+    if (bugStatus.bug2) bugsFixedArray.push('bug2_animation_playing');
     
-    console.log('🐛 Bugs fixed:', bugsFixed);
-    console.log('✅ Sequence completed!');
+    console.log('🐛 Bugs fixed:', bugsFixedArray);
     
     // Wait for gameEngine
     let retries = 0;
@@ -523,29 +477,12 @@ async function moveToNextPage() {
     }
     
     if (window.gameEngine) {
-        await gameEngine.moveToNextPage(bugsFixed);
+        await gameEngine.moveToNextPage(bugsFixedArray);
     } else {
         console.error('Game engine not loaded!');
         alert('Error: Game engine not loaded. Please refresh the page.');
     }
 }
-
-// Initialize on load
-window.onload = () => {
-    setTimeout(() => {
-        initGame();
-    }, 500);
-};
-
-// Console hints
-console.log("📜 Robin's Sequence Challenge");
-console.log("STEP 1: Fix all 2 CSS bugs using DevTools");
-console.log("STEP 2: Watch the sequence carefully");
-console.log("STEP 3: Click the symbols in the correct order");
-console.log("");
-console.log("Bugs to fix:");
-console.log("1. Sequence display clip-path (circle(0%) → circle(100%))");
-console.log("2. Puzzle buttons visibility (hidden → visible)");
 
 checkBugsFixed();
 </script>

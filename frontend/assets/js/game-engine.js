@@ -1,5 +1,5 @@
 // ============================================================================
-// game-engine.js - FIXED VERSION WITH FINAL PAGE DASHBOARD REDIRECT
+// game-engine.js - FIXED VERSION WITH PAGE 10 SCORE SYNC
 // Save as: frontend/assets/js/game-engine.js
 // ============================================================================
 
@@ -85,9 +85,51 @@ class GameEngine {
                 this.handleTokenUpdate(data);
                 break;
             
+            case 'round_completed':
+                // ✅ Handle round completion broadcast from teammate
+                this.handleRoundCompleted(data);
+                break;
+            
             default:
                 console.log('Unknown message type:', data.type);
         }
+    }
+
+    // ✅ NEW: Handle round completion from teammate
+    handleRoundCompleted(data) {
+        const { round_number, final_page, final_score } = data;
+        
+        console.log('📨 Received round_completed:', {
+            round_number,
+            final_page,
+            final_score,
+            myCurrentRound: this.session.roundNumber,
+            myCurrentPage: this.session.pageNumber
+        });
+        
+        // Update score display immediately
+        const scoreEl = document.getElementById('current-score');
+        if (scoreEl) {
+            scoreEl.textContent = final_score;
+        }
+        
+        // Determine round name
+        let roundName = 'Round';
+        if (final_page === 10) roundName = 'Round 1';
+        else if (final_page === 20) roundName = 'Round 2';
+        else if (final_page === 30) roundName = 'Round 3';
+        
+        // Show notification and redirect
+        this.showNotification(`${roundName} Completed by teammate! Final Score: ${final_score}`, 'success');
+        
+        console.log('🏁 Redirecting to dashboard after teammate completed round...');
+        
+        setTimeout(() => {
+            if (this.ws) {
+                this.ws.close();
+            }
+            window.location.href = CONFIG.BACKEND_URL + '/dashboard/';
+        }, 2000);
     }
 
     // ✅ FIXED: Force navigation for teammates
@@ -282,19 +324,6 @@ class GameEngine {
                     console.log('🔑 New token received:', data.new_token);
                 }
 
-                // ✅ CRITICAL: Broadcast PAGE NAVIGATION to teammates
-                if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-                    this.ws.send(JSON.stringify({
-                        type: 'page_changed',
-                        next_page: nextPage,
-                        new_token: this.session.token
-                    }));
-                    console.log('📢 Broadcasted page_changed to teammates:', {
-                        next_page: nextPage,
-                        new_token: this.session.token
-                    });
-                }
-
                 // ✅ CHECK FOR ROUND COMPLETION OR FINAL PAGE
                 if (data.round_completed || isFinalPage) {
                     // Determine which round just completed
@@ -303,17 +332,50 @@ class GameEngine {
                     else if (currentPage === 20) roundName = 'Round 2';
                     else if (currentPage === 30) roundName = 'Round 3';
                     
+                    // ✅ CRITICAL: Broadcast final score update to teammates BEFORE redirecting
+                    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                        this.ws.send(JSON.stringify({
+                            type: 'round_completed',
+                            round_number: this.session.roundNumber,
+                            final_page: currentPage,
+                            final_score: data.final_score || data.current_score,
+                            new_token: this.session.token
+                        }));
+                        console.log('📢 Broadcasted round_completed to teammates:', {
+                            round_number: this.session.roundNumber,
+                            final_page: currentPage,
+                            final_score: data.final_score || data.current_score
+                        });
+                    }
+                    
                     alert(`🎉 ${roundName} Completed!\n\nFinal Score: ${data.final_score || data.current_score}\n\nReturning to dashboard...`);
                     
                     console.log(`✅ ${roundName} completed at page ${currentPage}. Redirecting to dashboard.`);
                     
-                    // Close WebSocket before leaving
-                    if (this.ws) {
-                        this.ws.close();
+                    // ✅ Wait a moment for WebSocket message to send before closing
+                    setTimeout(() => {
+                        // Close WebSocket before leaving
+                        if (this.ws) {
+                            this.ws.close();
+                        }
+                        
+                        window.location.href = CONFIG.BACKEND_URL + '/dashboard/';
+                    }, 500); // 500ms delay to ensure WebSocket message is sent
+                    
+                } else {
+                    // ✅ CRITICAL: Broadcast PAGE NAVIGATION to teammates (for non-final pages)
+                    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                        this.ws.send(JSON.stringify({
+                            type: 'page_changed',
+                            next_page: nextPage,
+                            new_token: this.session.token
+                        }));
+                        console.log('📢 Broadcasted page_changed to teammates:', {
+                            next_page: nextPage,
+                            new_token: this.session.token
+                        });
                     }
                     
-                    window.location.href = CONFIG.BACKEND_URL + '/dashboard/';
-                } else {
                     // ✅ Navigate to next page (only if NOT a final page)
                     const nextPageUrl = `/round${this.session.roundNumber}/page${nextPage}.html?team=${this.session.teamId}&token=${this.session.token}&round=${this.session.roundNumber}&page=${nextPage}`;
                     console.log('🔄 Moving to next page:', nextPageUrl);

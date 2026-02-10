@@ -485,7 +485,7 @@ async function completeRound() {
         }
         
         if (window.gameEngine) {
-            await gameEngine.completeRound();
+           await gameEngine.moveToNextPage(bugsFixed);
         } else {
             console.error('Game engine not loaded!');
             // Fallback
