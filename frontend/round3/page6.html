@@ -114,7 +114,7 @@
    ============================================================================ */
 
 body {
-    background: url("./images/page26 bg.png") center/cover no-repeat;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: #eaeaea;
     font-family: monospace;
     display: flex;
@@ -323,6 +323,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function proceedToNext(event) {
     event.preventDefault();
+    
+    // FIX: Get escape element reference
+    const escape = document.getElementById("escape");
     
     if (escape.style.display === 'none') {
         alert('❌ You must decrypt the files first!\n\nClick "Decrypt Files" button after fixing both bugs.');
