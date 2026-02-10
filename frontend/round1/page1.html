@@ -122,7 +122,7 @@ body {
     padding-top: 80px;
 }
 
-/* DARK MOOD OVERLAY */
+/*DARK MOOD OVERLAY*/
 .overlay {
     position: fixed;
     inset: 0;
@@ -172,11 +172,11 @@ body {
     border: 1px solid #ffb000;
 }
 
-/* WAFFLE BOXES (BUGS) */
+/* WAFFLE BOXE*/
 .waffle {
     position: fixed;
     width: 80px;
-    /* ❌ BUG: All 3 waffles are HIDDEN with opacity: 0 */
+    /*BUG:*/
     opacity: 0;
     transition: 0.3s;
     z-index: 2;
@@ -315,9 +315,9 @@ body {
 <script>
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false,  // Waffle 1 is visible (opacity = 1)
-  bug2: false,  // Waffle 2 is visible (opacity = 1)
-  bug3: false   // Waffle 3 is visible (opacity = 1)
+  bug1: false,
+  bug2: false, 
+  bug3: false 
 };
 
 const waffles = document.querySelectorAll(".waffle");
