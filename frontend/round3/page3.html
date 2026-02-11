@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="total-bugs" content="1">
-<title>Web Escape | Round 3 - Page 4 (1 Bug)</title>
+<title>Web Escape | Round 3 - Page 3 (1 Bug)</title>
 <style>
 /* RESET */
 * {
@@ -239,7 +239,6 @@ button:active {
     <small>Hint: Fix the button ID to match JavaScript!</small>
 </div>
 <p>Click fast to generate pulling power.</p>
-<!-- ❌ BUG: ID is "pullBTN" but JavaScript uses "pullBtn" (case mismatch) -->
 <button id="pullBTN">PULL!</button>
 <p id="power">Power: 0</p>
 <a href="#" id="escape" onclick="proceedToNext(event)">ESCAPE</a>
@@ -251,13 +250,12 @@ button:active {
 <script>
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false  // Button ID is "pullBtn" (not "pullBTN")
+  bug1: false
 };
 
 let power = 0;
 
 function checkBugsFixed() {
-    // Check Bug 1: Button ID is "pullBtn"
     const correctBtn = document.getElementById("pullBtn");
     bugStatus.bug1 = correctBtn !== null;
     
@@ -297,7 +295,7 @@ async function proceedToNext(event) {
     event.preventDefault();
     
     if (!bugStatus.bug1) {
-        alert('❌ Fix the bug first! Use DevTools (F12) to:\n\nChange button id from "pullBTN" to "pullBtn" (lowercase Btn)');
+        alert('❌ Fix the bug first! Use DevTools (F12)');
         return;
     }
     
@@ -329,15 +327,6 @@ async function proceedToNext(event) {
         alert('Error: Game engine not loaded. Please refresh the page.');
     }
 }
-
-// Console hints
-console.log("💪 Tug of War Challenge");
-console.log("STEP 1: Fix 1 bug using DevTools");
-console.log("STEP 2: Click PULL button 10 times to reach Power: 10");
-console.log("STEP 3: Click ESCAPE to proceed");
-console.log("");
-console.log("Bug to fix:");
-console.log("1. Button id (pullBTN → pullBtn) - case mismatch!");
 
 checkBugsFixed();
 </script>

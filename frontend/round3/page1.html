@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="total-bugs" content="2">
-<title>Web Escape | Round 3 - Page 2 (2 Bugs)</title>
+<title>Web Escape | Round 3 - Page 1 (2 Bugs)</title>
 <style>
 /* RESET */
 * {
@@ -167,7 +167,6 @@ button {
     cursor: pointer;
     border-radius: 8px;
     border: none;
-    /* ❌ BUG 1: Move button is hidden! */
     display: none;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     transition: all 0.3s;
@@ -233,7 +232,7 @@ button:hover {
     <small>Hint: Show the move button and fix the variable name!</small>
 </div>
 <div id="light" class="red">RED LIGHT</div>
-<!-- ❌ BUG 2: ID is "moveBTN" but JavaScript references "moveBtn" (case mismatch) -->
+
 <button id="moveBTN">MOVE</button>
 <button id="escapeBtn">ESCAPE</button>
 
@@ -244,27 +243,23 @@ button:hover {
 <script>
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false,  // moveBTN button display is not none
-  bug2: false   // Button ID matches variable name
+  bug1: false,  
+  bug2: false
 };
 
 let isGreenLight = false;
 const light = document.getElementById("light");
-const moveBtn = document.getElementById("moveBtn"); // Will be null until bug 2 is fixed
+const moveBtn = document.getElementById("moveBtn");
 const escapeBtn = document.getElementById("escapeBtn");
 
 function checkBugsFixed() {
     const moveBtnElement = document.getElementById("moveBTN");
     
-    // Check Bug 1: Move button is visible
-    // Add null check before getComputedStyle
     if (moveBtnElement) {
         const btnStyle = window.getComputedStyle(moveBtnElement);
         const display = btnStyle.display;
         bugStatus.bug1 = display !== 'none';
     } else {
-        // If moveBTN doesn't exist, it means ID was changed (bug 2 fixed)
-        // Check the new ID instead
         const correctBtn = document.getElementById("moveBtn");
         if (correctBtn) {
             const btnStyle = window.getComputedStyle(correctBtn);
@@ -272,8 +267,7 @@ function checkBugsFixed() {
             bugStatus.bug1 = display !== 'none';
         }
     }
-    
-    // Check Bug 2: Button ID is "moveBtn" (not "moveBTN")
+
     const correctBtn = document.getElementById("moveBtn");
     bugStatus.bug2 = correctBtn !== null;
     
@@ -326,7 +320,7 @@ escapeBtn.addEventListener("click", async () => {
         if (!bugStatus.bug1) missingFixes.push('Change #moveBTN button display from none to inline-block');
         if (!bugStatus.bug2) missingFixes.push('Change button id from "moveBTN" to "moveBtn" (lowercase B)');
         
-        alert(`❌ Fix all 2 bugs first! Use DevTools (F12) to:\n\n${missingFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`);
+        alert('❌ Fix all 2 bugs first! Use DevTools (F12)');
         return;
     }
     
@@ -358,17 +352,6 @@ async function moveToNextPage() {
         alert('Error: Game engine not loaded. Please refresh the page.');
     }
 }
-
-// Console hints
-console.log("🚦 Red Light Green Light Challenge");
-console.log("STEP 1: Fix all 2 bugs using DevTools");
-console.log("STEP 2: Wait for GREEN LIGHT");
-console.log("STEP 3: Click MOVE button when it's green");
-console.log("STEP 4: Click ESCAPE to proceed");
-console.log("");
-console.log("Bugs to fix:");
-console.log("1. #moveBTN button display (none → inline-block)");
-console.log("2. Button id attribute (moveBTN → moveBtn) to match JavaScript variable");
 
 checkBugsFixed();
 </script>

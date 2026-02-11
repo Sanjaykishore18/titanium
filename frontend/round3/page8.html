@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="total-bugs" content="4">
-<title>Web Escape | Round 3 - Page 9 (4 Bugs)</title>
+<title>Web Escape | Round 3 - Page 8 (3 Bugs)</title>
 <style>
 /* RESET */
 * {
@@ -291,7 +291,6 @@ const bugStatus = {
   bug1: false,  // left-leg has data-step attribute (not data-stpe)
   bug2: false,  // right-leg has left CSS position set
   bug3: false,  // legs have different z-index values
-  bug4: false   // No JavaScript syntax errors
 };
 
 const arena = document.getElementById('squid-arena');
@@ -315,14 +314,12 @@ function checkBugsFixed() {
     const rightZ = parseInt(rightLegStyle.zIndex) || 0;
     bugStatus.bug3 = leftZ !== rightZ;
     
-    // Bug 4 is checked by JavaScript execution (if code runs, it's fixed)
-    bugStatus.bug4 = true; // Will be true if no syntax errors
     
     // Update bug counter in header
     const bugsFixedCount = Object.values(bugStatus).filter(v => v).length;
     const bugCounter = document.getElementById('bugs-fixed');
     if (bugCounter) {
-        bugCounter.textContent = `${bugsFixedCount}/4`;
+        bugCounter.textContent = `${bugsFixedCount}/3`;
     }
 }
 
@@ -330,14 +327,13 @@ function checkBugsFixed() {
 setInterval(checkBugsFixed, 300);
 
 arena.addEventListener('click', async (event) => {
-    const allBugsFixed = bugStatus.bug1 && bugStatus.bug2 && bugStatus.bug3 && bugStatus.bug4;
+    const allBugsFixed = bugStatus.bug1 && bugStatus.bug2 && bugStatus.bug3;
     
     if (!allBugsFixed) {
         const missingFixes = [];
         if (!bugStatus.bug1) missingFixes.push('Change left-leg attribute from data-stpe to data-step');
         if (!bugStatus.bug2) missingFixes.push('Add .right-leg left position (e.g., left: 180px)');
         if (!bugStatus.bug3) missingFixes.push('Change z-index for one of the legs (e.g., .right-leg z-index: 2)');
-        if (!bugStatus.bug4) missingFixes.push('Fix JavaScript alert syntax errors (add opening parenthesis)');
         
         alert(`❌ Fix all 4 bugs first! Use DevTools (F12) to:\n\n${missingFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`);
         return;
@@ -360,7 +356,7 @@ arena.addEventListener('click', async (event) => {
         currentStep = 1; // Reset on wrong click
     }
     
-    if (currentStep > 4) {
+    if (currentStep > 3) {
         alert('🏆 You reached the head and won!');
         await moveToNextPage();
     }
@@ -372,7 +368,6 @@ async function moveToNextPage() {
     if (bugStatus.bug1) bugsFixed.push('bug1_attribute_typo_fixed');
     if (bugStatus.bug2) bugsFixed.push('bug2_css_position_added');
     if (bugStatus.bug3) bugsFixed.push('bug3_zindex_fixed');
-    if (bugStatus.bug4) bugsFixed.push('bug4_syntax_errors_fixed');
     
     console.log('🐛 Bugs fixed:', bugsFixed);
     console.log('🦑 Squid Game Arena completed!');

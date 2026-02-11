@@ -4,15 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="total-bugs" content="2">
-<title>Web Escape | Round 2 - Page 1 (2 Bugs)</title>
+<title>Web Escape | Round 2 - Page 5 (2 Bugs)</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=IM+Fell+DW+Pica&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Orbitron:wght@400;700&display=swap');
-
 /* RESET */
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 /* ============================================================================
@@ -112,11 +111,11 @@
 }
 
 /* ============================================================================
-   ORIGINAL GAME STYLES
+   ORIGINAL GAME STYLES (UNCHANGED)
    ============================================================================ */
 
 body {
-    background: #0a0f0d url(page12.png) no-repeat center center;
+    background: #0a0f0d url(page19s.png) no-repeat center center;
     background-size: cover;
     font-family: 'Orbitron', sans-serif;
     min-height: 100vh;
@@ -125,180 +124,121 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 80px;
+    padding-top: 80px; /* Added for header */
 }
 
 .header {
+    position: absolute;
+    top: 100px; /* Adjusted for game header */
     text-align: center;
-    padding: 40px;
-    z-index: 10;
+    width: 100%;
 }
 
 h1 {
     font-family: 'Cinzel Decorative', cursive;
-    font-size: 4em;
-    color: #2ecc71;
-    text-shadow: 0 0 20px rgba(46, 204, 113, 0.5);
-    margin-bottom: 10px;
-    letter-spacing: 10px;
+    font-size: 3.5em;
+    color: #8b4513;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+    margin-bottom: 5px;
 }
 
-.task-hint {
-    color: #bdc3c7;
+.instruction {
     font-size: 1.2em;
-    letter-spacing: 2px;
-    text-transform: uppercase;
+    font-style: italic;
+    color: #5d4037;
 }
 
-.game-hint {
-    color: #ffd700;
-    font-size: 1em;
-    margin-top: 15px;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 10px;
-    border-radius: 5px;
+/* Unique Bug Container */
+.treasure-area {
+    width: 90vw;
+    height: 70vh;
+    position: relative;
 }
 
-.trial-ground {
+.beli-coin {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-}
-
-.falling-stone {
-    position: absolute;
-    width: 120px;
-    height: 120px;
-    background: radial-gradient(circle at 30% 30%, #555, #222);
-    border-radius: 20px;
-    clip-path: polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    font-size: 3em;
     cursor: pointer;
-    pointer-events: all;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-    animation: falling 4s linear infinite;
-    top: -150px;
-    
-    /* ❌ BUG 1: Stones are blurry */
-    filter: blur(10px);
-    opacity: 1;
-    
-    /* ❌ BUG 2: Animation is paused */
-    animation-play-state: paused;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    user-select: none;
+    filter: drop-shadow(2px 2px 5px rgba(0, 0, 0, 0.3));
+
+    /* BUG 1: Highly Unique CSS Bug - Ray Offset */
+    /* This pushes the elements 100vw away along a specific angle, clearing them from the screen */
+    offset-path: ray(90deg);
+
 }
 
-@keyframes falling {
-    0% {
-        transform: translateY(0) rotate(0deg);
-    }
-    100% {
-        transform: translateY(110vh) rotate(360deg);
-    }
+
+.beli-coin:hover {
+    transform: scale(1.3) rotate(15deg);
 }
 
-.falling-stone:nth-child(1) {
-    left: 20%;
-    animation-delay: 0s;
+.beli-coin.found {
+    opacity: 0.5;
+    filter: grayscale(1);
+    pointer-events: none;
+    transform: scale(0.8);
 }
 
-.falling-stone:nth-child(2) {
-    left: 50%;
-    animation-delay: 1.5s;
-}
-
-.falling-stone:nth-child(3) {
-    left: 80%;
-    animation-delay: 3s;
-}
-
-.falling-stone.slashed {
-    animation: none;
-    opacity: 0;
-    transform: scale(2);
+#navigation-confirm {
+    margin-top: 30px;
+    padding: 15px 40px;
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: 1.5em;
+    background: #f1c40f;
+    color: #8b4513;
+    border: 2px solid #8b4513;
+    cursor: pointer;
+    border-radius: 5px;
     transition: all 0.3s;
-    pointer-events: none;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+    font-weight: bold;
+    opacity: 0.3;
+
+    /* BUG 2: Highly Unique CSS Bug - Luminance Masking */
+    /* In luminance masking mode, black becomes transparent. This hides the button completely. */
+    mask-image: linear-gradient(black, black);
+    -webkit-mask-image: linear-gradient(black, black);
 }
 
-.slash-effect {
-    position: fixed;
-    height: 4px;
-    background: #fff;
-    box-shadow: 0 0 20px #2ecc71, 0 0 40px #fff;
-    pointer-events: none;
-    z-index: 1000;
-    transform-origin: left;
-    opacity: 0;
+#navigation-confirm.ready {
+    opacity: 1;
 }
 
-@keyframes slashAnim {
-    0% {
-        transform: scaleX(0);
-        opacity: 1;
-    }
-    100% {
-        transform: scaleX(1);
-        opacity: 0;
-    }
+#navigation-confirm:hover {
+    background: #f39c12;
+    transform: translateY(-2px);
+    /* Hover fix won't work if root bug is there */
 }
+
 
 .success-overlay {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(46, 204, 113, 0.4) 0%, rgba(0, 0, 0, 0.9) 100%);
-    z-index: 2000;
+    inset: 0;
+    background: radial-gradient(circle, #f1c40f 0%, #d35400 100%);
+    z-index: 1000;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-}
-
-.victory-text {
-    font-family: 'Cinzel Decorative', cursive;
-    font-size: 5em;
     color: #fff;
-    text-shadow: 0 0 30px #2ecc71;
-    animation: textPulse 1s infinite;
+    font-family: 'Cinzel Decorative', serif;
+    text-align: center;
 }
 
-@keyframes textPulse {
-    0%, 100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-    50% {
-        transform: scale(1.1);
-        opacity: 0.8;
-    }
+.success-overlay h2 {
+    font-size: 5em;
+    text-shadow: 0 0 20px #000;
 }
 
-.inventory {
+#coin-counter {
     position: fixed;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 20px;
-    z-index: 100;
-}
-
-.sword-icon {
-    font-size: 3em;
-    opacity: 0.2;
-    transition: all 0.5s;
-}
-
-.sword-icon.active {
-    opacity: 1;
-    transform: scale(1.2);
-    filter: drop-shadow(0 0 10px #2ecc71);
+    bottom: 20px;
+    left: 20px;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #8b4513;
 }
 
 /* Responsive */
@@ -310,16 +250,14 @@ h1 {
     
     h1 {
         font-size: 2.5em;
-        letter-spacing: 5px;
     }
     
-    .task-hint {
-        font-size: 0.9em;
+    .instruction {
+        font-size: 1em;
     }
     
-    .falling-stone {
-        width: 80px;
-        height: 80px;
+    .beli-coin {
+        font-size: 2em;
     }
 }
 </style>
@@ -344,31 +282,28 @@ h1 {
     </button>
 </div>
 
-<!-- GAME CONTENT -->
+<!-- ORIGINAL GAME CONTENT (UNCHANGED) -->
 <div class="header">
-    <h1>SANTORYU TRIAL</h1>
-    <div class="task-hint">SLASH THE FALLING STONES TO MASTER THE THREE SWORD STYLE</div>
-    <div class="game-hint">
-        💡 Use DevTools (F12) to fix 2 bugs!<br>
-        <small>Hint: Make the stones clear and animated!</small>
-    </div>
+    <h1>Berry Bonanza</h1>
+    <p class="instruction">Find Nami's hidden Berry coins to unlock the vault!</p>
 </div>
 
-<div class="trial-ground" id="stoneContainer">
-    <div class="falling-stone" onclick="slashStone(this, 0)"></div>
-    <div class="falling-stone" onclick="slashStone(this, 1)"></div>
-    <div class="falling-stone" onclick="slashStone(this, 2)"></div>
+<!-- The coins are hidden by the Ray Offset bug in CSS -->
+<div class="treasure-area" id="treasureArea">
+    <div class="beli-coin" style="top: 15%; left: 20%;" onclick="collectCoin(this)">💰</div>
+    <div class="beli-coin" style="top: 25%; left: 75%;" onclick="collectCoin(this)">💰</div>
+    <div class="beli-coin" style="top: 60%; left: 10%;" onclick="collectCoin(this)">💰</div>
+    <div class="beli-coin" style="top: 55%; left: 45%;" onclick="collectCoin(this)">💰</div>
+    <div class="beli-coin" style="top: 75%; left: 80%;" onclick="collectCoin(this)">💰</div>
 </div>
 
-<div class="inventory">
-    <div class="sword-icon" id="sword-0">⚔️</div>
-    <div class="sword-icon" id="sword-1">⚔️</div>
-    <div class="sword-icon" id="sword-2">⚔️</div>
-</div>
+<div id="coin-counter">COINS COLLECTED: 0 / 5</div>
+
+<button id="navigation-confirm" onclick="advance()">OPEN THE VAULT</button>
 
 <div class="success-overlay" id="victoryScreen">
-    <div class="victory-text">SANTORYU MASTERED</div>
-    <div style="color: #2ecc71; font-size: 1.5em; margin-top: 20px; letter-spacing: 5px;">PROCEED TO THE NEXT CHALLENGE</div>
+    <h2>BIG RICH!</h2>
+    <p style="font-size: 2em;">Treasure secured. Wealth awaits!</p>
 </div>
 
 <!-- Load Scripts -->
@@ -376,33 +311,29 @@ h1 {
 <script src="../assets/js/game-engine.js"></script>
 
 <script>
-// Track which bugs are fixed
+// ============================================================================
+// BUG TRACKING SYSTEM (ADDED FOR MULTIPLAYER)
+// ============================================================================
 const bugStatus = {
-  bug1: false,  // Stones don't have blur filter
-  bug2: false   // Animation is playing (not paused)
+  bug1: false,  // offset-path removed or set to none
+  bug2: false   // mask-image removed or set to none
 };
 
-let slashedCount = 0;
-const totalStones = 3;
-let bugsFixed = false;
-
 function checkBugsFixed() {
-    const stones = document.querySelectorAll('.falling-stone');
-    if (stones.length === 0) return;
+    const coins = document.querySelectorAll('.beli-coin');
+    const button = document.getElementById('navigation-confirm');
     
-    const firstStone = stones[0];
-    const stoneStyle = window.getComputedStyle(firstStone);
+    // Check Bug 1: Coins are not offset
+    if (coins.length > 0) {
+        const coinStyle = window.getComputedStyle(coins[0]);
+        const offsetPath = coinStyle.offsetPath;
+        bugStatus.bug1 = offsetPath === 'none' || !offsetPath || offsetPath === '';
+    }
     
-    // Check Bug 1: No blur filter
-    const filter = stoneStyle.filter;
-    bugStatus.bug1 = filter === 'none' || !filter.includes('blur');
-    
-    // Check Bug 2: Animation is playing
-    const animationState = stoneStyle.animationPlayState;
-    bugStatus.bug2 = animationState === 'running';
-    
-    // Check if all bugs are fixed
-    const allBugsFixed = bugStatus.bug1 && bugStatus.bug2;
+    // Check Bug 2: Button is visible (no mask)
+    const btnStyle = window.getComputedStyle(button);
+    const maskImage = btnStyle.maskImage || btnStyle.webkitMaskImage;
+    bugStatus.bug2 = maskImage === 'none' || !maskImage || maskImage === '';
     
     // Update bug counter in header
     const bugsFixedCount = Object.values(bugStatus).filter(v => v).length;
@@ -410,79 +341,76 @@ function checkBugsFixed() {
     if (bugCounter) {
         bugCounter.textContent = `${bugsFixedCount}/2`;
     }
-    
-    bugsFixed = allBugsFixed;
 }
 
 // Check bugs periodically
 setInterval(checkBugsFixed, 300);
 
-function slashStone(element, index) {
-    if (!bugsFixed) {
-        alert('❌ Fix all 2 bugs first! Use DevTools (F12) to:\n\n1. Remove filter: blur(10px) from .falling-stone\n2. Change animation-play-state: paused to animation-play-state: running');
-        return;
-    }
-    
-    if (element.classList.contains('slashed')) return;
+// ============================================================================
+// ORIGINAL GAME LOGIC (UNCHANGED)
+// ============================================================================
+let coinsFound = 0;
+const totalCoins = 5;
 
-    createSlashEffect(element);
+function collectCoin(element) {
+    if (element.classList.contains('found')) return;
 
-    element.classList.add('slashed');
-    document.getElementById(`sword-${index}`).classList.add('active');
-    slashedCount++;
+    element.classList.add('found');
+    coinsFound++;
 
-    if (slashedCount === totalStones) {
-        setTimeout(() => {
-            document.getElementById('victoryScreen').style.display = 'flex';
-            setTimeout(async () => {
-                await moveToNextPage();
-            }, 2000);
-        }, 500);
+    updateUI();
+}
+
+function updateUI() {
+    const counter = document.getElementById('coin-counter');
+    counter.innerText = `COINS COLLECTED: ${coinsFound} / ${totalCoins}`;
+
+    if (coinsFound === totalCoins) {
+        document.getElementById('navigation-confirm').classList.add('ready');
     }
 }
 
-function createSlashEffect(target) {
-    const rect = target.getBoundingClientRect();
-    const effect = document.createElement('div');
-    effect.className = 'slash-effect';
-
-    const angle = Math.random() * 360;
-    const length = 300;
-
-    effect.style.left = (rect.left + rect.width / 2) + 'px';
-    effect.style.top = (rect.top + rect.height / 2) + 'px';
-    effect.style.width = length + 'px';
-    effect.style.transform = `rotate(${angle}deg) translate(-50%, -50%)`;
-    effect.style.animation = 'slashAnim 0.3s forwards';
-
-    document.body.appendChild(effect);
-    setTimeout(() => effect.remove(), 400);
-}
-
-async function moveToNextPage() {
-    // Collect which bugs were fixed
-    const bugsFixedArray = [];
-    if (bugStatus.bug1) bugsFixedArray.push('bug1_blur_removed');
-    if (bugStatus.bug2) bugsFixedArray.push('bug2_animation_playing');
-    
-    console.log('🐛 Bugs fixed:', bugsFixedArray);
-    
-    // Wait for gameEngine
-    let retries = 0;
-    const maxRetries = 20;
-    
-    while (!window.gameEngine && retries < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        retries++;
-    }
-    
-    if (window.gameEngine) {
-        await gameEngine.moveToNextPage(bugsFixedArray);
-    } else {
-        console.error('Game engine not loaded!');
-        alert('Error: Game engine not loaded. Please refresh the page.');
+// ============================================================================
+// MODIFIED ADVANCE FUNCTION (FOR MULTIPLAYER INTEGRATION)
+// ============================================================================
+async function advance() {
+    if (coinsFound === totalCoins) {
+        document.getElementById('victoryScreen').style.display = 'flex';
+        
+        setTimeout(async () => {
+            // Collect which bugs were fixed
+            const bugsFixed = [];
+            if (bugStatus.bug1) bugsFixed.push('bug1_offset_path_fixed');
+            if (bugStatus.bug2) bugsFixed.push('bug2_mask_image_fixed');
+            
+            console.log('🐛 Bugs fixed:', bugsFixed);
+            console.log('💰 All coins collected!');
+            
+            // Wait for gameEngine
+            let retries = 0;
+            const maxRetries = 20;
+            
+            while (!window.gameEngine && retries < maxRetries) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                retries++;
+            }
+            
+            if (window.gameEngine) {
+                await gameEngine.moveToNextPage(bugsFixed);
+            } else {
+                console.error('Game engine not loaded!');
+                // Fallback to original behavior
+                window.location.href = 'page20.html';
+            }
+        }, 2000);
     }
 }
+
+// Console hints
+console.log("💰 Nami's Berry Bonanza");
+console.log("Fix 2 CSS bugs to reveal hidden coins and button!");
+console.log("Bug 1: .beli-coin has offset-path: ray(90deg) - remove it!");
+console.log("Bug 2: #navigation-confirm has mask-image - remove it!");
 
 checkBugsFixed();
 </script>

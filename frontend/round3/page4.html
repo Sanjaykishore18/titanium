@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="total-bugs" content="1">
-<title>Web Escape | Round 3 - Page 5 (1 Bug)</title>
+<title>Web Escape | Round 3 - Page 4 (1 Bug)</title>
 <style>
 /* RESET */
 * {
@@ -260,7 +260,6 @@ button:active {
     
     <div id="result">Make your guess…</div>
     
-    <!-- ❌ BUG: data-unlocked="false" should be "true" -->
     <a href="#" id="escape" data-unlocked="false" onclick="proceedToNext(event)">ESCAPE</a>
 </div>
 
@@ -271,14 +270,14 @@ button:active {
 <script>
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false  // Escape link has data-unlocked="true"
+  bug1: false
 };
 
 const result = document.getElementById("result");
 const escapeBtn = document.getElementById("escape");
 
 function checkBugsFixed() {
-    // Check Bug 1: data-unlocked is "true"
+    
     bugStatus.bug1 = escapeBtn.dataset.unlocked === "true";
     
     // Update bug counter in header
@@ -323,7 +322,7 @@ async function proceedToNext(event) {
     event.preventDefault();
     
     if (!bugStatus.bug1) {
-        alert('❌ Fix the bug first! Use DevTools (F12) to:\n\nChange #escape data-unlocked from "false" to "true"');
+        alert('❌ Fix the bug first! Use DevTools (F12)');
         return;
     }
     
@@ -355,17 +354,6 @@ async function proceedToNext(event) {
         alert('Error: Game engine not loaded. Please refresh the page.');
     }
 }
-
-// Console hints
-console.log("🔵 Marbles Game Challenge");
-console.log("STEP 1: Fix 1 bug using DevTools");
-console.log("STEP 2: Guess ODD or EVEN correctly");
-console.log("STEP 3: Click ESCAPE to proceed");
-console.log("");
-console.log("Bug to fix:");
-console.log("1. #escape data-unlocked attribute (false → true)");
-console.log("");
-console.log("💡 Winning is not enough. Check what is locked.");
 
 checkBugsFixed();
 </script>

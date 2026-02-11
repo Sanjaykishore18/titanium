@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="total-bugs" content="2">
-<title>Web Escape | Round 3 - Page 3 (2 Bugs)</title>
+<title>Web Escape | Round 3 - Page 2 (2 Bugs)</title>
 <style>
 /* RESET */
 * {
@@ -164,7 +164,6 @@ button {
     color: #FFF;
     font-weight: bold;
     margin: 5px;
-    /* ❌ BUG 2: Button invisible! */
     opacity: 0;
     transition: all 0.3s;
 }
@@ -243,7 +242,6 @@ button:disabled {
     
     <div id="timer">Time: 30s</div>
     
-    <!-- ❌ BUG 1: Typo in attribute name "data-sucess" should be "data-success" -->
     <button
         id="extract-btn"
         data-sucess="true"
@@ -261,8 +259,8 @@ button:disabled {
 <script>
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false,  // Button has data-success attribute (not data-sucess)
-  bug2: false   // Button opacity is 1 (not 0)
+  bug1: false,
+  bug2: false
 };
 
 let timeLeft = 30;
@@ -272,10 +270,9 @@ function checkBugsFixed() {
     const btn = document.getElementById('extract-btn');
     const btnStyle = window.getComputedStyle(btn);
     
-    // Check Bug 1: Has correct data-success attribute
     bugStatus.bug1 = btn.hasAttribute('data-success');
     
-    // Check Bug 2: Button is visible (opacity > 0.5)
+ 
     const opacity = parseFloat(btnStyle.opacity);
     bugStatus.bug2 = opacity > 0.5;
     
@@ -321,7 +318,7 @@ function extractShape() {
         if (!bugStatus.bug1) missingFixes.push('Change button attribute from data-sucess="true" to data-success="true"');
         if (!bugStatus.bug2) missingFixes.push('Change button opacity from 0 to 1');
         
-        alert(`❌ Fix all 2 bugs first! Use DevTools (F12) to:\n\n${missingFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`);
+        alert('❌ Fix all 2 bugs first! Use DevTools (F12)');
         return;
     }
     
@@ -373,18 +370,6 @@ async function moveToNextPage() {
         alert('Error: Game engine not loaded. Please refresh the page.');
     }
 }
-
-// Console hints
-console.log("🍯 Honeycomb Candy Challenge");
-console.log("STEP 1: Fix all 2 bugs using DevTools");
-console.log("STEP 2: Click EXTRACT CIRCLE before time runs out");
-console.log("STEP 3: Succeed to proceed to next page");
-console.log("");
-console.log("Bugs to fix:");
-console.log("1. Button data attribute typo (data-sucess → data-success)");
-console.log("2. Button opacity (0 → 1)");
-console.log("");
-console.log("⏰ You have 30 seconds!");
 
 checkBugsFixed();
 </script>
