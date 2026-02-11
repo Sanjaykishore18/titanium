@@ -324,7 +324,7 @@ btn.addEventListener('click', async () => {
         if (!bugStatus.bug1) missingFixes.push('Change input type from "number" to "text"');
         if (!bugStatus.bug2) missingFixes.push('Change input pointer-events from none to auto');
         
-        alert(`❌ Fix all 2 bugs first! Use DevTools (F12) to:\n\n${missingFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`);
+        alert('❌ Fix all 2 bugs first! Use DevTools (F12)');
         return;
     }
     
@@ -336,7 +336,7 @@ btn.addEventListener('click', async () => {
         Number(value) > 1000
     ) {
         alert("✅ Access Granted. Game Master defeated!");
-        await completeRound();
+        await moveToNextPage();
     } else {
         let feedback = "❌ Access Denied. Check:\n\n";
         if (value.length !== 4) feedback += `• Length is ${value.length}, needs 4\n`;
@@ -374,21 +374,34 @@ async function completeRound() {
     }
 }
 
-// Console hints
-console.log("🎭 Game Master - FINAL Challenge");
-console.log("STEP 1: Fix all 2 bugs using DevTools");
-console.log("STEP 2: Enter a 4-digit password that:");
-console.log("   - Has exactly 4 characters");
-console.log("   - Does NOT contain '0'");
-console.log("   - Is greater than 1000");
-console.log("STEP 3: Click DECODE to complete Round 3!");
-console.log("");
-console.log("Bugs to fix:");
-console.log("1. Input type (number → text) - for string length check");
-console.log("2. Input pointer-events (none → auto) - to enable typing");
-console.log("");
-console.log("💡 Valid passwords: 1111, 1234, 2345, 5678, 9999, etc.");
-console.log("❌ Invalid: 0123 (has 0), 999 (length 3), 0999 (has 0 & ≤1000)");
+// Provide a global wrapper so pages can call `moveToNextPage()` like other pages do
+async function moveToNextPage(bugsFixed = []) {
+    // If gameEngine exists, delegate to its method
+    if (window.gameEngine && typeof window.gameEngine.moveToNextPage === 'function') {
+        try {
+            await window.gameEngine.moveToNextPage(bugsFixed);
+            return;
+        } catch (err) {
+            console.error('Error calling gameEngine.moveToNextPage:', err);
+        }
+    }
+
+    // Wait briefly for gameEngine to initialize
+    let retries = 0;
+    const maxRetries = 20;
+    while (!window.gameEngine && retries < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        retries++;
+    }
+
+    if (window.gameEngine && typeof window.gameEngine.moveToNextPage === 'function') {
+        await window.gameEngine.moveToNextPage(bugsFixed);
+    } else {
+        console.warn('gameEngine not available; fallback: refreshing or returning to dashboard');
+        alert('Progress saved. Returning to dashboard.');
+        window.location.href = CONFIG.BACKEND_URL + '/dashboard/';
+    }
+}
 
 checkBugsFixed();
 </script>

@@ -115,8 +115,7 @@
 
 body {
     min-height: 100vh;
-    background: url("./images/page28 bg.webp") center/cover no-repeat;
-    background-size: cover;
+    background: url("../assets/images/img 28.png") no-repeat center center/cover;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -361,48 +360,6 @@ arena.addEventListener('click', async (event) => {
         await moveToNextPage();
     }
 });
-
-async function moveToNextPage() {
-    // Collect which bugs were fixed
-    const bugsFixed = [];
-    if (bugStatus.bug1) bugsFixed.push('bug1_attribute_typo_fixed');
-    if (bugStatus.bug2) bugsFixed.push('bug2_css_position_added');
-    if (bugStatus.bug3) bugsFixed.push('bug3_zindex_fixed');
-    
-    console.log('🐛 Bugs fixed:', bugsFixed);
-    console.log('🦑 Squid Game Arena completed!');
-    
-    // Wait for gameEngine
-    let retries = 0;
-    const maxRetries = 20;
-    
-    while (!window.gameEngine && retries < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        retries++;
-    }
-    
-    if (window.gameEngine) {
-        await gameEngine.moveToNextPage(bugsFixed);
-    } else {
-        console.error('Game engine not loaded!');
-        alert('Error: Game engine not loaded. Please refresh the page.');
-    }
-}
-
-// Console hints
-console.log("🦑 Squid Game Arena Challenge");
-console.log("STEP 1: Fix all 4 bugs using DevTools");
-console.log("STEP 2: Click squid parts in correct order: Left Leg → Right Leg → Body → Head");
-console.log("STEP 3: Complete sequence to proceed");
-console.log("");
-console.log("Bugs to fix:");
-console.log("1. HTML: left-leg attribute (data-stpe → data-step)");
-console.log("2. CSS: .right-leg missing left position (add: left: 180px)");
-console.log("3. CSS: z-index conflict (.right-leg z-index: 1 → 2)");
-console.log("4. JS: alert syntax (alert`...`) → alert('...'))");
-console.log("");
-console.log("🎯 Click order: 1🦑 → 2🦑 → 3🦑 → 4🏆");
-
 checkBugsFixed();
 </script>
 

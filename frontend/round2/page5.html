@@ -115,8 +115,7 @@
    ============================================================================ */
 
 body {
-    background: #0a0f0d url(page19s.png) no-repeat center center;
-    background-size: cover;
+    background: url("../assets/images/img 15.png") no-repeat center center/cover;
     font-family: 'Orbitron', sans-serif;
     min-height: 100vh;
     color: #fff;
@@ -196,8 +195,6 @@ h1 {
     font-weight: bold;
     opacity: 0.3;
 
-    /* BUG 2: Highly Unique CSS Bug - Luminance Masking */
-    /* In luminance masking mode, black becomes transparent. This hides the button completely. */
     mask-image: linear-gradient(black, black);
     -webkit-mask-image: linear-gradient(black, black);
 }
@@ -315,8 +312,8 @@ h1 {
 // BUG TRACKING SYSTEM (ADDED FOR MULTIPLAYER)
 // ============================================================================
 const bugStatus = {
-  bug1: false,  // offset-path removed or set to none
-  bug2: false   // mask-image removed or set to none
+  bug1: false,  
+  bug2: false
 };
 
 function checkBugsFixed() {
@@ -405,13 +402,6 @@ async function advance() {
         }, 2000);
     }
 }
-
-// Console hints
-console.log("💰 Nami's Berry Bonanza");
-console.log("Fix 2 CSS bugs to reveal hidden coins and button!");
-console.log("Bug 1: .beli-coin has offset-path: ray(90deg) - remove it!");
-console.log("Bug 2: #navigation-confirm has mask-image - remove it!");
-
 checkBugsFixed();
 </script>
 

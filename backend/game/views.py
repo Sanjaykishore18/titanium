@@ -699,16 +699,16 @@ def public_leaderboard(request):
         total=Sum('score')
     ).values('total')
     
+    # Compute per-team aggregates: members, total score, pages completed, and total duration (sum of round durations)
     teams = Team.objects.annotate(
-        members_count=Count('members', distinct=True)
-    ).annotate(
+        members_count=Count('members', distinct=True),
         total_score=Coalesce(Subquery(team_scores), 0),
-        pages_completed=Count('round_progress__page_progress', filter=Q(round_progress__page_progress__completed=True), distinct=True)
-    ).order_by('-total_score', 'created_at')
+        pages_completed=Count('round_progress__page_progress', filter=Q(round_progress__page_progress__completed=True), distinct=True),
+        total_duration_seconds=Coalesce(Sum('round_progress__duration_seconds'), 0)
+    ).order_by('-total_score', '-pages_completed', 'total_duration_seconds', 'created_at')
     
     total_teams = teams.count()
     total_participants = TeamMember.objects.count()
-    
     context = {
         'teams': teams,
         'total_teams': total_teams,

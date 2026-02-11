@@ -180,6 +180,7 @@
                                 <th>Team Name</th>
                                 <th>Members</th>
                                 <th>Total Score</th>
+                                <th>Total Time (s)</th>
                                 <th>Pages Completed</th>
                                 <th>Status</th>
                             </tr>
@@ -202,6 +203,9 @@
                                 </td>
                                 <td>
                                     <span class="badge bg-primary fs-6">{{ team.total_score|default:0 }} pts</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ team.total_duration_seconds|default:0 }}s</span>
                                 </td>
                                 <td>
                                     <span class="badge bg-success">{{ team.pages_completed|default:0 }}/30</span>

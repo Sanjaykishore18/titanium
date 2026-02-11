@@ -176,7 +176,7 @@ input {
     font-family: monospace;
 }
 
-/* ❌ BUG 2: Middle digit invisible! */
+
 #digit2 {
     opacity: 0;
 }
@@ -259,11 +259,11 @@ button:hover {
         What you don't see matters most."
     </div>
     <div class="lock">
-        <!-- ❌ BUG 1: type="number" prevents maxlength from working -->
+        
         <input type="number" id="digit1" maxlength="1" placeholder="•">
-        <!-- ❌ BUG 2: opacity: 0 hides this digit -->
+        
         <input type="text" id="digit2" maxlength="1" placeholder="•">
-        <!-- ❌ BUG 3: ID typo "digti3" should be "digit3" -->
+        
         <input type="text" id="digti3" maxlength="1" placeholder="•">
     </div>
     <button id="unlockBtn">UNLOCK FREEDOM</button>
@@ -280,9 +280,9 @@ button:hover {
 <script>
 // Track which bugs are fixed
 const bugStatus = {
-  bug1: false,  // digit1 input type is "text" (not "number")
-  bug2: false,  // digit2 opacity is > 0.5
-  bug3: false   // Third input has id="digit3" (not "digti3")
+  bug1: false,  
+  bug2: false,  
+  bug3: false
 };
 
 const btn = document.getElementById('unlockBtn');
@@ -292,7 +292,6 @@ function checkBugsFixed() {
     const digit2 = document.getElementById('digit2');
     const digit3Correct = document.getElementById('digit3');
     
-    // Check Bug 1: digit1 type is "text"
     if (digit1) {
         bugStatus.bug1 = digit1.type === 'text';
     }
@@ -356,117 +355,57 @@ async function achieveFreedom() {
     if (bugStatus.bug1) bugsFixed.push('bug1_input_type_fixed');
     if (bugStatus.bug2) bugsFixed.push('bug2_visibility_restored');
     if (bugStatus.bug3) bugsFixed.push('bug3_id_typo_fixed');
-    
+
     console.log('🐛 Bugs fixed:', bugsFixed);
-    console.log('🕊️ Freedom achieved!');
-    console.log('✅ Code entered: 7 4 2');
-    
-    // Show success screen
+    console.log('🕊️ Freedom achieved! Delegating to game engine to finalize round.');
+
+    // Show a quick success screen while the engine handles scoring and redirect
     document.body.innerHTML = `
-        <div style='
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: linear-gradient(135deg, #000, #003300);
-            color: #00ff99;
-            font-family: monospace;
-            text-align: center;
-            padding: 20px;
-        '>
+        <div style='\n            display: flex;\n            flex-direction: column;\n            justify-content: center;\n            align-items: center;\n            height: 100vh;\n            background: linear-gradient(135deg, #000, #003300);\n            color: #00ff99;\n            font-family: monospace;\n            text-align: center;\n            padding: 20px;\n        '>
             <h1 style='font-size: 4rem; margin-bottom: 20px; text-shadow: 0 0 20px #00ff99;'>
                 🕊️ FREEDOM ACHIEVED 🕊️
             </h1>
             <p style='font-size: 1.5rem; margin-bottom: 30px;'>
-                Round 3 Complete!
+                Finalizing your score and progress...
             </p>
             <p style='font-size: 1.2rem; opacity: 0.8;'>
-                Returning to dashboard...
+                Returning to dashboard shortly...
             </p>
         </div>
     `;
-    
-    // Wait for localStorage to be ready
-    let retries = 0;
-    const maxRetries = 70;
-    
-    while (!localStorage.getItem('team_id') && retries < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        retries++;
-    }
 
+    // Prefer calling the engine's moveToNextPage so score/page progress and teammate broadcasts are handled uniformly
     try {
-        const teamId = localStorage.getItem('team_id');
-        const token = localStorage.getItem('game_token');
-        const round = parseInt(localStorage.getItem('current_round')) || 3;
-        const page = 30; // Final page for Round 3
-
-        console.log('Calling backend validate API for final page...', { teamId, round, page });
-
-        const resp = await fetch(
-            CONFIG.BACKEND_URL + CONFIG.API.VALIDATE_PAGE,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({
-                    team_id: teamId,
-                    token: token,
-                    round_number: round,
-                    page_number: page,
-                    bugs_fixed: bugsFixed
-                })
-            }
-        );
-
-        const data = await resp.json();
-
-        console.log('Backend response:', data);
-
-        if (data.error) {
-            console.error('Validate API error:', data);
-            if (data.redirect_dashboard) {
-                const host = window.location.hostname;
-                window.location.href = `http://${host}:8000/dashboard/`;
-                return;
-            }
-            alert(data.error || 'Validation failed');
+        if (window.gameEngine && typeof window.gameEngine.moveToNextPage === 'function') {
+            await window.gameEngine.moveToNextPage(bugsFixed);
             return;
         }
 
-        // Update UI score
-        const scoreEl = document.getElementById('current-score');
-        if (scoreEl && (data.final_score || data.current_score)) {
-            scoreEl.textContent = data.final_score || data.current_score;
-            console.log('Score updated to:', data.final_score || data.current_score);
+        // Wait briefly for gameEngine to initialize
+        let retries = 0;
+        const maxRetries = 20;
+        while (!window.gameEngine && retries < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            retries++;
         }
 
-        // Broadcast to teammates if websocket open
-        if (window.gameEngine && window.gameEngine.ws && window.gameEngine.ws.readyState === WebSocket.OPEN) {
-            window.gameEngine.ws.send(JSON.stringify({
-                type: 'round_completed',
-                round_number: round,
-                final_page: page,
-                final_score: data.final_score || data.current_score,
-                new_token: data.new_token || token
-            }));
-            console.log('Broadcasted round_completed to teammates');
+        if (window.gameEngine && typeof window.gameEngine.moveToNextPage === 'function') {
+            await window.gameEngine.moveToNextPage(bugsFixed);
+            return;
         }
 
-        // Redirect to backend dashboard
-        const host = window.location.hostname;
-        console.log('🎉 Round 3 completed! Redirecting to dashboard...');
-        setTimeout(() => {
-            window.location.href = `http://${host}:8000/dashboard/`;
-        }, 2000);
-
-    } catch (err) {
-        console.error('Error completing round:', err);
+        // Fallback: if engine still isn't available, redirect to dashboard after a short delay
+        console.warn('gameEngine not available; falling back to dashboard redirect');
         setTimeout(() => {
             const host = window.location.hostname;
             window.location.href = `http://${host}:8000/dashboard/`;
-        }, 2000);
+        }, 1500);
+    } catch (err) {
+        console.error('Error completing round via gameEngine:', err);
+        const host = window.location.hostname;
+        setTimeout(() => {
+            window.location.href = `http://${host}:8000/dashboard/`;
+        }, 1500);
     }
 }
 
