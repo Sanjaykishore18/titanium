@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="total-bugs" content="4">
+<meta name="total-bugs" content="3">
 <title>Web Escape | Round 3 - Page 8 (3 Bugs)</title>
 <style>
 /* RESET */
@@ -249,7 +249,7 @@ body {
     <div class="timer" id="timer">--:--</div>
     
     <div class="bugs-indicator">
-        🐛 Bugs: <span id="bugs-fixed">0/4</span>
+        🐛 Bugs: <span id="bugs-fixed">0/3</span>
     </div>
     
     <button class="exit-btn" onclick="exitGame()">
@@ -259,8 +259,8 @@ body {
 
 <!-- GAME HINT -->
 <div class="game-hint">
-    💡 Use DevTools (F12) to fix 4 bugs!<br>
-    <small>Hint: Fix attribute typo, add missing CSS, fix z-index, and fix JavaScript syntax!</small>
+    💡 Use DevTools (F12) to fix 3 bugs!<br>
+    <small>Hint: Fix attribute typo, add missing CSS position, and fix z-index!</small>
 </div>
 
 <!-- GAME CONTENT -->
@@ -289,7 +289,7 @@ body {
 const bugStatus = {
   bug1: false,  // left-leg has data-step attribute (not data-stpe)
   bug2: false,  // right-leg has left CSS position set
-  bug3: false,  // legs have different z-index values
+  bug3: false   // legs have different z-index values
 };
 
 const arena = document.getElementById('squid-arena');
@@ -313,7 +313,6 @@ function checkBugsFixed() {
     const rightZ = parseInt(rightLegStyle.zIndex) || 0;
     bugStatus.bug3 = leftZ !== rightZ;
     
-    
     // Update bug counter in header
     const bugsFixedCount = Object.values(bugStatus).filter(v => v).length;
     const bugCounter = document.getElementById('bugs-fixed');
@@ -334,7 +333,7 @@ arena.addEventListener('click', async (event) => {
         if (!bugStatus.bug2) missingFixes.push('Add .right-leg left position (e.g., left: 180px)');
         if (!bugStatus.bug3) missingFixes.push('Change z-index for one of the legs (e.g., .right-leg z-index: 2)');
         
-        alert(`❌ Fix all 4 bugs first! Use DevTools (F12) to:\n\n${missingFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`);
+        alert(`❌ Fix all 3 bugs first! Use DevTools (F12) to:\n\n${missingFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`);
         return;
     }
     
@@ -355,11 +354,53 @@ arena.addEventListener('click', async (event) => {
         currentStep = 1; // Reset on wrong click
     }
     
-    if (currentStep > 3) {
+    // Check for victory (clicked all 4 parts)
+    if (currentStep > 4) {
         alert('🏆 You reached the head and won!');
         await moveToNextPage();
     }
 });
+
+async function moveToNextPage() {
+    // Collect which bugs were fixed
+    const bugsFixed = [];
+    if (bugStatus.bug1) bugsFixed.push('bug1_attribute_typo_fixed');
+    if (bugStatus.bug2) bugsFixed.push('bug2_css_position_added');
+    if (bugStatus.bug3) bugsFixed.push('bug3_zindex_fixed');
+    
+    console.log('🐛 Bugs fixed:', bugsFixed);
+    console.log('🦑 Squid Game Arena completed!');
+    
+    // Wait for gameEngine
+    let retries = 0;
+    const maxRetries = 20;
+    
+    while (!window.gameEngine && retries < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        retries++;
+    }
+    
+    if (window.gameEngine) {
+        await gameEngine.moveToNextPage(bugsFixed);
+    } else {
+        console.error('Game engine not loaded!');
+        alert('Error: Game engine not loaded. Please refresh the page.');
+    }
+}
+
+// Console hints
+console.log("🦑 Squid Game Arena Challenge");
+console.log("STEP 1: Fix all 3 bugs using DevTools");
+console.log("STEP 2: Click squid parts in correct order: Left Leg → Right Leg → Body → Head");
+console.log("STEP 3: Complete sequence to proceed");
+console.log("");
+console.log("Bugs to fix:");
+console.log("1. HTML: left-leg attribute (data-stpe → data-step)");
+console.log("2. CSS: .right-leg missing left position (add: left: 180px)");
+console.log("3. CSS: z-index conflict (.right-leg z-index: 1 → 2)");
+console.log("");
+console.log("🎯 Click order: 1🦑 → 2🦑 → 3🦑 → 4🏆");
+
 checkBugsFixed();
 </script>
 

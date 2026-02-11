@@ -20,6 +20,7 @@
     background: rgba(0,0,0,0.95);
     padding: 15px 30px;
     position: fixed;
+    
     top: 0;
     left: 0;
     right: 0;
@@ -240,7 +241,7 @@ button:disabled {
         <small>Hint: Fix the typo in data attribute and show the button!</small>
     </div>
     
-    <div id="timer">Time: 30s</div>
+    <div id="timer">Time: 180s</div>
     
     <button
         id="extract-btn"
@@ -263,7 +264,7 @@ const bugStatus = {
   bug2: false
 };
 
-let timeLeft = 30;
+let timeLeft = 180;
 let timerInterval;
 
 function checkBugsFixed() {

@@ -115,7 +115,7 @@
 
 body {
     min-height: 100vh;
-    background: url("./images/page30 bg.png") center/cover no-repeat;
+    background: url("../assets/images/img 30.png") no-repeat center center/cover;
     color: #eaffea;
     font-family: monospace;
     display: flex;
@@ -357,11 +357,22 @@ async function achieveFreedom() {
     if (bugStatus.bug3) bugsFixed.push('bug3_id_typo_fixed');
 
     console.log('🐛 Bugs fixed:', bugsFixed);
-    console.log('🕊️ Freedom achieved! Delegating to game engine to finalize round.');
+    console.log('🕊️ Freedom achieved! Calling backend validate API...');
 
-    // Show a quick success screen while the engine handles scoring and redirect
+    // Show a quick success screen
     document.body.innerHTML = `
-        <div style='\n            display: flex;\n            flex-direction: column;\n            justify-content: center;\n            align-items: center;\n            height: 100vh;\n            background: linear-gradient(135deg, #000, #003300);\n            color: #00ff99;\n            font-family: monospace;\n            text-align: center;\n            padding: 20px;\n        '>
+        <div style='
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #000, #003300);
+            color: #00ff99;
+            font-family: monospace;
+            text-align: center;
+            padding: 20px;
+        '>
             <h1 style='font-size: 4rem; margin-bottom: 20px; text-shadow: 0 0 20px #00ff99;'>
                 🕊️ FREEDOM ACHIEVED 🕊️
             </h1>
@@ -374,38 +385,83 @@ async function achieveFreedom() {
         </div>
     `;
 
-    // Prefer calling the engine's moveToNextPage so score/page progress and teammate broadcasts are handled uniformly
+    let retries = 0, maxRetries = 70;
+    while (!localStorage.getItem('team_id') && retries < maxRetries) {
+        await new Promise(r => setTimeout(r, 100));
+        retries++;
+    }
+
     try {
-        if (window.gameEngine && typeof window.gameEngine.moveToNextPage === 'function') {
-            await window.gameEngine.moveToNextPage(bugsFixed);
+        const teamId = localStorage.getItem('team_id');
+        const token = localStorage.getItem('game_token');
+        const round = parseInt(localStorage.getItem('current_round')) || 2;
+        const page = 10;
+
+        console.log('Calling backend validate API for final page...', { teamId, round, page });
+
+        const resp = await fetch(
+            CONFIG.BACKEND_URL + CONFIG.API.VALIDATE_PAGE,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    team_id: teamId,
+                    token: token,
+                    round_number: round,
+                    page_number: page,
+                    bugs_fixed: bugsFixed
+                })
+            }
+        );
+
+        const data = await resp.json();
+
+        console.log('Backend response:', data);
+
+        if (data.error) {
+            console.error('Validate API error:', data);
+            if (data.redirect_dashboard) {
+                const host = window.location.hostname;
+                window.location.href = `http://${host}:8000/dashboard/`;
+                return;
+            }
+            alert(data.error || 'Validation failed');
             return;
         }
 
-        // Wait briefly for gameEngine to initialize
-        let retries = 0;
-        const maxRetries = 20;
-        while (!window.gameEngine && retries < maxRetries) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-            retries++;
+        // Update UI score
+        const scoreEl = document.getElementById('current-score');
+        if (scoreEl && (data.final_score || data.current_score)) {
+            scoreEl.textContent = data.final_score || data.current_score;
+            console.log('Score updated to:', data.final_score || data.current_score);
         }
 
-        if (window.gameEngine && typeof window.gameEngine.moveToNextPage === 'function') {
-            await window.gameEngine.moveToNextPage(bugsFixed);
-            return;
+        // Broadcast to teammates if websocket open
+        if (window.gameEngine && window.gameEngine.ws && window.gameEngine.ws.readyState === WebSocket.OPEN) {
+            window.gameEngine.ws.send(JSON.stringify({
+                type: 'round_completed',
+                round_number: round,
+                final_page: page,
+                final_score: data.final_score || data.current_score,
+                new_token: data.new_token || token
+            }));
+            console.log('Broadcasted round_completed to teammates');
         }
 
-        // Fallback: if engine still isn't available, redirect to dashboard after a short delay
-        console.warn('gameEngine not available; falling back to dashboard redirect');
+        // Redirect to backend dashboard (include port)
+        const host = window.location.hostname;
+        console.log('🎉 Round 3 completed! Redirecting to dashboard...');
+        setTimeout(() => {
+            window.location.href = `http://${host}:8000/dashboard/`;
+        }, 500);
+
+    } catch (err) {
+        console.error('Error completing round:', err);
         setTimeout(() => {
             const host = window.location.hostname;
             window.location.href = `http://${host}:8000/dashboard/`;
-        }, 1500);
-    } catch (err) {
-        console.error('Error completing round via gameEngine:', err);
-        const host = window.location.hostname;
-        setTimeout(() => {
-            window.location.href = `http://${host}:8000/dashboard/`;
-        }, 1500);
+        }, 2000);
     }
 }
 
