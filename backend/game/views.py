@@ -1,5 +1,5 @@
 # ============================================================================
-# FIXED views.py - Proper Leaderboard Ranking (First to Complete = First Place)
+# FIXED views.py - Race Condition Fix + Proper Scoring (10 points per page)
 # ============================================================================
 
 import csv
@@ -8,7 +8,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from django.db.models import Q, Sum, Count, F, Case, When, IntegerField, Min, Max
+from django.db.models import Q, Sum, Count, F, Case, When, IntegerField
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.http import JsonResponse
@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 from datetime import timedelta
 import hashlib
 import json
-from django.db import transaction
+from django.db import transaction  # ✅ ADDED FOR RACE CONDITION FIX
 from .models import *
 
 def is_superuser(user):
@@ -159,7 +159,7 @@ def team_dashboard(request):
         'team_rank': team_rank,
         'total_teams': all_teams.count(),
         'top_teams': top_teams,
-        'total_score': total_score,
+        'total_score': total_score,  # Overall score across all rounds
     }
     
     return render(request, 'team_dashboard.html', context)
@@ -687,56 +687,28 @@ def export_team_round_progress_csv(request):
     
     return response
 
-# ============================================================================
-# ✅ FIXED PUBLIC LEADERBOARD - Proper ranking based on completion time
-# ============================================================================
+# ============= PUBLIC LEADERBOARD =============
 
 def public_leaderboard(request):
-    """
-    Ranking Logic (in order of priority):
-    1. Higher total score (across all rounds)
-    2. EARLIER first completion time (whoever finished first wins)
-    3. Fewer total pages completed (if same score & time - edge case)
-    4. Earlier team creation time (final tiebreaker)
-    """
     from django.db.models import Subquery, OuterRef
     
-    # Subquery to correctly sum each team's round scores
+    # Subquery to correctly sum each team's round scores (avoids JOIN multiplication bug)
     team_scores = TeamRoundProgress.objects.filter(
         team=OuterRef('pk')
     ).values('team').annotate(
         total=Sum('score')
     ).values('total')
     
-    # Subquery to get the EARLIEST completion time across all rounds
-    # This is the FIRST time any team member completed ANY round
-    first_completion_time = TeamRoundProgress.objects.filter(
-        team=OuterRef('pk'),
-        status__in=['completed', 'qualified'],
-        end_time__isnull=False
-    ).order_by('end_time').values('end_time')[:1]
-    
-    # Compute per-team aggregates
+    # Compute per-team aggregates: members, total score, pages completed, and total duration (sum of round durations)
     teams = Team.objects.annotate(
         members_count=Count('members', distinct=True),
         total_score=Coalesce(Subquery(team_scores), 0),
-        pages_completed=Count(
-            'round_progress__page_progress',
-            filter=Q(round_progress__page_progress__completed=True),
-            distinct=True
-        ),
-        total_duration_seconds=Coalesce(Sum('round_progress__duration_seconds'), 0),
-        first_completion=Subquery(first_completion_time)
-    ).order_by(
-        '-total_score',              # 1. Higher score = better rank
-        'first_completion',           # 2. Earlier completion = better rank (NULL values go last)
-        'pages_completed',            # 3. Fewer pages = better (edge case tiebreaker)
-        'created_at'                  # 4. Earlier registration = better (final tiebreaker)
-    )
+        pages_completed=Count('round_progress__page_progress', filter=Q(round_progress__page_progress__completed=True), distinct=True),
+        total_duration_seconds=Coalesce(Sum('round_progress__duration_seconds'), 0)
+    ).order_by('-total_score', '-pages_completed', 'total_duration_seconds', 'created_at')
     
     total_teams = teams.count()
     total_participants = TeamMember.objects.count()
-    
     context = {
         'teams': teams,
         'total_teams': total_teams,

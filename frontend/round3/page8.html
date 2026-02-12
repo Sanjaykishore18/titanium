@@ -1,408 +1,419 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="total-bugs" content="3">
-<title>Web Escape | Round 3 - Page 8 (3 Bugs)</title>
-<style>
-/* RESET */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
 
-/* ============================================================================
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="total-bugs" content="3">
+    <title>Web Escape | Round 3 - Page 8 (3 Bugs)</title>
+    <style>
+        /* RESET */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ============================================================================
    GAME HEADER
    ============================================================================ */
-.game-header {
-    background: rgba(0,0,0,0.95);
-    padding: 15px 30px;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 10000;
-    border-bottom: 3px solid #667eea;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
-    font-family: Arial, sans-serif;
-}
+        .game-header {
+            background: rgba(0, 0, 0, 0.95);
+            padding: 15px 30px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10000;
+            border-bottom: 3px solid #667eea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            font-family: Arial, sans-serif;
+        }
 
-.team-info {
-    color: #667eea;
-}
+        .team-info {
+            color: #667eea;
+        }
 
-.timer {
-    background: #dc3545;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-size: 24px;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-}
+        .timer {
+            background: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 24px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
 
-.timer-warning {
-    animation: pulse 1s infinite;
-}
+        .timer-warning {
+            animation: pulse 1s infinite;
+        }
 
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
+        @keyframes pulse {
 
-.bugs-indicator {
-    background: #28a745;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: bold;
-}
+            0%,
+            100% {
+                opacity: 1;
+            }
 
-.exit-btn {
-    background: #dc3545;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background 0.3s;
-}
+            50% {
+                opacity: 0.5;
+            }
+        }
 
-.exit-btn:hover {
-    background: #c82333;
-}
+        .bugs-indicator {
+            background: #28a745;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
 
-/* Notifications */
-.notification {
-    position: fixed;
-    top: 110px;
-    right: -350px;
-    background: rgba(102, 126, 234, 0.95);
-    color: white;
-    padding: 15px 25px;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    transition: right 0.3s;
-    z-index: 999;
-    max-width: 300px;
-}
+        .exit-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
 
-.notification.show {
-    right: 20px;
-}
+        .exit-btn:hover {
+            background: #c82333;
+        }
 
-.notification-success {
-    background: rgba(40, 167, 69, 0.95);
-}
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 110px;
+            right: -350px;
+            background: rgba(102, 126, 234, 0.95);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: right 0.3s;
+            z-index: 999;
+            max-width: 300px;
+        }
 
-.notification-error {
-    background: rgba(220, 53, 69, 0.95);
-}
+        .notification.show {
+            right: 20px;
+        }
 
-.notification-info {
-    background: rgba(23, 162, 184, 0.95);
-}
+        .notification-success {
+            background: rgba(40, 167, 69, 0.95);
+        }
 
-/* ============================================================================
+        .notification-error {
+            background: rgba(220, 53, 69, 0.95);
+        }
+
+        .notification-info {
+            background: rgba(23, 162, 184, 0.95);
+        }
+
+        /* ============================================================================
    ORIGINAL GAME STYLES
    ============================================================================ */
 
-body {
-    min-height: 100vh;
-    background: url("../assets/images/img 28.png") no-repeat center center/cover;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-top: 80px;
-}
+        body {
+            min-height: 100vh;
+            background: url("../assets/images/img 28.png") no-repeat center center/cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 80px;
+        }
 
-.game-hint {
-    position: fixed;
-    top: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(255, 215, 0, 0.95);
-    padding: 15px;
-    border-radius: 8px;
-    max-width: 700px;
-    color: #000;
-    font-weight: bold;
-    text-align: center;
-    z-index: 9999;
-    font-size: 0.9rem;
-}
+        .game-hint {
+            position: fixed;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 215, 0, 0.95);
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 700px;
+            color: #000;
+            font-weight: bold;
+            text-align: center;
+            z-index: 9999;
+            font-size: 0.9rem;
+        }
 
-#squid-arena {
-    width: 350px;
-    height: 450px;
-    background: #222;
-    position: relative;
-    margin: 100px auto;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-}
+        #squid-arena {
+            width: 350px;
+            height: 450px;
+            background: #222;
+            position: relative;
+            margin: 100px auto;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+        }
 
-.squid-part {
-    position: absolute;
-    background: rgba(255, 0, 0, 0.7);
-    border: 2px solid #ff4444;
-    width: 90px;
-    height: 90px;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-size: 36px;
-    border-radius: 15px;
-    user-select: none;
-    transition: background 0.3s ease;
-    margin-left: 10px;
-}
+        .squid-part {
+            position: absolute;
+            background: rgba(255, 0, 0, 0.7);
+            border: 2px solid #ff4444;
+            width: 90px;
+            height: 90px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 36px;
+            border-radius: 15px;
+            user-select: none;
+            transition: background 0.3s ease;
+            margin-left: 10px;
+        }
 
-.squid-part:hover {
-    background: rgba(255, 0, 0, 1);
-    transform: scale(1.05);
-}
+        .squid-part:hover {
+            background: rgba(255, 0, 0, 1);
+            transform: scale(1.05);
+        }
 
-.head {
-    top: 30px;
-    left: 130px;
-    border-radius: 50% 50% 40% 40%;
-    width: 110px;
-    height: 110px;
-    background: rgba(0, 200, 0, 0.8);
-    border-color: #44ff44;
-    z-index: 4;
-}
+        .head {
+            top: 30px;
+            left: 130px;
+            border-radius: 50% 50% 40% 40%;
+            width: 110px;
+            height: 110px;
+            background: rgba(0, 200, 0, 0.8);
+            border-color: #44ff44;
+            z-index: 4;
+        }
 
-.body {
-    top: 150px;
-    left: 90px;
-    width: 80px;
-    height: 110px;
-    border-radius: 24px;
-    z-index: 3;
-}
+        .body {
+            top: 150px;
+            left: 90px;
+            width: 80px;
+            height: 110px;
+            border-radius: 24px;
+            z-index: 3;
+        }
 
-.left-leg {
-    top: 290px;
-    left: 90px;
-    width: 80px;
-    height: 110px;
-    border-radius: 24px;
-    /* ❌ BUG 3: Same z-index as right-leg causes overlap issues */
-    z-index: 1;
-}
+        .left-leg {
+            top: 290px;
+            left: 90px;
+            width: 80px;
+            height: 110px;
+            border-radius: 24px;
+            /* ❌ BUG 3: Same z-index as right-leg causes overlap issues */
+            z-index: 1;
+        }
 
-.right-leg {
-    top: 290px;
-    /* ❌ BUG 2: Missing left position! Overlaps with left-leg */
-    width: 80px;
-    height: 110px;
-    border-radius: 24px;
-    /* ❌ BUG 3: Same z-index as left-leg */
-    z-index: 1;
-}
+        .right-leg {
+            top: 290px;
+            /* ❌ BUG 2: Missing left position! Overlaps with left-leg */
+            width: 80px;
+            height: 110px;
+            border-radius: 24px;
+            /* ❌ BUG 3: Same z-index as left-leg */
+            z-index: 1;
+        }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .game-header {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    #squid-arena {
-        width: 300px;
-        height: 400px;
-        margin: 50px auto;
-    }
-    
-    .squid-part {
-        width: 70px;
-        height: 70px;
-        font-size: 28px;
-    }
-    
-    .head {
-        width: 90px;
-        height: 90px;
-    }
-}
-</style>
+        /* Responsive */
+        @media (max-width: 768px) {
+            .game-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            #squid-arena {
+                width: 300px;
+                height: 400px;
+                margin: 50px auto;
+            }
+
+            .squid-part {
+                width: 70px;
+                height: 70px;
+                font-size: 28px;
+            }
+
+            .head {
+                width: 90px;
+                height: 90px;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-<!-- GAME HEADER -->
-<div class="game-header">
-    <div class="team-info">
-        <strong id="team-name">Loading...</strong><br>
-        <small>Round <span id="round-num">-</span> - Page <span id="page-num">-</span> | Score: <span id="current-score">0</span></small>
+    <!-- GAME HEADER -->
+    <div class="game-header">
+        <div class="team-info">
+            <strong id="team-name">Loading...</strong><br>
+            <small>Round <span id="round-num">-</span> - Page <span id="page-num">-</span> | Score: <span
+                    id="current-score">0</span></small>
+        </div>
+
+        <div class="timer" id="timer">--:--</div>
+
+        <div class="bugs-indicator">
+            🐛 Bugs: <span id="bugs-fixed">0/3</span>
+        </div>
+
+        <button class="exit-btn" onclick="exitGame()">
+            ← Exit Game
+        </button>
     </div>
-    
-    <div class="timer" id="timer">--:--</div>
-    
-    <div class="bugs-indicator">
-        🐛 Bugs: <span id="bugs-fixed">0/3</span>
+
+    <!-- GAME HINT -->
+    <div class="game-hint">
+        💡 Use DevTools (F12) to fix 3 bugs!<br>
+        <small>Hint: Fix attribute typo, add missing CSS position, and fix z-index!</small>
     </div>
-    
-    <button class="exit-btn" onclick="exitGame()">
-        ← Exit Game
-    </button>
-</div>
 
-<!-- GAME HINT -->
-<div class="game-hint">
-    💡 Use DevTools (F12) to fix 3 bugs!<br>
-    <small>Hint: Fix attribute typo, add missing CSS position, and fix z-index!</small>
-</div>
-
-<!-- GAME CONTENT -->
-<div id="squid-arena">
-    <!-- ❌ BUG 1: Typo "data-stpe" should be "data-step" -->
-    <div class="squid-part left-leg" data-stpe="1">
-        🦑
+    <!-- GAME CONTENT -->
+    <div id="squid-arena">
+        <!-- ❌ BUG 1: Typo "data-stpe" should be "data-step" -->
+        <div class="squid-part left-leg" data-stpe="1">
+            🦑
+        </div>
+        <div class="squid-part right-leg" data-step="2">
+            🦑
+        </div>
+        <div class="squid-part body" data-step="3">
+            🦑
+        </div>
+        <div class="squid-part head" data-step="4">
+            🏆
+        </div>
     </div>
-    <div class="squid-part right-leg" data-step="2">
-        🦑
-    </div>
-    <div class="squid-part body" data-step="3">
-        🦑
-    </div>
-    <div class="squid-part head" data-step="4">
-        🏆
-    </div>
-</div>
 
-<!-- Load Scripts -->
-<script src="../assets/js/config.js"></script>
-<script src="../assets/js/game-engine.js"></script>
+    <!-- Load Scripts -->
+    <script src="../assets/js/config.js"></script>
+    <script src="../assets/js/game-engine.js"></script>
 
-<script>
-// Track which bugs are fixed
-const bugStatus = {
-  bug1: false,  // left-leg has data-step attribute (not data-stpe)
-  bug2: false,  // right-leg has left CSS position set
-  bug3: false   // legs have different z-index values
-};
+    <script>
+        // Track which bugs are fixed
+        const bugStatus = {
+            bug1: false,  // left-leg has data-step attribute (not data-stpe)
+            bug2: false,  // right-leg has left CSS position set
+            bug3: false   // legs have different z-index values
+        };
 
-const arena = document.getElementById('squid-arena');
-let currentStep = 1;
+        const arena = document.getElementById('squid-arena');
+        let currentStep = 1;
 
-function checkBugsFixed() {
-    const leftLeg = document.querySelector('.left-leg');
-    const rightLeg = document.querySelector('.right-leg');
-    
-    // Check Bug 1: left-leg has correct data-step attribute
-    bugStatus.bug1 = leftLeg.hasAttribute('data-step');
-    
-    // Check Bug 2: right-leg has left position set
-    const rightLegStyle = window.getComputedStyle(rightLeg);
-    const rightLegLeft = rightLegStyle.left;
-    bugStatus.bug2 = rightLegLeft !== 'auto' && rightLegLeft !== '0px';
-    
-    // Check Bug 3: legs have different z-index
-    const leftLegStyle = window.getComputedStyle(leftLeg);
-    const leftZ = parseInt(leftLegStyle.zIndex) || 0;
-    const rightZ = parseInt(rightLegStyle.zIndex) || 0;
-    bugStatus.bug3 = leftZ !== rightZ;
-    
-    // Update bug counter in header
-    const bugsFixedCount = Object.values(bugStatus).filter(v => v).length;
-    const bugCounter = document.getElementById('bugs-fixed');
-    if (bugCounter) {
-        bugCounter.textContent = `${bugsFixedCount}/3`;
-    }
-}
+        function checkBugsFixed() {
+            const leftLeg = document.querySelector('.left-leg');
+            const rightLeg = document.querySelector('.right-leg');
 
-// Check bugs periodically
-setInterval(checkBugsFixed, 300);
+            // Check Bug 1: left-leg has correct data-step attribute
+            bugStatus.bug1 = leftLeg.hasAttribute('data-step');
 
-arena.addEventListener('click', async (event) => {
-    const allBugsFixed = bugStatus.bug1 && bugStatus.bug2 && bugStatus.bug3;
-    
-    if (!allBugsFixed) {
-        const missingFixes = [];
-        if (!bugStatus.bug1) missingFixes.push('Change left-leg attribute from data-stpe to data-step');
-        if (!bugStatus.bug2) missingFixes.push('Add .right-leg left position (e.g., left: 180px)');
-        if (!bugStatus.bug3) missingFixes.push('Change z-index for one of the legs (e.g., .right-leg z-index: 2)');
-        
-        alert(`❌ Fix all 3 bugs first! Use DevTools (F12) to:\n\n${missingFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`);
-        return;
-    }
-    
-    const part = event.target.closest('.squid-part');
-    if (!part) return;
-    
-    const step = part.getAttribute('data-step');
-    if (!step) {
-        alert('Oops! This part is not recognized (maybe typo in attribute).');
-        return;
-    }
-    
-    if (parseInt(step) === currentStep) {
-        alert(`✅ Step ${step} correct!`);
-        currentStep++;
-    } else {
-        alert(`❌ Wrong step! Expected step ${currentStep}, but clicked ${step}.`);
-        currentStep = 1; // Reset on wrong click
-    }
-    
-    // Check for victory (clicked all 4 parts)
-    if (currentStep > 4) {
-        alert('🏆 You reached the head and won!');
-        await moveToNextPage();
-    }
-});
+            // Check Bug 2: right-leg has left position set
+            const rightLegStyle = window.getComputedStyle(rightLeg);
+            const rightLegLeft = rightLegStyle.left;
+            bugStatus.bug2 = rightLegLeft !== 'auto' && rightLegLeft !== '0px';
 
-async function moveToNextPage() {
-    // Collect which bugs were fixed
-    const bugsFixed = [];
-    if (bugStatus.bug1) bugsFixed.push('bug1_attribute_typo_fixed');
-    if (bugStatus.bug2) bugsFixed.push('bug2_css_position_added');
-    if (bugStatus.bug3) bugsFixed.push('bug3_zindex_fixed');
-    
-    console.log('🐛 Bugs fixed:', bugsFixed);
-    console.log('🦑 Squid Game Arena completed!');
-    
-    // Wait for gameEngine
-    let retries = 0;
-    const maxRetries = 20;
-    
-    while (!window.gameEngine && retries < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        retries++;
-    }
-    
-    if (window.gameEngine) {
-        await gameEngine.moveToNextPage(bugsFixed);
-    } else {
-        console.error('Game engine not loaded!');
-        alert('Error: Game engine not loaded. Please refresh the page.');
-    }
-}
+            // Check Bug 3: legs have different z-index
+            const leftLegStyle = window.getComputedStyle(leftLeg);
+            const leftZ = parseInt(leftLegStyle.zIndex) || 0;
+            const rightZ = parseInt(rightLegStyle.zIndex) || 0;
+            bugStatus.bug3 = leftZ !== rightZ;
 
-// Console hints
-console.log("🦑 Squid Game Arena Challenge");
-console.log("STEP 1: Fix all 3 bugs using DevTools");
-console.log("STEP 2: Click squid parts in correct order: Left Leg → Right Leg → Body → Head");
-console.log("STEP 3: Complete sequence to proceed");
-console.log("");
-console.log("Bugs to fix:");
-console.log("1. HTML: left-leg attribute (data-stpe → data-step)");
-console.log("2. CSS: .right-leg missing left position (add: left: 180px)");
-console.log("3. CSS: z-index conflict (.right-leg z-index: 1 → 2)");
-console.log("");
-console.log("🎯 Click order: 1🦑 → 2🦑 → 3🦑 → 4🏆");
+            // Update bug counter in header
+            const bugsFixedCount = Object.values(bugStatus).filter(v => v).length;
+            const bugCounter = document.getElementById('bugs-fixed');
+            if (bugCounter) {
+                bugCounter.textContent = `${bugsFixedCount}/3`;
+            }
+        }
 
-checkBugsFixed();
-</script>
+        // Check bugs periodically
+        setInterval(checkBugsFixed, 300);
+
+        arena.addEventListener('click', async (event) => {
+            const allBugsFixed = bugStatus.bug1 && bugStatus.bug2 && bugStatus.bug3;
+
+            if (!allBugsFixed) {
+                const missingFixes = [];
+                if (!bugStatus.bug1) missingFixes.push('Change left-leg attribute from data-stpe to data-step');
+                if (!bugStatus.bug2) missingFixes.push('Add .right-leg left position (e.g., left: 180px)');
+                if (!bugStatus.bug3) missingFixes.push('Change z-index for one of the legs (e.g., .right-leg z-index: 2)');
+
+                alert(`❌ Fix all 3 bugs first! Use DevTools (F12) to:\n\n${missingFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`);
+                return;
+            }
+
+            const part = event.target.closest('.squid-part');
+            if (!part) return;
+
+            const step = part.getAttribute('data-step');
+            if (!step) {
+                alert('Oops! This part is not recognized (maybe typo in attribute).');
+                return;
+            }
+
+            if (parseInt(step) === currentStep) {
+                alert(`✅ Step ${step} correct!`);
+                currentStep++;
+            } else {
+                alert(`❌ Wrong step! Expected step ${currentStep}, but clicked ${step}.`);
+                currentStep = 1; // Reset on wrong click
+            }
+
+            // Check for victory (clicked all 4 parts)
+            if (currentStep > 4) {
+                alert('🏆 You reached the head and won!');
+                await moveToNextPage();
+            }
+        });
+
+        async function moveToNextPage() {
+            // Collect which bugs were fixed
+            const bugsFixed = [];
+            if (bugStatus.bug1) bugsFixed.push('bug1_attribute_typo_fixed');
+            if (bugStatus.bug2) bugsFixed.push('bug2_css_position_added');
+            if (bugStatus.bug3) bugsFixed.push('bug3_zindex_fixed');
+
+            console.log('🐛 Bugs fixed:', bugsFixed);
+            console.log('🦑 Squid Game Arena completed!');
+
+            // Wait for gameEngine
+            let retries = 0;
+            const maxRetries = 20;
+
+            while (!window.gameEngine && retries < maxRetries) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                retries++;
+            }
+
+            if (window.gameEngine) {
+                await gameEngine.moveToNextPage(bugsFixed);
+            } else {
+                console.error('Game engine not loaded!');
+                alert('Error: Game engine not loaded. Please refresh the page.');
+            }
+        }
+
+        // Console hints
+        console.log("🦑 Squid Game Arena Challenge");
+        console.log("STEP 1: Fix all 3 bugs using DevTools");
+        console.log("STEP 2: Click squid parts in correct order: Left Leg → Right Leg → Body → Head");
+        console.log("STEP 3: Complete sequence to proceed");
+        console.log("");
+        console.log("Bugs to fix:");
+        console.log("1. HTML: left-leg attribute (data-stpe → data-step)");
+        console.log("2. CSS: .right-leg missing left position (add: left: 180px)");
+        console.log("3. CSS: z-index conflict (.right-leg z-index: 1 → 2)");
+        console.log("");
+        console.log("🎯 Click order: 1🦑 → 2🦑 → 3🦑 → 4🏆");
+
+        checkBugsFixed();
+    </script>
 
 </body>
+
 </html>
